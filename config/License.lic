@@ -1,0 +1,14 @@
+license =
+{
+	VERSION=2,
+	TERM=
+	{
+		TYPE="EXPIRATION",
+		TIME={year=2012, month=10, day=24, hour=13, min=14, sec=20}
+	},
+	DEMO=false,
+
+	NOTES="License generated for Andy Armstrong of BBC / The Space. (andy@hexten.net)",
+
+	SIGNATURE="Y8sw4WhOfIqhzZyjxTsFiyXZyiAkG7f3VHd63HLmBz8WTHaMxnyDhMx9A8ZF+6ijPEEtntCrsjrBoIRxC9hDj5RugEHNWWjekw3AOFGoymggqwUOoKnY0MpvSnESYi1dsm/qZ09Zm1QLJKi06OSHuxpzDP6yaSkqmENumHVnHxSDGhP7OqpYpnq6jrVVkSOqP2XSdtYwQvSopakT6v/r7fEMRDY5or3LPZw5wVueGISMO5Uox1MnqQThDAUSpvSf12z3mQsLLKwPaVw68jzYrjFCu910k6PKzsDZ2XVxfFPVIZ5f9uM6DxUatXdUpHhK2oe0gA0r+Fv0d+Mt5VwQaw=="
+}
