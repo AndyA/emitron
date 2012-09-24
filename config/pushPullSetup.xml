@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<MAP isArray="false" name="">
+    <STR name="checksum">c2d4910157ed096d87ab0908265bc2c4</STR>
+    <MAP isArray="true" name="hds" />
+    <MAP isArray="true" name="hls" />
+    <MAP isArray="true" name="pull" />
+    <MAP isArray="true" name="push" />
+    <MAP isArray="true" name="record" />
+    <MAP isArray="false" name="serverVersion">
+        <STR name="banner">EvoStream Media Server (www.evostream.com) version 1.5.1 build 1393 - Barbarian - (built for MacOSX-10.7-x86_64 on 2012-08-03T18:03:49.000)</STR>
+        <UINT64 name="buildDate">1344017029</UINT64>
+        <STR name="buildNumber">1393</STR>
+        <STR name="codeName">Barbarian</STR>
+        <STR name="releaseNumber">1.5.1</STR>
+    </MAP>
+    <UINT32 name="version">12</UINT32>
+</MAP>
