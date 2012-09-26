@@ -1,17 +1,65 @@
 <?xml version="1.0" ?>
 <MAP isArray="false" name="">
-    <STR name="checksum">c2d4910157ed096d87ab0908265bc2c4</STR>
+    <STR name="checksum">1cdda92faa6dc51e45d2548df5718f85</STR>
     <MAP isArray="true" name="hds" />
-    <MAP isArray="true" name="hls" />
-    <MAP isArray="true" name="pull" />
+    <MAP isArray="true" name="hls">
+        <MAP isArray="false" name="__index__value__2">
+            <UINT32 name="bandwidth">0</UINT32>
+            <STR name="chunkBaseName">segment</STR>
+            <UINT64 name="chunkLength">10</UINT64>
+            <BOOL name="chunkOnIDR">true</BOOL>
+            <BOOL name="cleanupDestination">false</BOOL>
+            <UINT32 name="configId">2</UINT32>
+            <BOOL name="createMasterPlaylist">true</BOOL>
+            <STR name="groupName">test</STR>
+            <STR name="groupTargetFolder">/opt/evostream/webroot/live/hls/test/</STR>
+            <BOOL name="isHds">false</BOOL>
+            <BOOL name="isHls">true</BOOL>
+            <BOOL name="isPull">false</BOOL>
+            <BOOL name="isPush">false</BOOL>
+            <BOOL name="isRecord">false</BOOL>
+            <BOOL name="keepAlive">true</BOOL>
+            <STR name="localStreamName">Test</STR>
+            <STR name="masterPlaylistPath">/opt/evostream/webroot/live/hls/test/playlist.m3u8</STR>
+            <BOOL name="overwriteDestination">true</BOOL>
+            <UINT64 name="playlistLength">10</UINT64>
+            <STR name="playlistName">playlist.m3u8</STR>
+            <STR name="playlistType">appending</STR>
+            <UINT64 name="staleRetentionCount">10</UINT64>
+            <STR name="targetFolder">/opt/evostream/webroot/live/hls/test/Test</STR>
+        </MAP>
+    </MAP>
+    <MAP isArray="true" name="pull">
+        <MAP isArray="false" name="__index__value__1">
+            <UINT32 name="configId">1</UINT32>
+            <STR name="emulateUserAgent">EvoStream Media Server (www.evostream.com) player</STR>
+            <BOOL name="forceTcp">true</BOOL>
+            <UINT64 name="height">0</UINT64>
+            <BOOL name="isHds">false</BOOL>
+            <BOOL name="isHls">false</BOOL>
+            <BOOL name="isPull">true</BOOL>
+            <BOOL name="isPush">false</BOOL>
+            <BOOL name="isRecord">false</BOOL>
+            <BOOL name="keepAlive">true</BOOL>
+            <STR name="localStreamName">Test</STR>
+            <STR name="pageUrl"></STR>
+            <UINT64 name="rtcpDetectionInterval">10</UINT64>
+            <STR name="swfUrl"></STR>
+            <STR name="tcUrl">rtmp://cp67126.edgefcs.net/ondemand/mp4:mediapm/osmf/content/test/sample1_700kbps.f4v</STR>
+            <UINT64 name="tos">0</UINT64>
+            <UINT64 name="ttl">0</UINT64>
+            <STR name="uri">rtmp://cp67126.edgefcs.net/ondemand/mp4:mediapm/osmf/content/test/sample1_700kbps.f4v</STR>
+            <UINT64 name="width">0</UINT64>
+        </MAP>
+    </MAP>
     <MAP isArray="true" name="push" />
     <MAP isArray="true" name="record" />
     <MAP isArray="false" name="serverVersion">
-        <STR name="banner">EvoStream Media Server (www.evostream.com) version 1.5.1 build 1393 - Barbarian - (built for MacOSX-10.7-x86_64 on 2012-08-03T18:03:49.000)</STR>
-        <UINT64 name="buildDate">1344017029</UINT64>
-        <STR name="buildNumber">1393</STR>
+        <STR name="banner">EvoStream Media Server (www.evostream.com) version 1.5.3 build 1493 - Barbarian - (built for Debian-6.0.5-x86_64 on 2012-08-27T22:14:55.000)</STR>
+        <UINT64 name="buildDate">1346105695</UINT64>
+        <STR name="buildNumber">1493</STR>
         <STR name="codeName">Barbarian</STR>
-        <STR name="releaseNumber">1.5.1</STR>
+        <STR name="releaseNumber">1.5.3</STR>
     </MAP>
     <UINT32 name="version">12</UINT32>
 </MAP>
