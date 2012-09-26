@@ -9,7 +9,7 @@ use LWP::UserAgent;
 use MIME::Base64;
 
 my $evo = evo->new( host => 'localhost' );
-print Dumper($evo->api('version'));
+print Dumper( $evo->api( 'version' ) );
 
 sub evo::new {
   my ( $class, %args ) = @_;
