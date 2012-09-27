@@ -1,15 +1,15 @@
 <?xml version="1.0" ?>
 <MAP isArray="false" name="">
-    <STR name="checksum">1cdda92faa6dc51e45d2548df5718f85</STR>
+    <STR name="checksum">1280ded8920acc3aeaed659082413cf5</STR>
     <MAP isArray="true" name="hds" />
     <MAP isArray="true" name="hls">
-        <MAP isArray="false" name="__index__value__2">
+        <MAP isArray="false" name="__index__value__1">
             <UINT32 name="bandwidth">0</UINT32>
             <STR name="chunkBaseName">segment</STR>
             <UINT64 name="chunkLength">10</UINT64>
             <BOOL name="chunkOnIDR">true</BOOL>
             <BOOL name="cleanupDestination">false</BOOL>
-            <UINT32 name="configId">2</UINT32>
+            <UINT32 name="configId">1</UINT32>
             <BOOL name="createMasterPlaylist">true</BOOL>
             <STR name="groupName">test</STR>
             <STR name="groupTargetFolder">/opt/evostream/webroot/live/hls/test/</STR>
@@ -28,10 +28,81 @@
             <UINT64 name="staleRetentionCount">10</UINT64>
             <STR name="targetFolder">/opt/evostream/webroot/live/hls/test/Test</STR>
         </MAP>
+        <MAP isArray="false" name="__index__value__2">
+            <UINT32 name="bandwidth">0</UINT32>
+            <STR name="chunkBaseName">segment</STR>
+            <UINT64 name="chunkLength">10</UINT64>
+            <BOOL name="chunkOnIDR">true</BOOL>
+            <BOOL name="cleanupDestination">false</BOOL>
+            <UINT32 name="configId">2</UINT32>
+            <BOOL name="createMasterPlaylist">true</BOOL>
+            <STR name="groupName">inlet5</STR>
+            <STR name="groupTargetFolder">/opt/evostream/webroot/live/hls/inlet5/</STR>
+            <BOOL name="isHds">false</BOOL>
+            <BOOL name="isHls">true</BOOL>
+            <BOOL name="isPull">false</BOOL>
+            <BOOL name="isPush">false</BOOL>
+            <BOOL name="isRecord">false</BOOL>
+            <BOOL name="keepAlive">true</BOOL>
+            <STR name="localStreamName">inlet5</STR>
+            <STR name="masterPlaylistPath">/opt/evostream/webroot/live/hls/inlet5/playlist.m3u8</STR>
+            <BOOL name="overwriteDestination">true</BOOL>
+            <UINT64 name="playlistLength">10</UINT64>
+            <STR name="playlistName">playlist.m3u8</STR>
+            <STR name="playlistType">appending</STR>
+            <UINT64 name="staleRetentionCount">10</UINT64>
+            <STR name="targetFolder">/opt/evostream/webroot/live/hls/inlet5/inlet5</STR>
+        </MAP>
+        <MAP isArray="false" name="__index__value__3">
+            <UINT32 name="bandwidth">0</UINT32>
+            <STR name="chunkBaseName">segment</STR>
+            <UINT64 name="chunkLength">10</UINT64>
+            <BOOL name="chunkOnIDR">true</BOOL>
+            <BOOL name="cleanupDestination">false</BOOL>
+            <UINT32 name="configId">3</UINT32>
+            <BOOL name="createMasterPlaylist">true</BOOL>
+            <STR name="groupName">thick</STR>
+            <STR name="groupTargetFolder">/opt/evostream/webroot/live/hls/thick/</STR>
+            <BOOL name="isHds">false</BOOL>
+            <BOOL name="isHls">true</BOOL>
+            <BOOL name="isPull">false</BOOL>
+            <BOOL name="isPush">false</BOOL>
+            <BOOL name="isRecord">false</BOOL>
+            <BOOL name="keepAlive">true</BOOL>
+            <STR name="localStreamName">thick</STR>
+            <STR name="masterPlaylistPath">/opt/evostream/webroot/live/hls/thick/playlist.m3u8</STR>
+            <BOOL name="overwriteDestination">true</BOOL>
+            <UINT64 name="playlistLength">10</UINT64>
+            <STR name="playlistName">playlist.m3u8</STR>
+            <STR name="playlistType">appending</STR>
+            <UINT64 name="staleRetentionCount">10</UINT64>
+            <STR name="targetFolder">/opt/evostream/webroot/live/hls/thick/thick</STR>
+        </MAP>
     </MAP>
     <MAP isArray="true" name="pull">
-        <MAP isArray="false" name="__index__value__1">
-            <UINT32 name="configId">1</UINT32>
+        <MAP isArray="false" name="__index__value__10">
+            <UINT32 name="configId">10</UINT32>
+            <STR name="emulateUserAgent">MAC 11,3,300,265</STR>
+            <BOOL name="forceTcp">true</BOOL>
+            <UINT64 name="height">0</UINT64>
+            <BOOL name="isHds">false</BOOL>
+            <BOOL name="isHls">false</BOOL>
+            <BOOL name="isPull">true</BOOL>
+            <BOOL name="isPush">false</BOOL>
+            <BOOL name="isRecord">false</BOOL>
+            <BOOL name="keepAlive">true</BOOL>
+            <STR name="localStreamName">bbclive</STR>
+            <STR name="pageUrl"></STR>
+            <UINT64 name="rtcpDetectionInterval">10</UINT64>
+            <STR name="swfUrl"></STR>
+            <STR name="tcUrl">rtmp://zaphod-origin.ch.bbc.co.uk/live/inlet5</STR>
+            <UINT64 name="tos">256</UINT64>
+            <UINT64 name="ttl">256</UINT64>
+            <STR name="uri">rtmp://zaphod-origin.ch.bbc.co.uk/live/inlet5</STR>
+            <UINT64 name="width">0</UINT64>
+        </MAP>
+        <MAP isArray="false" name="__index__value__4">
+            <UINT32 name="configId">4</UINT32>
             <STR name="emulateUserAgent">EvoStream Media Server (www.evostream.com) player</STR>
             <BOOL name="forceTcp">true</BOOL>
             <UINT64 name="height">0</UINT64>
@@ -49,6 +120,48 @@
             <UINT64 name="tos">0</UINT64>
             <UINT64 name="ttl">0</UINT64>
             <STR name="uri">rtmp://cp67126.edgefcs.net/ondemand/mp4:mediapm/osmf/content/test/sample1_700kbps.f4v</STR>
+            <UINT64 name="width">0</UINT64>
+        </MAP>
+        <MAP isArray="false" name="__index__value__5">
+            <UINT32 name="configId">5</UINT32>
+            <STR name="emulateUserAgent">EvoStream Media Server (www.evostream.com) player</STR>
+            <BOOL name="forceTcp">true</BOOL>
+            <UINT64 name="height">0</UINT64>
+            <BOOL name="isHds">false</BOOL>
+            <BOOL name="isHls">false</BOOL>
+            <BOOL name="isPull">true</BOOL>
+            <BOOL name="isPush">false</BOOL>
+            <BOOL name="isRecord">false</BOOL>
+            <BOOL name="keepAlive">true</BOOL>
+            <STR name="localStreamName">inlet5</STR>
+            <STR name="pageUrl"></STR>
+            <UINT64 name="rtcpDetectionInterval">10</UINT64>
+            <STR name="swfUrl"></STR>
+            <STR name="tcUrl">rtmp://zaphod-origin.ch.bbc.co.uk/live/inlet5</STR>
+            <UINT64 name="tos">0</UINT64>
+            <UINT64 name="ttl">0</UINT64>
+            <STR name="uri">rtmp://zaphod-origin.ch.bbc.co.uk/live/inlet5</STR>
+            <UINT64 name="width">0</UINT64>
+        </MAP>
+        <MAP isArray="false" name="__index__value__6">
+            <UINT32 name="configId">6</UINT32>
+            <STR name="emulateUserAgent">EvoStream Media Server (www.evostream.com) player</STR>
+            <BOOL name="forceTcp">true</BOOL>
+            <UINT64 name="height">0</UINT64>
+            <BOOL name="isHds">false</BOOL>
+            <BOOL name="isHls">false</BOOL>
+            <BOOL name="isPull">true</BOOL>
+            <BOOL name="isPush">false</BOOL>
+            <BOOL name="isRecord">false</BOOL>
+            <BOOL name="keepAlive">true</BOOL>
+            <STR name="localStreamName">thick</STR>
+            <STR name="pageUrl"></STR>
+            <UINT64 name="rtcpDetectionInterval">10</UINT64>
+            <STR name="swfUrl"></STR>
+            <STR name="tcUrl">rtmp://newstream.hexten.net/vod/mp4:20120926_223000_bbchd_the_thick_of_it.mp4</STR>
+            <UINT64 name="tos">0</UINT64>
+            <UINT64 name="ttl">0</UINT64>
+            <STR name="uri">rtmp://newstream.hexten.net/vod/mp4:20120926_223000_bbchd_the_thick_of_it.mp4</STR>
             <UINT64 name="width">0</UINT64>
         </MAP>
     </MAP>
