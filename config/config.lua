@@ -73,7 +73,18 @@ configuration=
 					protocol="inboundLiveFlv",
 					waitForMetadata=true,
 				},
+                                {
+                                        ip="0.0.0.0",
+                                        port=9999,
+                                        protocol="inboundTcpTs"
+                                },
+                                {
+                                        ip="0.0.0.0",
+                                        port=9999,
+                                        protocol="inboundUdpTs"
+                                },
 			},
+
 			validateHandshake=false,
 			authentication=
 			{
