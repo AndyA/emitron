@@ -49,9 +49,6 @@ for RT in $RATES; do
   METRICS="shadowcolor=black@0.7:shadowx=$SH:shadowy=$SH:x=9*W/10-tw:y=8*H/10"
   DT="drawtext=$STYLE:$METRICS:timecode='00\\:00\\:00\\:01':rate=25/1:text='$CAP'" 
 
-  # Due to what looks like an ffmpeg bug specifying audio options screws
-  # up the parsing of the -profile option so we process in two stages.
-
   mkdir -p "$PFX"
   ffmpeg -y -i "$INPUTFILE" -vf "$DT" \
     -map 0:0 -map 0:1 \
