@@ -51,7 +51,8 @@ BEGIN {
   );
   while ( my ( $method, $api ) = each %API ) {
     no strict 'refs';
-    *$api = sub { shift->api( $api, @_ ) };
+    *$method = sub { shift->api( $api, @_ ) };
+    *$api = *$method unless $api eq $method;
   }
 }
 
