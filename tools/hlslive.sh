@@ -22,16 +22,16 @@ RATES="
 
 #RATES="W=224;H=126;R=5;BV=32;BA=24;AR=22050;P=baseline"
 
-FIFO="/tmp/hlslive.$$.fifo"
+FIFOS=""
+TEES=""
 
 function _shutdown() {
-  rm -f "$FIFO"
+  rm -f $FIFOS
 }
 
 trap _shutdown SIGINT
-mkpipe "$FIFO"
 
-ffmpeg -y -i "$INPUTFILE" -acodec copy -vcodec copy -f mpegts "$FIFO"
+TEES="ffmpeg -y -i '$INPUTFILE' -re -acodec copy -vcodec copy -f mpegts -"
 
 IDX=1
 set -x
@@ -55,7 +55,11 @@ for RT in $RATES; do
   DT="drawtext=$STYLE:$METRICS:timecode='00\\:00\\:00\\:01':rate=25/1:text='$CAP'" 
 
   mkdir -p "$PFX"
-  ffmpeg -y -f mpegts -i "$FIFO" -vf "$DT" \
+  FIFO="/tmp/hlslive.$$.$IDX.fifo"
+  FIFOS="$FIFOS $FIFO"
+  TEES="$TEES | tee $FIFO"
+  mkfifo $FIFO
+  ffmpeg -y -f mpegts -i "$FIFO" -re -vf "$DT" \
     -map 0:0 -map 0:1 \
     $AUDIO_OPTIONS -ar $AR -b:a ${BA}k \
     $VIDEO_OPTIONS -profile $P $VIDEO_EXTRA \
@@ -67,6 +71,9 @@ for RT in $RATES; do
   IDX=$[IDX+1]
 
 done
+
+TEES="$TEES > /dev/null"
+eval $TEES
 
 wait
 _shutdown
