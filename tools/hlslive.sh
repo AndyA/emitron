@@ -10,7 +10,7 @@ fi
 GOP=8
 AUDIO_OPTIONS="-acodec libfaac -ac 2"
 VIDEO_OPTIONS="-vcodec libx264"
-VIDEO_EXTRA="-sc_threshold 0"
+VIDEO_EXTRA="-preset veryfast -sc_threshold 0"
 
 FONT="$HOME/Dropbox/Fonts/Envy Code R.ttf"
 
@@ -31,7 +31,7 @@ function _shutdown() {
 
 trap _shutdown SIGINT
 
-TEES="ffmpeg -y -i '$INPUTFILE' -re -acodec copy -vcodec copy -f mpegts -"
+TEES="ffmpeg -re -y -i '$INPUTFILE' -acodec copy -vcodec copy -f mpegts - < /dev/null"
 
 IDX=1
 set -x
@@ -59,14 +59,14 @@ for RT in $RATES; do
   FIFOS="$FIFOS $FIFO"
   TEES="$TEES | tee $FIFO"
   mkfifo $FIFO
-  ffmpeg -y -f mpegts -i "$FIFO" -re -vf "$DT" \
+  ffmpeg -re -y -f mpegts -i "$FIFO" -vf "$DT" \
     -map 0:0 -map 0:1 \
     $AUDIO_OPTIONS -ar $AR -b:a ${BA}k \
     $VIDEO_OPTIONS -profile $P $VIDEO_EXTRA \
     -g $KEYINT -keyint_min $[KEYINT/2] -r $R -b:v ${BV}k -s $S \
     -flags -global_header -threads 0 \
     -f segment -segment_time $GOP \
-    -segment_list "$LIST" -segment_format mpegts "$FRAG" &
+    -segment_list "$LIST" -segment_format mpegts "$FRAG" < /dev/null &
 
   IDX=$[IDX+1]
 
