@@ -1,52 +1,19 @@
 .PHONY: all clean realclean send preview prores
 
-SOURCED=STREAM
-WORKD=work
-PREVIEWD=preview
-PRORES25D=prores25
-PRORES50D=prores50
-REMOTE=andy@phool:~/Desktop
+SRCD=incoming
+DSTD=media
 FFATOMIC=tools/ffatomic
 
-MTS=$(wildcard $(SOURCED)/*.MTS)
-MOV=$(patsubst $(SOURCED)/%.MTS, $(WORKD)/%.mov, $(MTS))
-PREVIEW=$(patsubst $(WORKD)/%.mov, $(PREVIEWD)/%.mp4, $(MOV))
-PRORES25=$(patsubst $(WORKD)/%.mov, $(PRORES25D)/%.mov, $(MOV))
-PRORES50=$(patsubst $(WORKD)/%.mov, $(PRORES50D)/%.mov, $(MOV))
+TS=$(wildcard $(SRCD)/*.ts)
+MP4=$(patsubst $(SRCD)/%.ts, $(DSTD)/%.mp4, $(TS))
 
-OUTD=$(PREVIEWD) $(PRORES25D) $(PRORES50D)
+all: mp4
 
-all: preview prores
+mp4: $(MP4)
 
-preview: $(PREVIEW)
-
-prores: $(PRORES25) $(PRORES50)
-
-$(MOV): $(WORKD)/%.mov: $(SOURCED)/%.MTS
-	$(FFATOMIC) movwrap $< $@
-
-$(PREVIEW): $(PREVIEWD)/%.mp4: $(WORKD)/%.mov
-	$(FFATOMIC) preview $< $@
-
-$(PRORES25): $(PRORES25D)/%.mov: $(WORKD)/%.mov
-	$(FFATOMIC) prores25 $< $@
-
-$(PRORES50): $(PRORES50D)/%.mov: $(WORKD)/%.mov
-	$(FFATOMIC) prores50 $< $@
+$(MP4): $(DSTD)/%.mp4: $(SRCD)/%.ts
+	$(FFATOMIC) mp4 $< $@
 
 clean:
-	rm -rf $(WORKD)
+	rm -rf $(MP4)
 
-realclean: clean
-	rm -rf $(OUTD)
-
-send:
-	mkdir -p $(OUTD)
-	rsync -avP $(OUTD) $(REMOTE)
-
-links:
-	tools/mklinks.sh
-
-# TODO: stacked undos
-undo:
-	[ -x ./.undo ] && ./.undo && rm ./.undo

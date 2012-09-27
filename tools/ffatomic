@@ -6,63 +6,9 @@ use warnings;
 use Path::Class;
 
 my %PROFILE = (
-  movwrap => sub {
+  mp4 => sub {
     my ( $in, $out ) = @_;
-    return (
-      'ffmpeg', '-y',
-      -i      => "$in",
-      -acodec => 'pcm_s16le',
-      -ar     => 48000,
-      -vcodec => 'copy',
-      -r      => 50,
-      "$out",
-    );
-  },
-  preview => sub {
-    my ( $in, $out ) = @_;
-    return (
-      'ffmpeg', '-y',
-      -i       => "$in",
-      -acodec  => 'libfaac',
-      '-b:a'   => '128k',
-      -ar      => 44100,
-      -vcodec  => 'libx264',
-      '-b:v'   => 3000000,
-      -r       => 25,
-      -s       => '1280x720',
-      -threads => 0,
-      "$out",
-    );
-  },
-  prores25 => sub {
-    my ( $in, $out ) = @_;
-    return (
-      'ffmpeg', '-y',
-      -i           => "$in",
-      -acodec      => 'pcm_s16le',
-      -ar          => 48000,
-      -vcodec      => 'prores',
-      '-profile:v' => 1,
-      '-b:v'       => 75000000,
-      -r           => 25,
-      -threads     => 0,
-      "$out",
-    );
-  },
-  prores50 => sub {
-    my ( $in, $out ) = @_;
-    return (
-      'ffmpeg', '-y',
-      -i           => "$in",
-      -acodec      => 'pcm_s16le',
-      -ar          => 48000,
-      -vcodec      => 'prores',
-      '-profile:v' => 1,
-      '-b:v'       => 75000000,
-      -r           => 50,
-      -threads     => 0,
-      "$out",
-    );
+    return mp4( $in, $out );
   },
 );
 
@@ -84,6 +30,25 @@ system @cmd and die join( ' ', @cmd ), " failed: $?\n";
 unlink "$out";
 rename "$tmp", "$out"
  or die "Can't rename $tmp as $out: $!\n";
+
+sub mp4 {
+  my ( $in, $out ) = @_;
+  return (
+    'ffmpeg', '-y',
+    -i       => "$in",
+    -map     => '0:0',
+    -map     => '0:1',
+    -acodec  => 'libfaac',
+    '-b:a'   => '128k',
+    '-r:a'   => 44100,
+    -vcodec  => 'libx264',
+    -bf      => 0,
+    '-b:v'   => '2800k',
+    '-r:v'   => 25,
+    -threads => 0,
+    "$out",
+  );
+}
 
 sub tmp_name {
   my $out  = file( shift );
