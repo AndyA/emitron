@@ -3,14 +3,15 @@
 INPUTFILE="$1"
 OUTPUTFILE="$2"
 if [ -z "$OUTPUTFILE" ]; then
-  echo "Usage: $0 <infile> <outfile>"
+  echo "Usage: $0 <infile> <outfile>" 1>&2
   exit 1
 fi
 
-GOP=4
+GOP=8
 AUDIO_OPTIONS="-acodec libfaac -ac 2"
 VIDEO_OPTIONS="-vcodec libx264"
 VIDEO_EXTRA="-sc_threshold 0"
+
 #VIDEO_OPTIONS="$VIDEO_OPTIONS -preset veryslow"
 
 FONT="$HOME/Dropbox/Fonts/Envy Code R.ttf"
@@ -25,12 +26,14 @@ RATES="
   W=1024;H=576;R=25;BV=2000;BA=96;AR=44100;P=main
   W=1280;H=720;R=25;BV=3372;BA=128;AR=48000;P=high"
 
-mkdir -p "$(dirname "$OUTPUTFILE")"
+#RATES="W=224;H=126;R=5;BV=32;BA=24;AR=22050;P=baseline"
+
 IDX=1
 set -x
 for RT in $RATES; do
-  TMP="$OUTPUTFILE-$IDX.tmp.mp4"
-  MP4="$OUTPUTFILE-$IDX.mp4"
+  PFX="$OUTPUTFILE-$IDX"
+  FRAG="$PFX/%05d.ts"
+  LIST="$PFX.m3u8"
 
   W=; H=; R=; BV=; BA=; P=; AR=
   eval $RT
@@ -49,14 +52,15 @@ for RT in $RATES; do
   # Due to what looks like an ffmpeg bug specifying audio options screws
   # up the parsing of the -profile option so we process in two stages.
 
-  ffmpeg -y -i "$INPUTFILE" -vf "$DT" -acodec copy \
+  mkdir -p "$PFX"
+  ffmpeg -y -i "$INPUTFILE" -vf "$DT" \
+    -map 0:0 -map 0:1 \
+    $AUDIO_OPTIONS -ar $AR -b:a ${BA}k \
     $VIDEO_OPTIONS -profile $P $VIDEO_EXTRA \
     -g $KEYINT -keyint_min $[KEYINT/2] -r $R -b:v ${BV}k -s $S \
-    -threads 0 "$TMP"
-
-  ffmpeg -y -i "$TMP" $AUDIO_OPTIONS -ar $AR -b:a ${BA}k -vcodec copy -threads 0 "$MP4" 
-
-  rm -f "$TMP"
+    -flags -global_header -threads 0 \
+    -f segment -segment_time $GOP \
+    -segment_list "$LIST" -segment_format mpegts "$FRAG"
 
   IDX=$[IDX+1]
 
