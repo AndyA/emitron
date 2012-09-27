@@ -76,7 +76,7 @@ for RT in $RATES; do
 done
 
 TEES="$TEES > /dev/null"
-eval $TEES
+eval $TEES &
 
 wait
 _shutdown
