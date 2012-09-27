@@ -86,22 +86,22 @@ configuration=
 			},
 
 			validateHandshake=false,
-			authentication=
-			{
-				rtmp={
-					type="adobe",
-					encoderAgents=
-					{
-						"FMLE/3.0 (compatible; FMSc/1.0)",
-						"Wirecast/FM 1.0 (compatible; FMSc/1.0)",
-						"EvoStream Media Server (www.evostream.com)"
-					},
-					usersFile="../config/users.lua"
-				},
-				rtsp={
-					usersFile="../config/users.lua"
-				}
-			},
+--                        authentication=
+--                        {
+--                                rtmp={
+--                                        type="adobe",
+--                                        encoderAgents=
+--                                        {
+--                                                "FMLE/3.0 (compatible; FMSc/1.0)",
+--                                                "Wirecast/FM 1.0 (compatible; FMSc/1.0)",
+--                                                "EvoStream Media Server (www.evostream.com)"
+--                                        },
+--                                        usersFile="../config/users.lua"
+--                                },
+--                                rtsp={
+--                                        usersFile="../config/users.lua"
+--                                }
+--                        },
 		},
 	}
 }
