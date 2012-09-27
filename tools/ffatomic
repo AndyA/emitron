@@ -1,0 +1,96 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Path::Class;
+
+my %PROFILE = (
+  movwrap => sub {
+    my ( $in, $out ) = @_;
+    return (
+      'ffmpeg', '-y',
+      -i      => "$in",
+      -acodec => 'pcm_s16le',
+      -ar     => 48000,
+      -vcodec => 'copy',
+      -r      => 50,
+      "$out",
+    );
+  },
+  preview => sub {
+    my ( $in, $out ) = @_;
+    return (
+      'ffmpeg', '-y',
+      -i       => "$in",
+      -acodec  => 'libfaac',
+      '-b:a'   => '128k',
+      -ar      => 44100,
+      -vcodec  => 'libx264',
+      '-b:v'   => 3000000,
+      -r       => 25,
+      -s       => '1280x720',
+      -threads => 0,
+      "$out",
+    );
+  },
+  prores25 => sub {
+    my ( $in, $out ) = @_;
+    return (
+      'ffmpeg', '-y',
+      -i           => "$in",
+      -acodec      => 'pcm_s16le',
+      -ar          => 48000,
+      -vcodec      => 'prores',
+      '-profile:v' => 1,
+      '-b:v'       => 75000000,
+      -r           => 25,
+      -threads     => 0,
+      "$out",
+    );
+  },
+  prores50 => sub {
+    my ( $in, $out ) = @_;
+    return (
+      'ffmpeg', '-y',
+      -i           => "$in",
+      -acodec      => 'pcm_s16le',
+      -ar          => 48000,
+      -vcodec      => 'prores',
+      '-profile:v' => 1,
+      '-b:v'       => 75000000,
+      -r           => 50,
+      -threads     => 0,
+      "$out",
+    );
+  },
+);
+
+die "usage: ffatomic <profile> <in> <out>\n"
+ unless @ARGV == 3;
+
+my ( $profile, $in, $out ) = @ARGV;
+
+my $pf = $PROFILE{$profile} || die "Unknown profile: $profile\n";
+
+my $tmp = tmp_name( $out );
+
+my @cmd = $pf->( $in, $tmp );
+
+file( $out )->parent->mkpath;
+file( $tmp )->parent->mkpath;
+
+system @cmd and die join( ' ', @cmd ), " failed: $?\n";
+unlink "$out";
+rename "$tmp", "$out"
+ or die "Can't rename $tmp as $out: $!\n";
+
+sub tmp_name {
+  my $out  = file( shift );
+  my $outd = $out->absolute->parent;
+  my $tmpd = dir( "$outd.tmp" );
+  return file( $tmpd, $out->basename );
+}
+
+# vim:ts=2:sw=2:sts=2:et:ft=perl
+
