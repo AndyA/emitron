@@ -13,10 +13,10 @@ use constant GOP  => 8;
 use constant FRAG => '%05d.ts';
 
 my %KLUDGE = (
-  1 => 176,
-  2 => 496,
+  1 => 396,
+  2 => 800,
   3 => 1500,
-  4 => 3500,
+  4 => 2096,
 );
 
 GetOptions() or die;
@@ -28,10 +28,12 @@ my @stm = stm->find_streams( $dir );
 die "No streams found" unless @stm;
 write_master( $dir, @stm );
 while () {
-  for my $stm ( @stm ) {
-    $stm->write_list if $stm->find_frags;
+  my $got = 0;
+  $got += $_->find_frags for @stm;
+  sleep GOP;
+  if ( $got ) {
+    $_->write_list for @stm;
   }
-  sleep GOP / 2;
 }
 
 sub write_master {
