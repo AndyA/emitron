@@ -1,4 +1,5 @@
 .*.sw?
 .DS_Store
+/*.tmp/
 /incoming/
 Session.vim
