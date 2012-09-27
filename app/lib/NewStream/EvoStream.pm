@@ -8,6 +8,8 @@ use JSON::XS;
 use LWP::UserAgent;
 use MIME::Base64;
 
+use NewStream::EvoStream::JSON qw( detox_json );
+
 use accessors::ro qw( host port );
 
 BEGIN {
@@ -82,7 +84,7 @@ sub api {
   }
   my $resp = $self->ua->get( $uri );
   die $resp->status_line if $resp->is_error;
-  return decode_json $resp->content;
+  return detox_json decode_json $resp->content;
 }
 
 1;
