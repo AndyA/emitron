@@ -8,9 +8,10 @@ if [ -z "$OUTPUTFILE" ]; then
 fi
 
 GOP=8
+PRESET=veryfast
 AUDIO_OPTIONS="-acodec libfaac -ac 2"
 VIDEO_OPTIONS="-vcodec libx264"
-VIDEO_EXTRA="-preset veryfast -sc_threshold 0"
+VIDEO_EXTRA="-preset $PRESET -sc_threshold 0"
 
 FONT="$HOME/Dropbox/Fonts/Envy Code R.ttf"
 
