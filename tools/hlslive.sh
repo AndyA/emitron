@@ -1,11 +1,13 @@
 #!/bin/bash
 
 INPUTFILE="$1"
-OUTPUTFILE="$2"
-if [ -z "$OUTPUTFILE" ]; then
+OUTPUTDIR="$2"
+if [ -z "$OUTPUTDIR" ]; then
   echo "Usage: $0 <infile> <outfile>" 1>&2
   exit 1
 fi
+
+OUTPUTFILE="$OUTPUTDIR/$( basename "$OUTPUTDIR" )"
 
 GOP=8
 PRESET=veryfast
@@ -66,8 +68,8 @@ for RT in $RATES; do
     $VIDEO_OPTIONS -profile $P $VIDEO_EXTRA \
     -g $KEYINT -keyint_min $[KEYINT/2] -r $R -b:v ${BV}k -s $S \
     -flags -global_header -threads 0 \
-    -f segment -segment_time $GOP \
-    -segment_list "$LIST" -segment_format mpegts "$FRAG" < /dev/null &
+    -f segment -segment_time $GOP -segment_format mpegts \
+    "$FRAG" < /dev/null &
 
   IDX=$[IDX+1]
 
