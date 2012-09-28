@@ -49,7 +49,7 @@ sub write_master {
       my $sd = $stm->dir;
       die unless $sd =~ /(\d+)$/;
       my $idx = $1;
-      my $bw  = $KLUDGE{$idx};
+      my $bw  = $KLUDGE{$idx} * 1000;
       $pl{$idx} = join "\n",
        "#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=$bw", $stm->list;
     }
@@ -104,7 +104,7 @@ sub stm::write_list {
     print $fh join "\n",
      '#EXTM3U',
      '#EXT-X-VERSION:3',
-     '#EXT-X-TARGETDURATION:20',
+     '#EXT-X-TARGETDURATION:' . GOP,
      '#EXT-X-ALLOW-CACHE:YES',
      '#EXT-X-MEDIA-SEQUENCE:1', '';
     for my $frag ( @{ $self->{frags} } ) {
