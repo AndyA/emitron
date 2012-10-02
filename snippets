@@ -1,0 +1,7 @@
+RTSP into EvoStream. Works but no stream name set. Adding localStreamName doesn't help.
+
+  ffmpeg -re -i media/sherlock-2.1.mp4 \
+    -acodec libfaac -b:a 128k -r:a 44100 \
+    -vcodec libx264 -bf 0 -b:v 2000k -r:v 25 \
+    -threads 0 -f rtsp -rtsp_transport tcp -muxdelay 1.0 \
+    rtsp://newstream.fenkle:5544/phool?localStreamName=phool
