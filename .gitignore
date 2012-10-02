@@ -1,3 +1,4 @@
+*.ts
 .*.sw?
 .DS_Store
 /*.tmp/
