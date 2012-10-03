@@ -10,18 +10,21 @@ use Path::Class;
 use constant FPS  => 25;
 use constant FONT => glob '~/Dropbox/Fonts/Envy\ Code\ R.ttf';
 
+my $iterations = shift || 1;
+
 $| = 1;
 
 testcard(
-  width    => 1024,
-  height   => 576,
-  frames   => 500,
-  leadin   => 100,
-  leadout  => 100,
-  out      => 'testcard',
-  template => 'f%06d.jpeg',
-  font     => FONT,
-  fontsize => 100,
+  width      => 1024,
+  height     => 576,
+  frames     => 500,
+  leadin     => 100,
+  leadout    => 100,
+  out        => 'testcard',
+  template   => 'f%06d.jpeg',
+  font       => FONT,
+  fontsize   => 100,
+  iterations => $iterations,
 );
 
 sub testcard {
@@ -30,8 +33,9 @@ sub testcard {
   my $out = dir( $a{out} );
   $out->mkpath;
 
-  for my $fr ( 0 .. $a{frames} - 1 ) {
-    my $tc = tc( $fr + 1 );
+  for my $frr ( 0 .. $a{frames} * $a{iterations} - 1 ) {
+    my $tc = tc( $frr + 1 );
+    my $fr = $frr % $a{frames};
     print "\r$tc";
 
     my $img = GD::Image->new( $a{width}, $a{height}, 1 );
@@ -66,7 +70,7 @@ sub testcard {
       }
     }
 
-    file( $out, sprintf $a{template}, $fr )
+    file( $out, sprintf $a{template}, $frr )
      ->openw->print( $img->jpeg( 90 ) );
   }
   print "\n";
