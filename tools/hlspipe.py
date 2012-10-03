@@ -78,9 +78,11 @@ class HLSPipe:
     if build_pipe:
       pipeline = gst.Pipeline('pipeline')
     else:
-      pipeline = \
-        gst.parse_launch('mpegtsmux name=muxer ! filesink location=hlspipe.ts rtspsrc location=rtsp://newstream.fenkle:5544/phool name=src src. ! rtpmp4gdepay ! queue ! muxer. src. ! rtph264depay ! queue ! muxer. '
-          )
+      pipeline = gst.parse_launch(
+        'mpegtsmux name=muxer ! filesink location=hlspipe.ts '
+        'rtspsrc location=rtsp://newstream.fenkle:5544/phool name=src '
+        'src. ! rtpmp4gdepay ! queue ! muxer. '
+        'src. ! rtph264depay ! queue ! muxer. ')
 
     def dump_pipe():
       dump_elt(pipeline.get_by_name('src'))
