@@ -6,3 +6,6 @@ Live streams:
   rtmp://zaphod-origin.ch.bbc.co.uk/live/inlet5
   rtmp://zaphod-origin.ch.bbc.co.uk/live/inlet1
 
+TODO:
+  Analyse MPEG2 (SPS/PPS etc)
+  ABR HLS encoding
