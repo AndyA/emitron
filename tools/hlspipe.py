@@ -91,8 +91,11 @@ class HLSPipe:
       src = gst.element_factory_make("rtspsrc", "src")
       src.set_property("location", "rtsp://newstream.fenkle:5544/phool")
 
-      dst = gst.element_factory_make("filesink", "dst");
-      dst.set_property("location", "hlspipe.ts")
+#      dst = gst.element_factory_make("filesink", "dst");
+#      dst.set_property("location", "hlspipe.ts")
+      dst = gst.element_factory_make("multifilesink", "dst");
+      dst.set_property("location", "hlspipe%05d.ts")
+      dst.set_property("next-file", "key-frame")
 
       pipeline.add(src, depaya, depayv, muxer, dst)
 
