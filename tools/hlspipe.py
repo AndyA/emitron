@@ -7,6 +7,29 @@ pygst.require("0.10")
 import gst
 
 class HLSPipe:
+  def auto_link(self, src, sink):
+    def try_link(elt, pad):
+      try:
+        print "]]] Trying %s -> %s asynchronously" % ( src.get_name(), sink.get_name() )
+        src.link(sink)
+        print "]]] Link %s -> %s created asynchronously" % ( src.get_name(), sink.get_name() )
+        src.get_parent_element().disconnect(h_id)
+        print "]]] Handler disconnected"
+        return
+      except:
+        pass
+
+    try:
+      print "]]] Trying %s -> %s synchronously" % ( src.get_name(), sink.get_name() )
+      src.link(sink)
+      print "]]] Link %s -> %s created synchronously" % ( src.get_name(), sink.get_name() )
+      return
+    except:
+      pass
+
+#    import pdb; pdb.set_trace()
+    h_id = src.connect("pad-added", try_link)
+    print "]]] Deferring %s -> %s" % ( src.get_name(), sink.get_name() )
 
   def __init__(self):
     build_pipe = True
@@ -69,18 +92,11 @@ class HLSPipe:
           err, debug = message.parse_error()
           print "Error: %s" % err, debug
 
-      def src_complete(src):
-        src.link(depayv)
-        src.link(depaya)
-        mention("WIRED SRC")
-
       muxer = gst.element_factory_make("mpegtsmux", "muxer")
-
       depaya = gst.element_factory_make("rtpmp4gdepay", "depaya")
       depayv = gst.element_factory_make("rtph264depay", "depayv")
 
       src = gst.element_factory_make("rtspsrc", "src")
-      src.connect("no-more-pads", src_complete)
       src.set_property("location", "rtsp://newstream.fenkle:5544/phool")
 
       dst = gst.element_factory_make("filesink", "dst");
@@ -91,12 +107,14 @@ class HLSPipe:
       def qlink(src, dst):
         q = gst.element_factory_make("queue")
         pipeline.add(q)
-        gst.element_link_many(src, q, dst)
+        self.auto_link(src, q)
+        self.auto_link(q, dst)
 
+      self.auto_link(src, depaya)
+      self.auto_link(src, depayv)
       qlink(depaya, muxer)
       qlink(depayv, muxer)
-
-      muxer.link(dst)
+      self.auto_link(muxer, dst)
 
     bus = pipeline.get_bus()
     bus.add_signal_watch()
