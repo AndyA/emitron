@@ -58,6 +58,15 @@ class HLSPipe:
     def mention(msg):
       print "HLSPIPE: %s" % msg
 
+    def on_message(bus, message):
+      t = message.type
+      if t == gst.MESSAGE_EOS:
+        pipeline.set_state(gst.STATE_NULL)
+      elif t == gst.MESSAGE_ERROR:
+        pipeline.set_state(gst.STATE_NULL)
+        err, debug = message.parse_error()
+        print "Error: %s" % err, debug
+
     if build_pipe:
       pipeline = gst.Pipeline("pipeline")
     else:
@@ -75,15 +84,6 @@ class HLSPipe:
     mention("PIPELINE: %s" % pipeline)
 
     if build_pipe:
-      def on_message(bus, message):
-        t = message.type
-        if t == gst.MESSAGE_EOS:
-          pipeline.set_state(gst.STATE_NULL)
-        elif t == gst.MESSAGE_ERROR:
-          pipeline.set_state(gst.STATE_NULL)
-          err, debug = message.parse_error()
-          print "Error: %s" % err, debug
-
       muxer = gst.element_factory_make("mpegtsmux", "muxer")
       depaya = gst.element_factory_make("rtpmp4gdepay", "depaya")
       depayv = gst.element_factory_make("rtph264depay", "depayv")
