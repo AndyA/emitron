@@ -10,26 +10,19 @@ class HLSPipe:
   def auto_link(self, src, sink):
     def try_link(elt, pad):
       try:
-        print "]]] Trying %s -> %s asynchronously" % ( src.get_name(), sink.get_name() )
         src.link(sink)
-        print "]]] Link %s -> %s created asynchronously" % ( src.get_name(), sink.get_name() )
-        src.get_parent_element().disconnect(h_id)
-        print "]]] Handler disconnected"
+        src.disconnect(h_id)
         return
-      except:
+      except (gst.LinkError):
         pass
 
     try:
-      print "]]] Trying %s -> %s synchronously" % ( src.get_name(), sink.get_name() )
       src.link(sink)
-      print "]]] Link %s -> %s created synchronously" % ( src.get_name(), sink.get_name() )
       return
-    except:
+    except (gst.LinkError):
       pass
 
-#    import pdb; pdb.set_trace()
     h_id = src.connect("pad-added", try_link)
-    print "]]] Deferring %s -> %s" % ( src.get_name(), sink.get_name() )
 
   def __init__(self):
     build_pipe = True
@@ -84,7 +77,6 @@ class HLSPipe:
     if build_pipe:
       def on_message(bus, message):
         t = message.type
-        print "LOG: %s" % message
         if t == gst.MESSAGE_EOS:
           pipeline.set_state(gst.STATE_NULL)
         elif t == gst.MESSAGE_ERROR:
