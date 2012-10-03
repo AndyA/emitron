@@ -11,6 +11,7 @@ OUTPUTFILE="$OUTPUTDIR/$( basename "$OUTPUTDIR" )"
 
 GOP=8
 PRESET=veryfast
+[ -z "$BURNIN" ] && BURNIN=true
 AUDIO_OPTIONS="-acodec libfaac -ac 2"
 VIDEO_OPTIONS="-vcodec libx264"
 VIDEO_EXTRA="-preset $PRESET -sc_threshold 0"
@@ -49,13 +50,17 @@ for RT in $RATES; do
   S="${W}x${H}"
   KEYINT=$( perl -e "print $GOP*$R" )
 
-  # Edit the next line with care - the leading and trailing blanks are \xA0 (non-breaking space)
-  CAP=" $S ${BV}k "
-  FS=$[W/30]
-  SH=$[W/400]
-  STYLE="fontcolor=white:fontsize=$FS:fontfile=$FONT"
-  METRICS="shadowcolor=black@0.7:shadowx=$SH:shadowy=$SH:x=9*W/10-tw:y=8*H/10"
-  DT="drawtext=$STYLE:$METRICS:timecode='00\\:00\\:00\\:01':rate=25/1:text='$CAP'" 
+  if $BURNIN; then
+    # Edit the next line with care - the leading and trailing blanks are \xA0 (non-breaking space)
+    CAP=" $S ${BV}k "
+    FS=$[W/30]
+    SH=$[W/400]
+    STYLE="fontcolor=white:fontsize=$FS:fontfile=$FONT"
+    METRICS="shadowcolor=black@0.7:shadowx=$SH:shadowy=$SH:x=9*W/10-tw:y=8*H/10"
+    DT="drawtext=$STYLE:$METRICS:timecode='00\\:00\\:00\\:01':rate=25/1:text='$CAP'" 
+  else
+    DT="null"
+  fi
 
   mkdir -p "$PFX"
   FIFO="/tmp/hlslive.$$.$IDX.fifo"
