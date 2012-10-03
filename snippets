@@ -28,3 +28,21 @@ HLS fragmenting
 
   http://gstreamer-devel.966125.n4.nabble.com/ \
     Implementing-a-MPEGTS-segmenter-what-s-the-best-approach-td3169098.html
+
+  v4l2src  \
+    ! stamp sync-margin=1 sync-interval=1  \
+    ! videorate  \
+    ! video/x-raw-yuv,width=640,height=480,framerate=30/1  \
+    ! ffmpegcolorspace  \
+    ! x264enc bitrate=512 subme=4 b-pyramid=true weightb=true  \
+    ! queue2  \
+    ! flvmux name=mux alsasrc  \
+    ! audio/x-raw-int,rate=1102nnels=2,depth=16  \
+    ! audiorate  \
+    ! queue2 max-size-buffers=600 max-size-bytes=0 max-size-time=0  \
+    ! audioconvert  \
+    ! lamemp3enc target=1 bitrate=40 mono=true encoding-engine-quality=1 target=bitrate  \
+    ! mux. mux.  \
+    ! queue2  \
+    ! rtmpsink location="rtmp://server2"
+5
