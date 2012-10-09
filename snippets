@@ -1,0 +1,48 @@
+RTSP into EvoStream. Works but no stream name set. Adding localStreamName doesn't help.
+
+  ffmpeg -re -i media/sherlock-2.1.mp4 \
+    -acodec libfaac -b:a 128k -r:a 44100 \
+    -vcodec libx264 -bf 0 -b:v 2000k -r:v 25 \
+    -threads 0 -f rtsp -rtsp_transport tcp -muxdelay 1.0 \
+    rtsp://newstream.fenkle:5544/phool?localStreamName=phool
+
+Works but suspect A/V sync
+
+  gst-launch rtspsrc location=rtsp://newstream.fenkle:5544/phool name=phool ! \
+    rtpmp4gdepay ! queue ! mpegtsmux name=muxer ! filesink location=foo.ts phool. ! \
+    rtph264depay ! queue ! muxer.
+
+Pipe asset to EvoStream
+
+  while true; do 
+    ffmpeg -re -i media/sherlock-2.1.mp4 \
+      -acodec libfaac -b:a 128k -r:a 44100 \
+      -vcodec libx264 -bf 0 -b:v 2000k -r:v 25 \
+      -threads 0 -f flv rtmp://newstream.fenkle/live/phool
+  done
+
+HLS fragmenting
+
+  gst-launch ... ! mpegtsmux ! multifilesink next-file=key-frame \ 
+    location=%05d.ts 
+
+  http://gstreamer-devel.966125.n4.nabble.com/ \
+    Implementing-a-MPEGTS-segmenter-what-s-the-best-approach-td3169098.html
+
+  v4l2src  \
+    ! stamp sync-margin=1 sync-interval=1  \
+    ! videorate  \
+    ! video/x-raw-yuv,width=640,height=480,framerate=30/1  \
+    ! ffmpegcolorspace  \
+    ! x264enc bitrate=512 subme=4 b-pyramid=true weightb=true  \
+    ! queue2  \
+    ! flvmux name=mux alsasrc  \
+    ! audio/x-raw-int,rate=1102nnels=2,depth=16  \
+    ! audiorate  \
+    ! queue2 max-size-buffers=600 max-size-bytes=0 max-size-time=0  \
+    ! audioconvert  \
+    ! lamemp3enc target=1 bitrate=40 mono=true encoding-engine-quality=1 target=bitrate  \
+    ! mux. mux.  \
+    ! queue2  \
+    ! rtmpsink location="rtmp://server2"
+5

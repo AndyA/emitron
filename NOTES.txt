@@ -1,2 +1,8 @@
 Cons:
   No B-frames.
+
+Live streams:
+  rtmp://zaphod-origin.ch.bbc.co.uk/livepkgr/hd_ch5
+  rtmp://zaphod-origin.ch.bbc.co.uk/live/inlet5
+  rtmp://zaphod-origin.ch.bbc.co.uk/live/inlet1
+
