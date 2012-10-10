@@ -3,11 +3,19 @@
   <head>
     <title>Clock</title>
     <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script src="mejs/build/mediaelement-and-player.min.js"></script>
     <script type="text/javascript" src="js/clock.js"></script>
+    <link rel="stylesheet" href="mejs/build/mediaelementplayer.css" />
   </head>
   <body>
-    <video id="clock" controls="controls" >
+    <video id="clock" width="960" height="320" controls="controls" preload="none" >
       <source src="clock.m3u8" type="application/x-mpegURL" />
+      <object width="960" height="320" type="application/x-shockwave-flash" 
+              data="mejs/build/flashmediaelement.swf"> 		
+        <param name="movie" value="mejs/build/flashmediaelement.swf" /> 
+        <param name="flashvars" 
+              value="controls=true&amp;file=rtmp://newstream.hexten.net/vod/mp4:clock-5.mp4" />
+      </object> 	
     </video>
   </body>
 </html>
