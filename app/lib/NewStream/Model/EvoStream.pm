@@ -71,8 +71,11 @@ sub _poll_streams {
     $self->add( $known->{$id}
        = NewStream::Model::Stream->new( id => $id, evo => $self->evo )
     );
+    debug( "Registering stream $id (",
+      $known->{$id}->name, ", ", $known->{$id}->type, ")" );
   }
   for my $oid ( keys %orphan ) {
+    debug( "Unregistering stream $oid" );
     $self->remove( delete $known->{$oid} );
   }
 }

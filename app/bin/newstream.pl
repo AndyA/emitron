@@ -18,10 +18,19 @@ use NewStream::Model::App;
 use NewStream::Model::EvoStream;
 
 NewStream::Logger->level( NewStream::Logger->DEBUG );
+
 my $app = NewStream::Model::App->new;
-my $evo
- = NewStream::Model::EvoStream->new( evo => NewStream::EvoStream->new );
-$app->add( $evo );
+my $evo = NewStream::EvoStream->new;
+my $es  = NewStream::Model::EvoStream->new( evo => $evo );
+$es->on(
+  added_stream => sub {
+    my $obj = shift;
+    info( "Hey - just added a streamable thing: ", $obj->name );
+  }
+);
+
+$app->add( $es );
+
 $app->run;
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl

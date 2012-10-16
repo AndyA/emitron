@@ -113,7 +113,6 @@ sub _add {
   $obj->on_added( $self );
   $self->raise( "added_$kind" => $obj );
   $self->raise( added => $kind, $obj );
-  debug( "added:\n", $obj );
 }
 
 sub _remove {
@@ -127,7 +126,6 @@ sub _remove {
   $obj->on_removed( $self );
   splice @{ $self->{_obj}{$kind} }, $idx, 1;
   delete $self->{_index}{ refaddr $obj};
-  debug( "removed:\n", $obj );
 }
 
 sub add {
