@@ -24,8 +24,6 @@ RATES="
   W=688;H=384;R=25;BV=1372;BA=128;AR=48000;P=main
   W=1024;H=576;R=25;BV=2000;BA=96;AR=44100;P=main"
 
-#RATES="W=224;H=126;R=5;BV=32;BA=24;AR=22050;P=baseline"
-
 FIFOS=""
 TEES=""
 
@@ -42,7 +40,6 @@ set -x
 for RT in $RATES; do
   PFX="$OUTPUTFILE-$IDX"
   FRAG="$PFX/%05d.ts"
-  LIST="$PFX.m3u8"
 
   W=; H=; R=; BV=; BA=; P=; AR=
   eval $RT
