@@ -6,6 +6,11 @@ RTSP into EvoStream. Works but no stream name set. Adding localStreamName doesn'
     -threads 0 -f rtsp -rtsp_transport tcp -muxdelay 1.0 \
     rtsp://newstream.fenkle:5544/phool?localStreamName=phool
 
+RTSP out of EvoStream:
+
+  ffmpeg -y -i rtsp://localhost:5544/phool \
+    -acodec copy -vcodec copy -t 120 -threads 0 foo.mp4
+
 Works but suspect A/V sync
 
   gst-launch rtspsrc location=rtsp://newstream.fenkle:5544/phool name=phool ! \
