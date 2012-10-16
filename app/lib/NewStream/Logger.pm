@@ -51,10 +51,16 @@ sub _ts {
    sprintf( '%06d', $now * 1_000_000 % 1_000_000 );
 }
 
+sub _dd {
+  my $obj = shift;
+  return Data::Dumper->new( [$obj] )->Indent( 2 )->Quotekeys( 0 )
+   ->Useqq( 1 )->Terse( 1 )->Dump;
+}
+
 sub _mention {
   my $level = shift;
   return if $level > $LOGLEVEL;
-  my $msg = join '', @_;
+  my $msg = join '', map { ref $_ ? _dd( $_ ) : $_ } @_;
   my $ts = _ts;
   print color $LOGCOLOUR[$level] // 'white';
   print "$ts: $_\n" for split /\n/, $msg;

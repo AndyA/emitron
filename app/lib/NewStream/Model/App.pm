@@ -16,12 +16,20 @@ NewStream::Model::App - Newstream Application
 
 =cut
 
+sub poll {
+  my $self = shift;
+  $self->raise( 'tick' );
+}
+
 sub run {
   my $self = shift;
   info( 'NewStream starting' );
   while () {
     usleep 500_000;
-    $self->raise( 'tick' );
+    eval { $self->poll };
+    if ( my $err = $@ ) {
+      error( $err );
+    }
   }
 }
 
