@@ -6,6 +6,8 @@ use warnings;
 use Carp qw( croak );
 use Scalar::Util qw( refaddr );
 
+use NewStream::Model::Selection;
+
 =head1 NAME
 
 NewStream::Model::Base - Base class for model objects
@@ -17,23 +19,25 @@ sub new {
   return bless {}, $class;
 }
 
+### Events ###
+
 sub _parse_ev_ns {
   my $ev = shift;
   return ( $1, $2 ) if $ev =~ m{^(.+?):(.+)$};
   return ( 'default', $ev );
 }
 
-sub _with_hash {
+sub _witheach_hash {
   my ( $hash, $key, $cb ) = @_;
   return $cb->( $hash, $key ) unless $key eq '*';
   $cb->( $hash, $_ ) for sort keys %$hash;
 }
 
-sub _with_event {
+sub _witheach_event {
   my $self = shift;
   my ( $ev, $cb )  = @_;
   my ( $ns, $evn ) = _parse_ev_ns( $ev );
-  _with_hash(
+  _witheach_hash(
     $self->{_handler},
     $evn,
     sub {
@@ -49,7 +53,7 @@ sub list_event_handlers {
   my $self = shift;
 
   my @eh = ();
-  $self->_with_event( '*:*', sub { push @eh, join ':', @_ } );
+  $self->_witheach_event( '*:*', sub { push @eh, join ':', @_ } );
   return @eh;
 }
 
@@ -66,7 +70,7 @@ sub off {
   my $self = shift;
   for my $ev ( @_ ) {
     my ( $ns, $evn ) = _parse_ev_ns( $ev );
-    _with_hash(
+    _witheach_hash(
       $self->{_handler},
       $evn,
       sub {
@@ -85,6 +89,8 @@ sub raise {
   my ( $ev, @args ) = @_;
   $_->[1]( @args ) for @{ $self->{_handler}{$ev} ||= [] };
 }
+
+### Collections ###
 
 sub _find_obj {
   my $self = shift;
@@ -135,7 +141,7 @@ sub remove {
   $self->_remove( $_ ) for @_;
 }
 
-sub each_kind {
+sub witheach_kind {
   my $self = shift;
   my $cb   = shift;
   my $objs = $self->{_obj};
@@ -144,12 +150,50 @@ sub each_kind {
   }
 }
 
-sub each {
+sub witheach_of {
   my $self = shift;
   my ( $kind, $cb ) = @_;
-  for my $obj ( @{ $self->{_obj}{$kind} ||= [] } ) {
-    $cb->( $obj );
+  $cb->( $kind, $_ ) for @{ $self->{_obj}{$kind} ||= [] };
+}
+
+sub witheach {
+  my $self = shift;
+  my $cb   = shift;
+  $self->witheach_kind( sub { $self->witheach_of( $_[0], $cb ) } );
+}
+
+### Selectors ###
+
+sub _hash_to_filter {
+  my $h    = shift;
+  my @term = ();
+  while ( my ( $k, $pred ) = each %$h ) {
+    push @term, sub {
+      my $obj = shift;
+      my $val
+       = ( UNIVERSAL::can( $obj, 'can' ) && $obj->can( $k ) )
+       ? $obj->$k()
+       : $obj->{$k};
+      return 'CODE' eq ref $pred ? $pred->( $val ) : $pred eq $val;
+    };
   }
+  return sub { 1 }
+   if @term == 0;
+  return $term[0] if @term == 1;
+  return sub {
+    my $obj = shift;
+    for my $t ( @term ) {
+      return unless $t->( $obj );
+    }
+    return 1;
+  };
+}
+
+sub select {
+  my $self = shift;
+  return $self unless @_;
+  return NewStream::Model::Selection->_new( $self,
+    _hash_to_filter( {@_} ) );
 }
 
 1;

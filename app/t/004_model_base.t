@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 13;
+use Test::More tests => 16;
 
 use NewStream::Model::Base;
 use Data::Dumper;
@@ -12,6 +12,14 @@ package Thing;
 use base qw( NewStream::Model::Base );
 
 sub kind { 'thing' }
+sub name { 'Celia' }
+
+package Thong;
+
+use base qw( NewStream::Model::Base );
+
+sub kind { 'thong' }
+sub name { 'Frank' }
 
 package main;
 
@@ -64,17 +72,19 @@ package main;
   my @log = ();
   $obj->on( added         => sub { push @log, 'added' } );
   $obj->on( added_thing   => sub { push @log, 'added_thing' } );
+  $obj->on( added_thong   => sub { push @log, 'added_thong' } );
   $obj->on( removed       => sub { push @log, 'removed' } );
   $obj->on( removed_thing => sub { push @log, 'removed_thing' } );
+  $obj->on( removed_thong => sub { push @log, 'removed_thong' } );
   my $tt1 = Thing->new;
-  my $tt2 = Thing->new;
+  my $tt2 = Thong->new;
 
   $obj->add( $tt1 );
   is_deeply [@log], [ 'added_thing', 'added' ], 'added 1';
 
   @log = ();
   $obj->add( $tt1, $tt2 );
-  is_deeply [@log], [ 'added_thing', 'added' ], 'added 2';
+  is_deeply [@log], [ 'added_thong', 'added' ], 'added 2';
 
   @log = ();
   $obj->add( $tt1, $tt2 );
@@ -90,7 +100,25 @@ package main;
 
   @log = ();
   $obj->remove( $tt2 );
-  is_deeply [@log], [ 'removed', 'removed_thing' ], 'removed 3';
+  is_deeply [@log], [ 'removed', 'removed_thong' ], 'removed 3';
+}
+{
+  my $obj = NewStream::Model::Base->new;
+  my $tt1 = Thing->new;
+  my $tt2 = Thong->new;
+  $obj->add( $tt1, $tt2 );
+  is_deeply [ where( $obj ) ], [ $tt1, $tt2 ], 'selected all';
+  is_deeply [ where( $obj, kind => 'thing' ) ], [$tt1],
+   'selected thing';
+  is_deeply [ where( $obj, name => 'Frank' ) ], [$tt2],
+   'selected Frank';
+}
+
+sub where {
+  my $obj = shift;
+  my @r   = ();
+  $obj->select( @_ )->witheach( sub { push @r, $_[1] } );
+  return @r;
 }
 
 # vim:ts=2:sw=2:et:ft=perl
