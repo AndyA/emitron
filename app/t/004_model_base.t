@@ -2,10 +2,18 @@
 
 use strict;
 use warnings;
-use Test::More tests => 7;
+use Test::More tests => 13;
 
 use NewStream::Model::Base;
 use Data::Dumper;
+
+package Thing;
+
+use base qw( NewStream::Model::Base );
+
+sub kind { 'thing' }
+
+package main;
 
 {
   my $obj = NewStream::Model::Base->new;
@@ -48,11 +56,41 @@ use Data::Dumper;
   @event_log = ();
   $obj->off( 'default:*' );
   $obj->raise( foo => 5 );
-  is_deeply [@event_log],
-   [
-    { index => 4, args => [5] },
-   ],
-   'event 2';
+  is_deeply [@event_log], [ { index => 4, args => [5] }, ], 'event 2';
+}
+
+{
+  my $obj = NewStream::Model::Base->new;
+  my @log = ();
+  $obj->on( added         => sub { push @log, 'added' } );
+  $obj->on( added_thing   => sub { push @log, 'added_thing' } );
+  $obj->on( removed       => sub { push @log, 'removed' } );
+  $obj->on( removed_thing => sub { push @log, 'removed_thing' } );
+  my $tt1 = Thing->new;
+  my $tt2 = Thing->new;
+
+  $obj->add( $tt1 );
+  is_deeply [@log], [ 'added_thing', 'added' ], 'added 1';
+
+  @log = ();
+  $obj->add( $tt1, $tt2 );
+  is_deeply [@log], [ 'added_thing', 'added' ], 'added 2';
+
+  @log = ();
+  $obj->add( $tt1, $tt2 );
+  is_deeply [@log], [], 'added 3';
+
+  @log = ();
+  $obj->remove( $tt1 );
+  is_deeply [@log], [ 'removed', 'removed_thing' ], 'removed 1';
+
+  @log = ();
+  $obj->remove( $tt1 );
+  is_deeply [@log], [], 'removed 2';
+
+  @log = ();
+  $obj->remove( $tt2 );
+  is_deeply [@log], [ 'removed', 'removed_thing' ], 'removed 3';
 }
 
 # vim:ts=2:sw=2:et:ft=perl

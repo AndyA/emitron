@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Carp qw( croak );
+use Scalar::Util qw( refaddr );
 
 =head1 NAME
 
@@ -83,6 +84,72 @@ sub raise {
   my $self = shift;
   my ( $ev, @args ) = @_;
   $_->[1]( @args ) for @{ $self->{_handler}{$ev} ||= [] };
+}
+
+sub _find_obj {
+  my $self = shift;
+  my $obj  = shift;
+  return $self->{_index}{ refaddr $obj};
+}
+
+sub on_added   { }
+sub on_removed { }
+
+sub _add {
+  my $self = shift;
+  my ( $kind, $obj ) = @_;
+  return if $self->_find_obj( $obj );
+  my $ol = $self->{_obj}{$kind} ||= [];
+  $self->{_index}{ refaddr $obj } = [ $kind, scalar @$ol ];
+  push @$ol, $obj;
+  $obj->on_added( $self );
+  $self->raise( "added_$kind" => $obj );
+  $self->raise( added => $kind, $obj );
+}
+
+sub _remove {
+  my $self = shift;
+  my $obj  = shift;
+  my $loc  = $self->_find_obj( $obj );
+  return unless $loc;
+  my ( $kind, $idx ) = @$loc;
+  $self->raise( removed => $kind, $obj );
+  $self->raise( "removed_$kind", $obj );
+  $obj->on_removed( $self );
+  splice @{ $self->{_obj}{$kind} }, $idx, 1;
+  delete $self->{_index}{ refaddr $obj};
+}
+
+sub add {
+  my $self = shift;
+  for my $obj ( @_ ) {
+    croak "Attempt to add something that doesn't respond to 'kind'"
+     unless UNIVERSAL::can( $obj, 'can' ) && $obj->can( 'kind' );
+    my $kind = $obj->kind;
+    $self->_add( $kind, $obj );
+  }
+}
+
+sub remove {
+  my $self = shift;
+  $self->_remove( $_ ) for @_;
+}
+
+sub each_kind {
+  my $self = shift;
+  my $cb   = shift;
+  my $objs = $self->{_obj};
+  for my $kind ( sort keys %$objs ) {
+    $cb->( $kind ) if @{ $objs->{$kind} };
+  }
+}
+
+sub each {
+  my $self = shift;
+  my ( $kind, $cb ) = @_;
+  for my $obj ( @{ $self->{_obj}{$kind} ||= [] } ) {
+    $cb->( $obj );
+  }
 }
 
 1;
