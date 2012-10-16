@@ -6,6 +6,7 @@ use warnings;
 use Carp qw( croak );
 use Scalar::Util qw( refaddr );
 
+use NewStream::Logger;
 use NewStream::Model::Selection;
 
 =head1 NAME
@@ -16,7 +17,8 @@ NewStream::Model::Base - Base class for model objects
 
 sub new {
   my $class = shift;
-  return bless {}, $class;
+  my %opts  = @_;
+  return bless {%opts}, $class;
 }
 
 ### Events ###
