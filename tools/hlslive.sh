@@ -35,7 +35,9 @@ function _shutdown() {
 
 trap _shutdown SIGINT
 
-TEES="cvlc --rtsp-tcp '$INPUTFILE' --sout file/ts://-"
+#TEES="cvlc --rtsp-tcp '$INPUTFILE' --sout file/ts://-"
+#TEES="ffmpeg -y -i '$INPUTFILE' -acodec copy -vcodec copy -bsf:v h264_mp4toannexb -f mpegts - < /dev/null"
+TEES="cat '$INPUTFILE'"
 
 IDX=1
 set -x
