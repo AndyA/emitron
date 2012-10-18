@@ -63,6 +63,22 @@ class HLSPipe:
       for p in elt.pads():
         dump_pad(p, depth + 1, seen)
 
+
+    def dump_buffer_flags(buffer):
+      flags = {
+        'BUFFER_FLAG_DELTA_UNIT':  gst.BUFFER_FLAG_DELTA_UNIT,
+        'BUFFER_FLAG_DISCONT':     gst.BUFFER_FLAG_DISCONT,
+        'BUFFER_FLAG_GAP':         gst.BUFFER_FLAG_GAP,
+        'BUFFER_FLAG_IN_CAPS':     gst.BUFFER_FLAG_IN_CAPS,
+        'BUFFER_FLAG_LAST':        gst.BUFFER_FLAG_LAST,
+        'BUFFER_FLAG_PREROLL':     gst.BUFFER_FLAG_PREROLL,
+        'BUFFER_FLAG_READONLY':    gst.BUFFER_FLAG_READONLY,
+      }
+
+      for flag in flags.keys():
+        print "%-24s: %s" % ( flag,
+          "TRUE" if buffer.flag_is_set(flags[flag]) else "FALSE" )
+
     def mention(msg):
       print 'HLSPIPE: %s' % msg
 
@@ -92,6 +108,7 @@ class HLSPipe:
         self.auto_link(src, q)
         self.auto_link(q, dst)
 
+      # Make some elements
       src = gst.element_factory_make('rtspsrc', 'src')
       src.set_property('location',
         'rtsp://newstream.fenkle:5544/phool')
@@ -99,17 +116,40 @@ class HLSPipe:
       depaya = gst.element_factory_make('rtpmp4gdepay', 'depaya')
       depayv = gst.element_factory_make('rtph264depay', 'depayv')
       muxer = gst.element_factory_make('mpegtsmux', 'muxer')
+
+      parser = gst.element_factory_make('h264parse', 'parser')
+      ident = gst.element_factory_make('identity', 'ident')
+
+      def on_handoff(ident, buffer):
+        if not buffer.flag_is_set(gst.BUFFER_FLAG_DELTA_UNIT):
+          mention('KEY FRAME')
+          valve.set_property('drop', False)
+          ident.set_property('signal-handoffs', False)
+
+#        import pdb; pdb.set_trace()
+
+      ident.connect('handoff', on_handoff)
+      ident.set_property('signal-handoffs', False)
+
+      valve = gst.element_factory_make('valve', 'valve')
+      valve.set_property('drop', False)
+
       dst = gst.element_factory_make("filesink", "dst");
       dst.set_property("location", "hlspipe.ts")
 
-      pipeline.add(src, depaya, depayv, muxer, dst)
+      pipeline.add(src, parser, ident, valve, depaya, depayv, muxer, dst)
 
       # Join them up
       self.auto_link(src, depaya)
       qlink(depaya, muxer)
       self.auto_link(src, depayv)
-      qlink(depayv, muxer)
-      self.auto_link(muxer, dst)
+      qlink(depayv, parser)
+      self.auto_link(parser, muxer)
+
+      self.auto_link(muxer, ident)
+      self.auto_link(ident, valve)
+
+      self.auto_link(valve, dst)
 
     else:
       pipeline = gst.parse_launch(
@@ -122,11 +162,8 @@ class HLSPipe:
 
     bus = pipeline.get_bus()
     bus.add_signal_watch()
-
     bus.enable_sync_message_emission()
-
     bus.connect('message', on_message)
-
     bus.connect("sync-message::element", on_sync_message)
 
     mention('PLAYING')
