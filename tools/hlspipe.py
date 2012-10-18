@@ -75,6 +75,9 @@ class HLSPipe:
         (err, debug) = message.parse_error()
         print 'Error: %s' % err, debug
 
+    def on_sync_message(bus, message):
+      mention('sync message')
+
     if build_pipe:
       pipeline = gst.Pipeline('pipeline')
     else:
@@ -92,22 +95,21 @@ class HLSPipe:
     mention('PIPELINE: %s' % pipeline)
 
     if build_pipe:
-      muxer = gst.element_factory_make('mpegtsmux', 'muxer')
       depaya = gst.element_factory_make('rtpmp4gdepay', 'depaya')
       depayv = gst.element_factory_make('rtph264depay', 'depayv')
+
+      tfa = gst.element_factory_make('typefind', 'tfa')
+      fsa = gst.element_factory_make('fakesink', 'fsa')
+      tfv = gst.element_factory_make('typefind', 'tfv')
+      fsv = gst.element_factory_make('fakesink', 'fsv')
 
       src = gst.element_factory_make('rtspsrc', 'src')
       src.set_property('location',
         'rtsp://newstream.fenkle:5544/phool')
 
-#      dst = gst.element_factory_make("filesink", "dst");
-#      dst.set_property("location", "hlspipe.ts")
-
-      dst = gst.element_factory_make('multifilesink', 'dst')
-      dst.set_property('location', 'hlspipe%05d.ts')
-      dst.set_property('next-file', 'key-frame')
-
-      pipeline.add(src, depaya, depayv, muxer, dst)
+#      dst = gst.element_factory_make('multifilesink', 'dst')
+#      dst.set_property('location', 'hlspipe%05d.ts')
+#      dst.set_property('next-file', 'key-frame')
 
       def qlink(src, dst):
         q = gst.element_factory_make('queue')
@@ -115,26 +117,67 @@ class HLSPipe:
         self.auto_link(src, q)
         self.auto_link(q, dst)
 
+      self.known_a = False
+      self.known_v = False
+
+      def try_wire():
+        mention('try_wire')
+#        import pdb; pdb.set_trace()
+        if self.known_a and self.known_v:
+          mention('got audio and video types, building wiring')
+          pipeline.set_state(gst.STATE_PAUSED)
+          muxer = gst.element_factory_make('mpegtsmux', 'muxer')
+          dst = gst.element_factory_make("filesink", "dst");
+          dst.set_property("location", "hlspipe.ts")
+
+          pipeline.add(muxer, dst)
+
+          tfa.unlink(fsa)
+          tfv.unlink(fsv)
+
+          muxer.sync_state_with_parent()
+          dst.sync_state_with_parent()
+
+          qlink(tfa, muxer)
+          qlink(tfv, muxer)
+
+          self.auto_link(muxer, dst)
+          pipeline.set_state(gst.STATE_PLAYING)
+
+      def have_type_a(tf, prob, caps):
+        mention('have-type_a')
+        self.known_a = True
+        try_wire()
+
+      def have_type_v(tf, prob, caps):
+        mention('have-type_v')
+        self.known_v = True
+        try_wire()
+
+      tfa.connect('have-type', have_type_a)
+      tfv.connect('have-type', have_type_v)
+
+      pipeline.add(src, depaya, tfa, fsa, depayv, tfv, fsv)
+
       self.auto_link(src, depaya)
+      self.auto_link(depaya, tfa)
+      self.auto_link(tfa, fsa)
+
       self.auto_link(src, depayv)
-      qlink(depaya, muxer)
-      qlink(depayv, muxer)
-      self.auto_link(muxer, dst)
+      self.auto_link(depayv, tfv)
+      self.auto_link(tfv, fsv)
 
     bus = pipeline.get_bus()
     bus.add_signal_watch()
 
-#    bus.enable_sync_message_emission()
+    bus.enable_sync_message_emission()
 
     bus.connect('message', on_message)
 
-#    bus.connect("sync-message::element", self.on_sync_message)
-
-#    import pdb; pdb.set_trace()
+    bus.connect("sync-message::element", on_sync_message)
 
     mention('PLAYING')
     pipeline.set_state(gst.STATE_PLAYING)
-
 
 HLSPipe()
 loop = gobject.MainLoop()
