@@ -26,14 +26,16 @@ RATES="
 
 FIFOS=""
 TEES=""
+TOKILL=""
 
 function _shutdown() {
+  kill $TOKILL
   rm -f $FIFOS
 }
 
 trap _shutdown SIGINT
 
-TEES="cvlc '$INPUTFILE' --sout file/ts://-"
+TEES="cvlc --rtsp-tcp '$INPUTFILE' --sout file/ts://-"
 
 IDX=1
 set -x
@@ -59,14 +61,15 @@ for RT in $RATES; do
     DT="null"
   fi
 
+  PAD="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
+
   mkdir -p "$PFX"
   FIFO="/tmp/hlslive.$$.$IDX.fifo"
   FIFOS="$FIFOS $FIFO"
   TEES="$TEES | tee $FIFO"
   mkfifo $FIFO
-  ffmpeg -y -f mpegts -i "$FIFO" -vf "$DT" \
+  ffmpeg -y -f mpegts -i "$FIFO" -vf "$PAD,$DT" \
     -map 0:0 -map 0:1 \
-    -analyzeduration 20 \
     $AUDIO_OPTIONS -ar $AR -b:a ${BA}k \
     $VIDEO_OPTIONS -profile:v $P $VIDEO_EXTRA \
     -g $KEYINT -keyint_min $[KEYINT/2] -r $R -b:v ${BV}k -s $S \
@@ -80,6 +83,9 @@ done
 
 TEES="$TEES > /dev/null"
 eval $TEES &
+TOKILL="$! $TOKILL"
+perl tools/hlswrap.pl "$OUTPUTDIR" &
+TOKILL="$! $TOKILL"
 
 wait
 _shutdown

@@ -7,8 +7,9 @@ ffmpeg -y \
   -vf 'format=yuv420p' \
   -acodec libfaac -b:a 128k -ac 2 \
   -vcodec libx264 -b:v 2000k -r:v 25 \
-  -profile baseline -bf 0 -g 100 -keyint_min 50 \
+  -profile:v baseline -bf 0 -g 100 -keyint_min 50 \
   -threads 0 -f flv rtmp://localhost/live/phool
+
 
 
 # vim:ts=2:sw=2:sts=2:et:ft=sh

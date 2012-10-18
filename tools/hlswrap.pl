@@ -27,6 +27,15 @@ my $dir = shift
 my @stm = stm->find_streams( $dir );
 die "No streams found" unless @stm;
 write_master( $dir, @stm );
+
+$SIG{INT} = sub {
+  print "Closing stream\n";
+  for my $stm ( @stm ) {
+    $stm->close;
+    $stm->write_list;
+  }
+};
+
 while () {
   my $got = 0;
   $got += $_->find_frags for @stm;
@@ -72,7 +81,12 @@ sub stm::find_streams {
 
 sub stm::new {
   my ( $class, %args ) = @_;
-  return bless { %args, frags => [], next => 0 }, $class;
+  return bless {
+    %args,
+    frags  => [],
+    next   => 1,
+    closed => 0,
+  }, $class;
 }
 
 sub stm::base { shift->{base} }
@@ -110,10 +124,13 @@ sub stm::write_list {
     for my $frag ( @{ $self->{frags} } ) {
       print $fh join "\n", "#EXTINF:" . GOP, $frag, '';
     }
+    print $fh "#EXT-X-ENDLIST\n" if $self->{closed};
   }
   rename $tmp, $list or die "Can't rename $tmp as $list: $!\n";
   print "Updated $list\n";
 }
+
+sub stm::close { shift->{closed} = 1 }
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl
 
