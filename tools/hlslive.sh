@@ -52,8 +52,8 @@ for RT in $RATES; do
   if $BURNIN; then
     # Edit the next line with care - the leading and trailing blanks are \xA0 (non-breaking space)
     CAP=" $S ${BV}k "
-    FS=$[W/30]
-    SH=$[W/400]
+    FS=36
+    SH=2
     STYLE="fontcolor=white:fontsize=$FS:fontfile=$FONT"
     METRICS="shadowcolor=black@0.7:shadowx=$SH:shadowy=$SH:x=9*W/10-tw:y=8*H/10"
     DT="drawtext=$STYLE:$METRICS:timecode='00\\:00\\:00\\:01':rate=25/1:text='$CAP'" 
@@ -68,11 +68,13 @@ for RT in $RATES; do
   FIFOS="$FIFOS $FIFO"
   TEES="$TEES | tee $FIFO"
   mkfifo $FIFO
-  ffmpeg -y -f mpegts -i "$FIFO" -vf "$PAD,$DT" \
+  ffmpeg -y -f mpegts -i "$FIFO" \
     -map 0:0 -map 0:1 \
     $AUDIO_OPTIONS -ar $AR -b:a ${BA}k \
     $VIDEO_OPTIONS -profile:v $P $VIDEO_EXTRA \
-    -g $KEYINT -keyint_min $[KEYINT/2] -r $R -b:v ${BV}k -s $S \
+    -g $KEYINT -keyint_min $[KEYINT/2] -r $R -b:v ${BV}k \
+    -s $S \
+    -vf "$PAD,$DT" \
     -flags -global_header -threads 0 \
     -f segment -segment_time $GOP -segment_format mpegts \
     "$FRAG" < /dev/null &
@@ -84,7 +86,7 @@ done
 TEES="$TEES > /dev/null"
 eval $TEES &
 TOKILL="$! $TOKILL"
-perl tools/hlswrap.pl "$OUTPUTDIR" &
+perl tools/hlswrap.pl --live "$OUTPUTDIR" &
 TOKILL="$! $TOKILL"
 
 wait
