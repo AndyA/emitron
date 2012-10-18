@@ -1,7 +1,7 @@
 #!/bin/bash
 
-INPUTFILE="$1"
-OUTPUTDIR="$2"
+INPUTFILE="${1-rtsp://newstream:5544/phool}"
+OUTPUTDIR="${2-webroot/live/hls/test}"
 if [ -z "$OUTPUTDIR" ]; then
   echo "Usage: $0 <infile> <outfile>" 1>&2
   exit 1
@@ -33,7 +33,7 @@ function _shutdown() {
 
 trap _shutdown SIGINT
 
-TEES="ffmpeg -y -i '$INPUTFILE' -acodec copy -vcodec copy -bsf:v h264_mp4toannexb -f mpegts - < /dev/null"
+TEES="cvlc '$INPUTFILE' --sout file/ts://-"
 
 IDX=1
 set -x
