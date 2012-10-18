@@ -78,34 +78,13 @@ class HLSPipe:
     def on_sync_message(bus, message):
       mention('sync message')
 
-    if build_pipe:
-      pipeline = gst.Pipeline('pipeline')
-    else:
-      pipeline = gst.parse_launch(
-        'mpegtsmux name=muxer ! filesink location=hlspipe.ts '
-        'rtspsrc location=rtsp://newstream.fenkle:5544/phool name=src '
-        'src. ! rtpmp4gdepay ! queue ! muxer. '
-        'src. ! rtph264depay ! queue ! muxer. ')
-
     def dump_pipe():
       dump_elt(pipeline.get_by_name('src'))
 
     atexit.register(dump_pipe)
 
-    mention('PIPELINE: %s' % pipeline)
-
     if build_pipe:
-
-      tf = gst.element_factory_make('typefind', 'tf')
-#      fs = gst.element_factory_make('fakesink', 'fs')
-
-      src = gst.element_factory_make('rtspsrc', 'src')
-      src.set_property('location',
-        'rtsp://newstream.fenkle:5544/phool')
-
-#      dst = gst.element_factory_make('multifilesink', 'dst')
-#      dst.set_property('location', 'hlspipe%05d.ts')
-#      dst.set_property('next-file', 'key-frame')
+      pipeline = gst.Pipeline('pipeline')
 
       def qlink(src, dst):
         q = gst.element_factory_make('queue')
@@ -113,39 +92,33 @@ class HLSPipe:
         self.auto_link(src, q)
         self.auto_link(q, dst)
 
-      def have_type(tf, prob, caps):
-        mention('have-type')
-        mention('try_wire')
-#        import pdb; pdb.set_trace()
-        depaya = gst.element_factory_make('rtpmp4gdepay', 'depaya')
-        depayv = gst.element_factory_make('rtph264depay', 'depayv')
-        muxer = gst.element_factory_make('mpegtsmux', 'muxer')
-        dst = gst.element_factory_make("filesink", "dst");
-        dst.set_property("location", "hlspipe.ts")
+      src = gst.element_factory_make('rtspsrc', 'src')
+      src.set_property('location',
+        'rtsp://newstream.fenkle:5544/phool')
 
-#        tf.unlink(fs)
+      depaya = gst.element_factory_make('rtpmp4gdepay', 'depaya')
+      depayv = gst.element_factory_make('rtph264depay', 'depayv')
+      muxer = gst.element_factory_make('mpegtsmux', 'muxer')
+      dst = gst.element_factory_make("filesink", "dst");
+      dst.set_property("location", "hlspipe.ts")
 
-        pipeline.add(depaya, depayv, muxer, dst)
+      pipeline.add(src, depaya, depayv, muxer, dst)
 
-        depaya.sync_state_with_parent()
-        depayv.sync_state_with_parent()
-        muxer.sync_state_with_parent()
-        dst.sync_state_with_parent()
+      # Join them up
+      self.auto_link(src, depaya)
+      qlink(depaya, muxer)
+      self.auto_link(src, depayv)
+      qlink(depayv, muxer)
+      self.auto_link(muxer, dst)
 
-        self.auto_link(tf, depaya)
-        qlink(depaya, muxer)
-        self.auto_link(tf, depayv)
-        qlink(depayv, muxer)
-        self.auto_link(muxer, dst)
+    else:
+      pipeline = gst.parse_launch(
+        'mpegtsmux name=muxer ! filesink location=hlspipe.ts '
+        'rtspsrc location=rtsp://newstream.fenkle:5544/phool name=src '
+        'src. ! rtpmp4gdepay ! queue ! muxer. '
+        'src. ! rtph264depay ! queue ! muxer. ')
 
-#          pipeline.set_state(gst.STATE_PLAYING)
-
-      tf.connect('have-type', have_type)
-
-      pipeline.add(src, tf)
-
-      self.auto_link(src, tf)
-#      self.auto_link(tf, fs)
+    mention('PIPELINE: %s' % pipeline)
 
     bus = pipeline.get_bus()
     bus.add_signal_watch()
