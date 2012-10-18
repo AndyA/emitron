@@ -1,6 +1,7 @@
 *.ts
 .*.sw?
 .DS_Store
+.gdb_history
 /*.tmp/
 /incoming/
 Session.vim
