@@ -95,13 +95,9 @@ class HLSPipe:
     mention('PIPELINE: %s' % pipeline)
 
     if build_pipe:
-      depaya = gst.element_factory_make('rtpmp4gdepay', 'depaya')
-      depayv = gst.element_factory_make('rtph264depay', 'depayv')
 
-      tfa = gst.element_factory_make('typefind', 'tfa')
-      fsa = gst.element_factory_make('fakesink', 'fsa')
-      tfv = gst.element_factory_make('typefind', 'tfv')
-      fsv = gst.element_factory_make('fakesink', 'fsv')
+      tf = gst.element_factory_make('typefind', 'tf')
+#      fs = gst.element_factory_make('fakesink', 'fs')
 
       src = gst.element_factory_make('rtspsrc', 'src')
       src.set_property('location',
@@ -117,55 +113,39 @@ class HLSPipe:
         self.auto_link(src, q)
         self.auto_link(q, dst)
 
-      self.known_a = False
-      self.known_v = False
-
-      def try_wire():
+      def have_type(tf, prob, caps):
+        mention('have-type')
         mention('try_wire')
 #        import pdb; pdb.set_trace()
-        if self.known_a and self.known_v:
-          mention('got audio and video types, building wiring')
-          pipeline.set_state(gst.STATE_PAUSED)
-          muxer = gst.element_factory_make('mpegtsmux', 'muxer')
-          dst = gst.element_factory_make("filesink", "dst");
-          dst.set_property("location", "hlspipe.ts")
+        depaya = gst.element_factory_make('rtpmp4gdepay', 'depaya')
+        depayv = gst.element_factory_make('rtph264depay', 'depayv')
+        muxer = gst.element_factory_make('mpegtsmux', 'muxer')
+        dst = gst.element_factory_make("filesink", "dst");
+        dst.set_property("location", "hlspipe.ts")
 
-          pipeline.add(muxer, dst)
+#        tf.unlink(fs)
 
-          tfa.unlink(fsa)
-          tfv.unlink(fsv)
+        pipeline.add(depaya, depayv, muxer, dst)
 
-          muxer.sync_state_with_parent()
-          dst.sync_state_with_parent()
+        depaya.sync_state_with_parent()
+        depayv.sync_state_with_parent()
+        muxer.sync_state_with_parent()
+        dst.sync_state_with_parent()
 
-          qlink(tfa, muxer)
-          qlink(tfv, muxer)
+        self.auto_link(tf, depaya)
+        qlink(depaya, muxer)
+        self.auto_link(tf, depayv)
+        qlink(depayv, muxer)
+        self.auto_link(muxer, dst)
 
-          self.auto_link(muxer, dst)
-          pipeline.set_state(gst.STATE_PLAYING)
+#          pipeline.set_state(gst.STATE_PLAYING)
 
-      def have_type_a(tf, prob, caps):
-        mention('have-type_a')
-        self.known_a = True
-        try_wire()
+      tf.connect('have-type', have_type)
 
-      def have_type_v(tf, prob, caps):
-        mention('have-type_v')
-        self.known_v = True
-        try_wire()
+      pipeline.add(src, tf)
 
-      tfa.connect('have-type', have_type_a)
-      tfv.connect('have-type', have_type_v)
-
-      pipeline.add(src, depaya, tfa, fsa, depayv, tfv, fsv)
-
-      self.auto_link(src, depaya)
-      self.auto_link(depaya, tfa)
-      self.auto_link(tfa, fsa)
-
-      self.auto_link(src, depayv)
-      self.auto_link(depayv, tfv)
-      self.auto_link(tfv, fsv)
+      self.auto_link(src, tf)
+#      self.auto_link(tf, fs)
 
     bus = pipeline.get_bus()
     bus.add_signal_watch()
