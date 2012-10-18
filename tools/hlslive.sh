@@ -33,7 +33,7 @@ function _shutdown() {
 
 trap _shutdown SIGINT
 
-TEES="ffmpeg -re -y -i '$INPUTFILE' -acodec copy -vcodec copy -f mpegts - < /dev/null"
+TEES="ffmpeg -y -i '$INPUTFILE' -acodec copy -vcodec copy -bsf:v h264_mp4toannexb -f mpegts - < /dev/null"
 
 IDX=1
 set -x
@@ -64,10 +64,11 @@ for RT in $RATES; do
   FIFOS="$FIFOS $FIFO"
   TEES="$TEES | tee $FIFO"
   mkfifo $FIFO
-  ffmpeg -re -y -f mpegts -i "$FIFO" -vf "$DT" \
+  ffmpeg -y -f mpegts -i "$FIFO" -vf "$DT" \
     -map 0:0 -map 0:1 \
+    -analyzeduration 20 \
     $AUDIO_OPTIONS -ar $AR -b:a ${BA}k \
-    $VIDEO_OPTIONS -profile $P $VIDEO_EXTRA \
+    $VIDEO_OPTIONS -profile:v $P $VIDEO_EXTRA \
     -g $KEYINT -keyint_min $[KEYINT/2] -r $R -b:v ${BV}k -s $S \
     -flags -global_header -threads 0 \
     -f segment -segment_time $GOP -segment_format mpegts \
