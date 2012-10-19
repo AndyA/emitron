@@ -15,7 +15,7 @@ function wc_default() {
     -vf 'format=yuv420p' \
     -acodec libfaac -b:a 128k -ac 2 \
     -vcodec libx264 -b:v 2000k \
-    -profile:v baseline -bf 0 -g 100 -keyint_min 50 -r:v 15 \
+    -profile:v baseline -bf 0 -g 100 -keyint_min 50 -r:v $rate \
     -threads 0 -f flv "$url"
 }
 
