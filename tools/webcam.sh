@@ -20,15 +20,15 @@ function wc_default() {
 }
 
 function wc_orac() {
-  rate=30
+  rate=15
   v4l2-ctl --set-fmt-video=width=1920,height=1080,pixelformat=1
-  v4l2-ctl --set-parm=30
+  v4l2-ctl --set-parm=$rate
   ffmpeg -y \
     -f alsa -ac 2 -r:a 48000 -i hw:1,0 \
     -f h264 -i <( tools/capture -o ) \
     -acodec libfaac -b:a 128k -ac 2 \
     -vcodec copy \
-    -threads 0 -f flv "$url"
+    -f flv "$url"
 }
 
 set -x
