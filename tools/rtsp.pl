@@ -6,7 +6,7 @@ use RTSP::Client;
 
 my $client = RTSP::Client->new_from_uri(
   transport_protocol => 'RTP/AVP;multicast',
-  uri                => 'rtsp://newstream.fenkle:5544/phool',
+  uri                => 'rtsp://newstream.fenkle:5544/igloo',
   debug              => 1,
   print_headers      => 1,
 );
