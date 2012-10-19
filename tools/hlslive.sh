@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INPUTFILE="${1-rtsp://newstream:5544/phool}"
+INPUTFILE="${1-rtsp://newstream:5544/igloo}"
 OUTPUTDIR="${2-webroot/live/hls/test}"
 if [ -z "$OUTPUTDIR" ]; then
   echo "Usage: $0 <infile> <outfile>" 1>&2
@@ -18,11 +18,17 @@ VIDEO_EXTRA="-preset $PRESET -sc_threshold 0"
 
 FONT="$HOME/Dropbox/Fonts/Envy Code R.ttf"
 
+#RATES="
+#  W=400;H=224;R=25;BV=300;BA=96;AR=44100;P=baseline
+#  W=640;H=360;R=25;BV=704;BA=96;AR=44100;P=main
+#  W=688;H=384;R=25;BV=1372;BA=128;AR=48000;P=main
+#  W=1024;H=576;R=25;BV=2000;BA=96;AR=44100;P=main"
+
 RATES="
   W=400;H=224;R=25;BV=300;BA=96;AR=44100;P=baseline
-  W=640;H=360;R=25;BV=704;BA=96;AR=44100;P=main
-  W=688;H=384;R=25;BV=1372;BA=128;AR=48000;P=main
-  W=1024;H=576;R=25;BV=2000;BA=96;AR=44100;P=main"
+  W=640;H=360;R=25;BV=704;BA=96;AR=44100;P=baseline
+  W=688;H=384;R=25;BV=1372;BA=128;AR=48000;P=baseline
+  W=1024;H=576;R=25;BV=2000;BA=96;AR=44100;P=baseline"
 
 FIFOS=""
 TEES=""
@@ -38,6 +44,7 @@ trap _shutdown SIGINT
 #TEES="cvlc --rtsp-tcp '$INPUTFILE' --sout file/ts://-"
 #TEES="ffmpeg -y -i '$INPUTFILE' -acodec copy -vcodec copy -bsf:v h264_mp4toannexb -f mpegts - < /dev/null"
 TEES="cat '$INPUTFILE'"
+#TEES="buffer -i '$INPUTFILE'"
 
 IDX=1
 set -x
@@ -68,7 +75,7 @@ for RT in $RATES; do
   mkdir -p "$PFX"
   FIFO="/tmp/hlslive.$$.$IDX.fifo"
   FIFOS="$FIFOS $FIFO"
-  TEES="$TEES | tee $FIFO"
+  TEES="$TEES | buffer | tee $FIFO"
   mkfifo $FIFO
   ffmpeg -y -f mpegts -i "$FIFO" \
     -map 0:0 -map 0:1 \
@@ -77,9 +84,17 @@ for RT in $RATES; do
     -g $KEYINT -keyint_min $[KEYINT/2] -r $R -b:v ${BV}k \
     -s $S \
     -vf "$PAD,$DT" \
-    -flags -global_header -threads 0 \
-    -f segment -segment_time $GOP -segment_format mpegts \
-    "$FRAG" < /dev/null &
+    -flags -global_header -threads 0 -f mpegts | \
+      m3u8-segmenter -i - \
+        -d $GOP -p "$PFX/seg" \
+        -m "$PFX.m3u8" \
+        -u http://newstream.fenkle/
+
+#    -f segment -segment_time $GOP -segment_format mpegts \
+#    "$FRAG" < /dev/null &
+
+#    -f mpegts "$PFX.ts" < /dev/null &
+
 
   IDX=$[IDX+1]
 

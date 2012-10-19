@@ -46,7 +46,7 @@ my @stms = [
     },
     uniqueId            => 8,
     creationTimestamp   => "1350409116110.97",
-    name                => "phool",
+    name                => "igloo",
     type                => "INR",
     outStreamsUniqueIds => undef
   }

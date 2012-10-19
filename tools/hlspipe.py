@@ -111,7 +111,7 @@ class HLSPipe:
       # Make some elements
       src = gst.element_factory_make('rtspsrc', 'src')
       src.set_property('location',
-        'rtsp://newstream.fenkle:5544/phool')
+        'rtsp://newstream.fenkle:5544/igloo')
 
       depaya = gst.element_factory_make('rtpmp4gdepay', 'depaya')
       depayv = gst.element_factory_make('rtph264depay', 'depayv')
@@ -154,7 +154,7 @@ class HLSPipe:
     else:
       pipeline = gst.parse_launch(
         'mpegtsmux name=muxer ! filesink location=hlspipe.ts '
-        'rtspsrc location=rtsp://newstream.fenkle:5544/phool name=src '
+        'rtspsrc location=rtsp://newstream.fenkle:5544/igloo name=src '
         'src. ! rtpmp4gdepay ! queue ! muxer. '
         'src. ! rtph264depay ! queue ! muxer. ')
 
