@@ -70,6 +70,7 @@ for RT in $RATES; do
     DT="null"
   fi
 
+  # Make it 16x9
   PAD="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
 
   mkdir -p "$PFX"
