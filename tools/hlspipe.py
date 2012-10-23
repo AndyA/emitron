@@ -9,7 +9,6 @@ import pygst
 pygst.require('0.10')
 import gst
 
-
 class HLSPipe:
 
   def auto_link(self, src, sink):
@@ -30,7 +29,8 @@ class HLSPipe:
 
     h_id = src.connect('pad-added', try_link)
 
-  def __init__(self):
+  def __init__(self, loop):
+    self.loop = loop
     build_pipe = True
 
     def pad_name(pad):
@@ -82,6 +82,10 @@ class HLSPipe:
     def mention(msg):
       print 'HLSPIPE: %s' % msg
 
+    def bailout(msg):
+      mention(msg)
+      self.loop.quit()
+
     def on_message(bus, message):
       t = message.type
       if t == gst.MESSAGE_EOS:
@@ -89,7 +93,7 @@ class HLSPipe:
       elif t == gst.MESSAGE_ERROR:
         pipeline.set_state(gst.STATE_NULL)
         (err, debug) = message.parse_error()
-        print 'Error: %s' % err, debug
+        bailout("Error: %s (%s)" % (err, debug))
 
     def on_sync_message(bus, message):
       mention('sync message')
@@ -149,7 +153,7 @@ class HLSPipe:
     mention('PLAYING')
     pipeline.set_state(gst.STATE_PLAYING)
 
-HLSPipe()
 loop = gobject.MainLoop()
+HLSPipe(loop)
 gobject.threads_init()
 loop.run()
