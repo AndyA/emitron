@@ -77,19 +77,16 @@ for RT in $RATES; do
   FIFOS="$FIFOS $FIFO"
   TEES="$TEES | tee $FIFO"
   mkfifo $FIFO
-  ffmpeg -f mpegts -i "$FIFO" \
+  ffmpeg -vsync 1 -f mpegts -i "$FIFO" \
     -map 0:0 -map 0:1 \
-    $AUDIO_OPTIONS -ar $AR -b:a ${BA}k \
+    $AUDIO_OPTIONS -r:a $AR -b:a ${BA}k \
     $VIDEO_OPTIONS -profile:v $P $VIDEO_EXTRA \
-    -g $KEYINT -keyint_min $[KEYINT/2] -r $R -b:v ${BV}k \
+    -g $KEYINT -keyint_min $[KEYINT/2] -r:v $R -b:v ${BV}k \
     -s $S \
     -vf "$PAD,$DT" \
-    -flags -global_header -threads 0 -f mpegts - < /dev/null | \
-      ffmpeg -y -f mpegts -i - \
-        -map 0 \
-        -acodec copy -vcodec copy \
-        -f segment -segment_time $GOP -segment_format mpegts \
-        "$FRAG" &
+    -flags -global_header -threads 0 \
+    -f segment -segment_time $GOP -segment_format mpegts \
+    "$FRAG" < /dev/null &
 
   IDX=$[IDX+1]
 
