@@ -158,6 +158,7 @@ sub stm::write_list {
      '#EXT-X-VERSION:3',
      '#EXT-X-TARGETDURATION:' . GOP,
      '#EXT-X-ALLOW-CACHE:YES',
+     '#EXT-X-PLAYLIST-TYPE:EVENT',
      '#EXT-X-MEDIA-SEQUENCE:1', '';
     for my $frag ( @{ $self->frags } ) {
       print $fh join "\n", "#EXTINF:" . GOP, $frag, '';
