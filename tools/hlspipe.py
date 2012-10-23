@@ -108,48 +108,28 @@ class HLSPipe:
         self.auto_link(src, q)
         self.auto_link(q, dst)
 
+#        import pdb; pdb.set_trace()
+
       # Make some elements
       src = gst.element_factory_make('rtspsrc', 'src')
       src.set_property('location',
-        'rtsp://newstream.fenkle:5544/igloo')
+        'rtsp://newstream.fenkle:5544/orac')
 
       depaya = gst.element_factory_make('rtpmp4gdepay', 'depaya')
       depayv = gst.element_factory_make('rtph264depay', 'depayv')
       muxer = gst.element_factory_make('mpegtsmux', 'muxer')
 
-      parser = gst.element_factory_make('h264parse', 'parser')
-      ident = gst.element_factory_make('identity', 'ident')
-
-      def on_handoff(ident, buffer):
-        if not buffer.flag_is_set(gst.BUFFER_FLAG_DELTA_UNIT):
-          mention('KEY FRAME')
-          valve.set_property('drop', False)
-          ident.set_property('signal-handoffs', False)
-
-#        import pdb; pdb.set_trace()
-
-      ident.connect('handoff', on_handoff)
-      ident.set_property('signal-handoffs', False)
-
-      valve = gst.element_factory_make('valve', 'valve')
-      valve.set_property('drop', False)
-
       dst = gst.element_factory_make("filesink", "dst");
       dst.set_property("location", "hlspipe.ts")
 
-      pipeline.add(src, parser, ident, valve, depaya, depayv, muxer, dst)
+      pipeline.add(src, depaya, depayv, muxer, dst)
 
       # Join them up
       self.auto_link(src, depaya)
       qlink(depaya, muxer)
       self.auto_link(src, depayv)
-      qlink(depayv, parser)
-      self.auto_link(parser, muxer)
-
-      self.auto_link(muxer, ident)
-      self.auto_link(ident, valve)
-
-      self.auto_link(valve, dst)
+      qlink(depayv, muxer)
+      self.auto_link(muxer, dst)
 
     else:
       pipeline = gst.parse_launch(

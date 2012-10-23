@@ -3,10 +3,11 @@
 use strict;
 use warnings;
 
+use Data::Dumper;
 use File::Basename qw( basename );
 use File::Spec;
-use Data::Dumper;
 use Getopt::Long;
+use List::Util qw( min max );
 use Time::HiRes qw( sleep );
 use XML::LibXML::XPathContext;
 use XML::LibXML;
@@ -42,7 +43,7 @@ sub run_live {
   while () {
     my $got = 0;
     $got += $_->find_frags for @stm;
-    if ( @on_ready && all_ready( @stm ) ) {
+    if ( @on_ready && lwm( @stm ) > 1 ) {
       $_->() for splice @on_ready;
     }
     sleep GOP;
@@ -62,13 +63,11 @@ sub run_vod {
   write_master( $dir, @stm );
 }
 
-sub all_ready {
-  my @stm = @_;
-  for my $stm ( @stm ) {
-    return unless $stm->frags;
-  }
-  return 1;
+sub all_frags {
+  return map { scalar @{ $_->frags } } @_;
 }
+
+sub lwm { min( all_frags( @_ ) ) }
 
 sub write_master {
   my ( $dir, @stm ) = @_;
