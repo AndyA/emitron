@@ -61,7 +61,8 @@ $(function() {
       type: hls_mime
     })).attr({
       controls: 'controls',
-      autoplay: 'autoplay'
+      autoplay: 'autoplay',
+      loop: 'loop',
     });
     deferredSeek(clock, timeOfDay);
   }
@@ -71,6 +72,7 @@ $(function() {
       src: here.makeAbsolute(f4m),
       autoPlay: true,
       controlBarAutoHide: true,
+      loop: true,
       javascriptCallbackFunction: "onSMPCallback"
     };
 
