@@ -22,8 +22,8 @@ function onMediaPlayerStateChange(state, playerId) {
 $(function() {
   var here = new URLParser(window.location.href);
   var hls_mime = 'application/x-mpegURL';
-  var m3u8 = "/s3/v0001aw2/v0001aw2.m3u8";
-  var f4m = "/s3/v0001aw2/v0001aw2.f4m";
+  var m3u8 = "http://media.thespace.org/v0001aw2/v0001aw2.m3u8";
+  var f4m = "http://media.thespace.org/v0001aw2/v0001aw2.f4m";
 
   var $clock = $('#clock');
   var clock = $clock[0];
