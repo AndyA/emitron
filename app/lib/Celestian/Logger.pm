@@ -1,11 +1,11 @@
-package Celestian::Logger;
+package Emitron::Logger;
 
 use strict;
 use warnings;
 
 =head1 NAME
 
-Celestian::Logger - Log output
+Emitron::Logger - Log output
 
 =cut
 

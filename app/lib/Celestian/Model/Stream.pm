@@ -1,11 +1,11 @@
-package Celestian::Model::Stream;
+package Emitron::Model::Stream;
 
 use strict;
 use warnings;
 
-use Celestian::Logger;
+use Emitron::Logger;
 
-use base qw( Celestian::Model::Base );
+use base qw( Emitron::Model::Base );
 
 use constant kind => 'stream';
 
@@ -13,7 +13,7 @@ use accessors::ro qw( evo id );
 
 =head1 NAME
 
-Celestian::Model::Stream - A stream
+Emitron::Model::Stream - A stream
 
 =cut
 

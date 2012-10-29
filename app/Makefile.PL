@@ -3,9 +3,9 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME                => 'Celestian',
+    NAME                => 'Emitron',
     AUTHOR              => q{YOUR NAME <youremail@example.com>},
-    VERSION_FROM        => 'lib/Celestian.pm',
+    VERSION_FROM        => 'lib/Emitron.pm',
     ABSTRACT            => 'YOUR APPLICATION ABSTRACT',
     ($ExtUtils::MakeMaker::VERSION >= 6.3002
       ? ('LICENSE'=> 'perl')
@@ -17,5 +17,5 @@ WriteMakefile(
         'Dancer'     => 1.31,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean               => { FILES => 'Celestian-*' },
+    clean               => { FILES => 'Emitron-*' },
 );

@@ -1,4 +1,4 @@
-package Celestian::Model::Base;
+package Emitron::Model::Base;
 
 use strict;
 use warnings;
@@ -6,12 +6,12 @@ use warnings;
 use Carp qw( croak );
 use Scalar::Util qw( refaddr );
 
-use Celestian::Logger;
-use Celestian::Model::Selection;
+use Emitron::Logger;
+use Emitron::Model::Selection;
 
 =head1 NAME
 
-Celestian::Model::Base - Base class for model objects
+Emitron::Model::Base - Base class for model objects
 
 =cut
 
@@ -194,7 +194,7 @@ sub _hash_to_filter {
 sub select {
   my $self = shift;
   return $self unless @_;
-  return Celestian::Model::Selection->_new( $self,
+  return Emitron::Model::Selection->_new( $self,
     _hash_to_filter( {@_} ) );
 }
 

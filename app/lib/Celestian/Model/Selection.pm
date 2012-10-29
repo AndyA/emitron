@@ -1,15 +1,15 @@
-package Celestian::Model::Selection;
+package Emitron::Model::Selection;
 
 use strict;
 use warnings;
 
 use Scalar::Util qw( refaddr );
 
-use base qw( Celestian::Model::Base );
+use base qw( Emitron::Model::Base );
 
 =head1 NAME
 
-Celestian::Model::Selection - A selection of objects
+Emitron::Model::Selection - A selection of objects
 
 =cut
 

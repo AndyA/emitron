@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Data::Dumper;
-use Celestian::EvoStream::JSON qw( detox_json );
+use Emitron::EvoStream::JSON qw( detox_json );
 
 use Test::More tests => 1;
 

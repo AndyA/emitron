@@ -1,4 +1,4 @@
-package Celestian::EvoStream::JSON;
+package Emitron::EvoStream::JSON;
 
 use strict;
 use warnings;
@@ -11,7 +11,7 @@ sub detox_json($);
 
 =head1 NAME
 
-Celestian::EvoStream::JSON - JSON helpers
+Emitron::EvoStream::JSON - JSON helpers
 
 =cut
 

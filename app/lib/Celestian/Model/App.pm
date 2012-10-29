@@ -1,18 +1,18 @@
-package Celestian::Model::App;
+package Emitron::Model::App;
 
 use strict;
 use warnings;
 
-use Celestian::Logger;
+use Emitron::Logger;
 use Time::HiRes qw( usleep );
 
-use base qw( Celestian::Model::Base );
+use base qw( Emitron::Model::Base );
 
 use constant kind => 'application';
 
 =head1 NAME
 
-Celestian::Model::App - Newstream Application
+Emitron::Model::App - Newstream Application
 
 =cut
 
@@ -23,7 +23,7 @@ sub poll {
 
 sub run {
   my $self = shift;
-  info( 'Celestian starting' );
+  info( 'Emitron starting' );
   while () {
     usleep 500_000;
     eval { $self->poll };
