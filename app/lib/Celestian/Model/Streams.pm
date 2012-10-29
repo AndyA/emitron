@@ -1,11 +1,11 @@
-package NewStream::Model::Streams;
+package Celestian::Model::Streams;
 
 use strict;
 use warnings;
 
 =head1 NAME
 
-NewStream::Model::Streams - A set of streams
+Celestian::Model::Streams - A set of streams
 
 =cut
 

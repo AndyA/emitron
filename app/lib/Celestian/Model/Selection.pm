@@ -1,15 +1,15 @@
-package NewStream::Model::Selection;
+package Celestian::Model::Selection;
 
 use strict;
 use warnings;
 
 use Scalar::Util qw( refaddr );
 
-use base qw( NewStream::Model::Base );
+use base qw( Celestian::Model::Base );
 
 =head1 NAME
 
-NewStream::Model::Selection - A selection of objects
+Celestian::Model::Selection - A selection of objects
 
 =cut
 

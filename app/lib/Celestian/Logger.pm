@@ -1,11 +1,11 @@
-package NewStream::Logger;
+package Celestian::Logger;
 
 use strict;
 use warnings;
 
 =head1 NAME
 
-NewStream::Logger - Log output
+Celestian::Logger - Log output
 
 =cut
 

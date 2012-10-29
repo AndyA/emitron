@@ -1,11 +1,11 @@
-package NewStream::Model::Stream;
+package Celestian::Model::Stream;
 
 use strict;
 use warnings;
 
-use NewStream::Logger;
+use Celestian::Logger;
 
-use base qw( NewStream::Model::Base );
+use base qw( Celestian::Model::Base );
 
 use constant kind => 'stream';
 
@@ -13,7 +13,7 @@ use accessors::ro qw( evo id );
 
 =head1 NAME
 
-NewStream::Model::Stream - A stream
+Celestian::Model::Stream - A stream
 
 =cut
 

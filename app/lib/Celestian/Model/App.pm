@@ -1,18 +1,18 @@
-package NewStream::Model::App;
+package Celestian::Model::App;
 
 use strict;
 use warnings;
 
-use NewStream::Logger;
+use Celestian::Logger;
 use Time::HiRes qw( usleep );
 
-use base qw( NewStream::Model::Base );
+use base qw( Celestian::Model::Base );
 
 use constant kind => 'application';
 
 =head1 NAME
 
-NewStream::Model::App - Newstream Application
+Celestian::Model::App - Newstream Application
 
 =cut
 
@@ -23,7 +23,7 @@ sub poll {
 
 sub run {
   my $self = shift;
-  info( 'NewStream starting' );
+  info( 'Celestian starting' );
   while () {
     usleep 500_000;
     eval { $self->poll };

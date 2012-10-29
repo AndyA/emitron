@@ -12,16 +12,16 @@ use Time::HiRes qw( usleep  );
 
 use lib qw( lib );
 
-use NewStream::EvoStream;
-use NewStream::Logger;
-use NewStream::Model::App;
-use NewStream::Model::EvoStream;
+use Celestian::EvoStream;
+use Celestian::Logger;
+use Celestian::Model::App;
+use Celestian::Model::EvoStream;
 
-NewStream::Logger->level( NewStream::Logger->DEBUG );
+Celestian::Logger->level( Celestian::Logger->DEBUG );
 
-my $app = NewStream::Model::App->new;
-my $evo = NewStream::EvoStream->new;
-my $es  = NewStream::Model::EvoStream->new( evo => $evo );
+my $app = Celestian::Model::App->new;
+my $evo = Celestian::EvoStream->new;
+my $es  = Celestian::Model::EvoStream->new( evo => $evo );
 $es->on(
   added_stream => sub {
     my $obj = shift;

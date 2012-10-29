@@ -1,12 +1,12 @@
-package NewStream::Model::EvoStream;
+package Celestian::Model::EvoStream;
 
 use strict;
 use warnings;
 
-use NewStream::Logger;
-use NewStream::Model::Stream;
+use Celestian::Logger;
+use Celestian::Model::Stream;
 
-use base qw( NewStream::Model::Base );
+use base qw( Celestian::Model::Base );
 
 use constant kind => 'evostream';
 
@@ -14,7 +14,7 @@ use accessors::ro qw( evo );
 
 =head1 NAME
 
-NewStream::Model::EvoStream - An EvoStream instance
+Celestian::Model::EvoStream - An EvoStream instance
 
 =cut
 
@@ -69,7 +69,7 @@ sub _poll_streams {
     delete $orphan{$id};
     next if $known->{$id};
     $self->add( $known->{$id}
-       = NewStream::Model::Stream->new( id => $id, evo => $self->evo )
+       = Celestian::Model::Stream->new( id => $id, evo => $self->evo )
     );
     debug( "Registering stream $id (",
       $known->{$id}->name, ", ", $known->{$id}->type, ")" );

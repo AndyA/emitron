@@ -1,4 +1,4 @@
-package NewStream::EvoStream;
+package Celestian::EvoStream;
 
 use strict;
 use warnings;
@@ -8,7 +8,7 @@ use JSON::XS;
 use LWP::UserAgent;
 use MIME::Base64;
 
-use NewStream::EvoStream::JSON qw( detox_json );
+use Celestian::EvoStream::JSON qw( detox_json );
 
 use accessors::ro qw( host port );
 
@@ -60,7 +60,7 @@ BEGIN {
 
 =head1 NAME
 
-NewStream::EvoStream - EvoStream Media Server API
+Celestian::EvoStream - EvoStream Media Server API
 
 =cut
 

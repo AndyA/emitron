@@ -1,4 +1,4 @@
-package NewStream::Model::Base;
+package Celestian::Model::Base;
 
 use strict;
 use warnings;
@@ -6,12 +6,12 @@ use warnings;
 use Carp qw( croak );
 use Scalar::Util qw( refaddr );
 
-use NewStream::Logger;
-use NewStream::Model::Selection;
+use Celestian::Logger;
+use Celestian::Model::Selection;
 
 =head1 NAME
 
-NewStream::Model::Base - Base class for model objects
+Celestian::Model::Base - Base class for model objects
 
 =cut
 
@@ -194,7 +194,7 @@ sub _hash_to_filter {
 sub select {
   my $self = shift;
   return $self unless @_;
-  return NewStream::Model::Selection->_new( $self,
+  return Celestian::Model::Selection->_new( $self,
     _hash_to_filter( {@_} ) );
 }
 

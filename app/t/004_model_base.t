@@ -4,19 +4,19 @@ use strict;
 use warnings;
 use Test::More tests => 16;
 
-use NewStream::Model::Base;
+use Celestian::Model::Base;
 use Data::Dumper;
 
 package Thing;
 
-use base qw( NewStream::Model::Base );
+use base qw( Celestian::Model::Base );
 
 sub kind { 'thing' }
 sub name { 'Celia' }
 
 package Thong;
 
-use base qw( NewStream::Model::Base );
+use base qw( Celestian::Model::Base );
 
 sub kind { 'thong' }
 sub name { 'Frank' }
@@ -24,8 +24,8 @@ sub name { 'Frank' }
 package main;
 
 {
-  my $obj = NewStream::Model::Base->new;
-  isa_ok $obj, 'NewStream::Model::Base';
+  my $obj = Celestian::Model::Base->new;
+  isa_ok $obj, 'Celestian::Model::Base';
 
   $obj->on( foo => sub { } );
   is_deeply [ $obj->list_event_handlers ], ['default:foo'],
@@ -41,7 +41,7 @@ package main;
 }
 
 {
-  my $obj        = NewStream::Model::Base->new;
+  my $obj        = Celestian::Model::Base->new;
   my $call_index = 0;
   my @event_log  = ();
 
@@ -68,7 +68,7 @@ package main;
 }
 
 {
-  my $obj = NewStream::Model::Base->new;
+  my $obj = Celestian::Model::Base->new;
   my @log = ();
   $obj->on( added         => sub { push @log, 'added' } );
   $obj->on( added_thing   => sub { push @log, 'added_thing' } );
@@ -103,7 +103,7 @@ package main;
   is_deeply [@log], [ 'removed', 'removed_thong' ], 'removed 3';
 }
 {
-  my $obj = NewStream::Model::Base->new;
+  my $obj = Celestian::Model::Base->new;
   my $tt1 = Thing->new;
   my $tt2 = Thong->new;
   $obj->add( $tt1, $tt2 );
