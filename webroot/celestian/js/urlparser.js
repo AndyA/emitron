@@ -39,8 +39,14 @@ URLParser.prototype = {
       return this.parts[arguments[0]];
     }
   },
+  root: function() {
+    return this.parts.scheme + '://' + this.parts.host;
+  },
+  here: function() {
+    return this.root() + this.parts.path;
+  },
   toString: function() {
-    var u = this.parts.scheme + '://' + this.parts.host + this.parts.path;
+    var u = this.here();
     if (this.parts.query != null) {
       u += '?' + this.parts.query;
     }
