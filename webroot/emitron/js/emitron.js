@@ -1,9 +1,9 @@
 $(function() {
   var here = new URLParser(window.location.href);
   var api = here.root() + '/api';
-  var ev = new EV(api + '/ev');
+  var ev = new EV(api + '/ev/');
   ev.on('test', function(ev, data) {
-    console.log("Got message: " + ev);
+    console.log("Got message: " + ev + ": " + data.sequence);
   });
   ev.on('error', function(ev, data) {
     var msg = "Error";
