@@ -9,3 +9,11 @@ Live streams:
 TODO:
   Analyse MPEG2 (SPS/PPS etc)
   ABR HLS encoding
+
+Webapp:
+  Comms:
+    Shared data structure
+      Where does the structure live?
+      How is it represented?
+      How do we observe changes?
+      How do we represent deltas?
