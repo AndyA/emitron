@@ -15,7 +15,7 @@ get '/' => sub {
 
 get '/api/ev/:serial?' => sub {
   my $sn = param( 'serial' ) || 0;
-  my $next = eventwait( SEMFILE, $sn, 5000 );
+  my $next = eventwait( SEMFILE, $sn, 10000 );
   return { name => 'keepalive' } if $next == $sn;    # timeout
   return {
     name   => 'test',
