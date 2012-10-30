@@ -22,22 +22,14 @@ JSONPatch.prototype = {
       switch (pp.op) {
       case 'add':
         this.p.visit(path, function(elt, key) {
-          if (elt instanceof Array) {
-            elt.splice(key, 0, pp.value)
-          }
-          else {
-            elt[key] = pp.value
-          }
+          if (elt instanceof Array) elt.splice(key, 0, pp.value);
+          else elt[key] = pp.value;
         });
         break;
       case 'remove':
         this.p.visit(path, function(elt, key) {
-          if (elt instanceof Array) {
-            elt.splice(key, 1)
-          }
-          else {
-            delete elt[key]
-          }
+          if (elt instanceof Array) elt.splice(key, 1);
+          else delete elt[key];
         });
         break;
       default:
