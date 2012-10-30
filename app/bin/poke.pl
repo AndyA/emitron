@@ -3,13 +3,19 @@
 use strict;
 use warnings;
 
-use IPC::GlobalEvent qw( eventsignal eventwait );
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 
-use constant SEMFILE => '/tmp/emitron.event';
+use Emitron::Model::Watched;
 
-my $sn = shift || 0;
+use constant MODEL => '/tmp/emitron.model';
 
-eventsignal( SEMFILE, $sn );
+our $VERSION = '0.1';
+
+my $model = Emitron::Model::Watched->new( root => MODEL );
+$model->init;
+
+$model->commit( { args => \@ARGV } );
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl
 
