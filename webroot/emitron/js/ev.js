@@ -3,6 +3,7 @@ function EV(endpoint) {
   this.evmap = {};
   this.uptime = 0;
   this.downtime = 0;
+  this.serial = null;
 }
 
 EV.prototype = {
@@ -24,9 +25,10 @@ EV.prototype = {
     };
   },
   _makeRequest: function() {
+    var url = this.endpoint;
+    if (this.serial) url += this.serial;
     $.ajax({
-      url: this.endpoint,
-      cache: false,
+      url: url,
       context: this,
       dataType: 'json',
       global: false,
@@ -37,8 +39,15 @@ EV.prototype = {
   _success: function(data, status, xhr) {
     this.uptime++;
     this.downtime = 0;
-    this._despatch(data);
-    this._makeRequest();
+    if (data.name == 'keepalive') {
+      this._makeRequest();
+    }
+    else {
+      this.serial = data.serial;
+      // Queue the next request as soon as possible
+      this._makeRequest();
+      this._despatch(data);
+    }
   },
   _error: function(xhr, status, error) {
     this.uptime = 0;
