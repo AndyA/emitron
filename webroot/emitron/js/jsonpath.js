@@ -5,12 +5,6 @@ function JSONPath(data) {
 }
 
 JSONPath.prototype = {
-  parse: function(path) {
-    if (/^\$(?:\.\w+)*$/.test(path)) {
-      return path.split('.');
-    }
-    throw "Sorry, I don't handle full JSONPath yet";
-  },
   getData: function() {
     return this.data['$'];
   },
@@ -19,7 +13,7 @@ JSONPath.prototype = {
   //   * container        The containing object
   //   * key              The key of the target object
   visit: function(path, cb) {
-    var p = this.parse(path);
+    var p = JSONPath.parse(path);
     var dp = this.data;
     while (p.length > 1) {
       var key = p.shift();
@@ -32,4 +26,11 @@ JSONPath.prototype = {
       cb(container[key]);
     });
   }
+}
+
+JSONPath.parse = function(path) {
+  if (/^\$(?:\.\w+)*$/.test(path)) {
+    return path.split('.');
+  }
+  throw "Sorry, I don't handle full JSONPath yet";
 }

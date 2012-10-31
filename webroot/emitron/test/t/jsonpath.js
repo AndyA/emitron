@@ -1,14 +1,13 @@
 // Tests for JSONPath
 module("JSONPath");
 test("parse", function() {
-  var p = new JSONPath({});
   raises(function() {
-    p.parse('');
+    JSONPath.parse('');
   },
   /Sorry/, 'Exception on empty path');
-  deepEqual(p.parse('$'), ['$'], 'Parsed $');
-  deepEqual(p.parse('$.foo'), ['$', 'foo'], 'Parsed $.foo');
-  deepEqual(p.parse('$.foo.0.bar'), ['$', 'foo', '0', 'bar'], 'Parsed $.foo.0.bar');
+  deepEqual(JSONPath.parse('$'), ['$'], 'Parsed $');
+  deepEqual(JSONPath.parse('$.foo'), ['$', 'foo'], 'Parsed $.foo');
+  deepEqual(JSONPath.parse('$.foo.0.bar'), ['$', 'foo', '0', 'bar'], 'Parsed $.foo.0.bar');
 });
 
 test("visit", function() {
