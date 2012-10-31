@@ -23,8 +23,12 @@ JSONPath.nibbler = function(path, tokmatch) {
         };
       }
     }
-    // no match: error
-    throw "JSONPath error: " + path.substring(0, path.length - buf.length) + " >>> " + buf;
+    var r = {
+      t: 'unknown',
+      m: [buf]
+    };
+    buf = '';
+    return r;
   }
 }
 
@@ -44,6 +48,10 @@ JSONPath.toker = (function() {
   var esc = /\\([bfnrtv"'\\]|[0-3][0-7]{2}|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4})/g;
 
   var tokmatch = [{
+    re: /^\d+:\d+(?::\d+)?/,
+    t: 'slice'
+  },
+  {
     re: /^(\w+|\$)/,
     t: 'lit'
   },
@@ -111,31 +119,187 @@ JSONPath.toker = (function() {
     var nib = JSONPath.nibbler(path, tokmatch);
     return function() {
       var tok = nib();
-      if (tok && tok.t == 'str') return {
-        t: 'str',
-        m: [tok.m[0], ppString(tok.m[1])]
-      };
+      if (tok) {
+        switch (tok.t) {
+        case 'str':
+          return {
+            t: 'str',
+            m: [tok.m[0], ppString(tok.m[1])]
+          };
+        case 'slice':
+          var m = [tok.m[0]];
+          m.push.apply(m, tok.m[0].split(':'));
+          return {
+            t: 'slice',
+            m: m
+          };
+        }
+      }
       return tok;
     }
-
-    return JSONPath.nibbler(path, tokmatch);
   }
 })();
 
+function JSONPathNode(match, iter) {
+  this.match = match;
+  this.iter = iter;
+}
+
 // Parse a JSONPath expression. Returns a list that may contain a
-// mixture of literal element keys and closures. Literal keys are
+// mixture of literal element keys and objects.
+//
+// closures. Literal keys are
 // simply used to index into the current object. Closures may be
 // called with the current object; they will return an iterator
 // that enumerates the selected keys within that object.
 //
 // The path may be relative (no leading '$')
-JSONPath.parse = function(path) {
-  if (/^\$(?:\.\w+)*$/.test(path)) {
-    // fast case: a simple literal absolute path
-    return path.split('.');
+JSONPath.parse = (function() {
+  function mkListIter(l) {
+    return function() {
+      return l.pop()
+    }
   }
-  throw "Sorry, I don't handle full JSONPath yet";
-}
+
+  function mkCounter(from, to, step) {
+    if (step == null) step = 1;
+    return function() {
+      var i = from;
+      if (i >= to) return null;
+      from += step;
+      return i;
+    }
+  }
+
+  function getKeys(obj) {
+    var k = [];
+    for (var key in obj) if (obj.hasOwnProperty(key)) k.push(key);
+    return k;
+  }
+
+  function mkKeyIter(obj) {
+    if (obj instanceof Array) return mkCounter(0, obj.length);
+    return mkListIter(getKeys(obj));
+  }
+
+  function hasKey(obj, key) {
+    if (obj instanceof Array) return key >= 0 && key < obj.length;
+    return obj.hasOwnProperty(key);
+  }
+
+  function mkLiteral(t) {
+    var v = t.m[1];
+    return new JSONPathNode(function(key) {
+      return key == v;
+    },
+    function(obj) {
+      return mkListIter(hasKey(obj, v) ? [v] : []);
+    });
+  }
+
+  function mkAny(t) {
+    return new JSONPathNode(function(key) {
+      return true;
+    },
+    function(obj) {
+      return mkKeyIter(obj);
+    });
+  }
+
+  function mkSlice(t) {
+    var from = t.m[1];
+    var to = t.m[2];
+    var step = t.m.length > 3 ? t.m[3] : 1;
+    return new JSONPathNode(function(key) {
+      return key >= from && key < to && key % step == 0;
+    },
+    function(obj) {
+      if (!obj instanceof Array || from >= obj.length) return mkListIter([]);
+      if (to > obj.length) to = obj.length;
+      return mkCounter(from, to, step);
+    });
+  }
+
+  function mkMulti(pp) {
+    return new JSONPathNode(function(key) {
+      for (var i = 0; i < pp.length; i++) {
+        if (pp.match(key)) return true;
+      }
+      return false;
+    },
+    function(obj) {
+      if (pp.length == 0) return mkListIter([]);
+      var i = 0;
+      var ii = pp[i++].iter(obj);
+      return function() {
+        while (ii) {
+          var nv = ii();
+          if (nv !== null) return nv;
+          ii = pp[i++].iter(obj);
+        }
+        return null;
+      }
+    });
+  }
+
+  function parseBrackets(tokr) {
+    var t = tokr();
+    var pp = [];
+    while (t) {
+      switch (t.t) {
+      case 'slice':
+        pp.push(mkSlice(t));
+        break;
+      case 'lit':
+      case 'str':
+        pp.push(mkLiteral(t));
+        break;
+      case 'star':
+        pp.push(mkAny(t));
+        break;
+      default:
+        throw "Syntax error: " + t.m[0];
+      }
+      t = tokr();
+      if (!t) throw "Missing ]";
+      if (t.t == 'rb') break;
+      if (t.t != 'comma') throw "Syntax error: " + t.m[0];
+      t = tokr();
+    }
+    if (pp.length == 0) throw "Empty []";
+    if (pp.length == 1) return pp[0];
+  }
+
+  return function(path) {
+    if (/^\$(?:\.\w+)*$/.test(path)) {
+      // fast case: a simple literal absolute path
+      return path.split('.');
+    }
+    var tokr = JSONPath.toker(path);
+    var t = tokr();
+    if (!t) throw "Empty path";
+    var pp = [];
+    while (t) {
+      switch (t.t) {
+      case 'lit':
+        pp.push(mkLiteral(t));
+        break;
+      case 'star':
+        pp.push(mkAny(t));
+        break;
+      case 'dot':
+        break;
+      case 'lb':
+        pp.push(parseBrackets(tokr));
+        break;
+      default:
+        throw "Syntax error";
+      }
+      t = tokr();
+    }
+    return pp;
+  }
+})();
 
 JSONPath.prototype = {
   parse: function(path) {
