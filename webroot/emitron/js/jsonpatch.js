@@ -7,7 +7,7 @@ JSONPatch.prototype = {
     return this.p.getData();
   },
   setData: function(data) {
-    this.p = new JSONPath(data);
+    this.p = new JSONVisitor(data);
   },
   patchPath: function(patch) {
     var p = [];
