@@ -17,12 +17,12 @@ $(function() {
 
   ev.on('model', function(ev, data) {
     model.setData(data);
-    console.log("Data replaced: " + JSON.stringify(model.getData(), null, 2));
+    console.log("Data replaced: ", model.getData());
   });
 
   ev.on('model-patch', function(ev, data) {
     model.patch(data);
-    console.log("Data patched: " + JSON.stringify(data, null, 2) + ", " + JSON.stringify(model.getData(), null, 2));
+    console.log("Data patched: ", data, model.getData());
   });
 
   ev.listen();
