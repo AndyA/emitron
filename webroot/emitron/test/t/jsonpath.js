@@ -1,4 +1,5 @@
 // Tests for JSONPath
+module("JSONPath");
 test("parse", function() {
   var p = new JSONPath({});
   raises(function() {

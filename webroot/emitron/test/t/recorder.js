@@ -1,4 +1,5 @@
 // Tests for Recorder
+module("Recorder");
 test("log", function() {
   var rec = new Recorder();
   var cb = rec.callback();
