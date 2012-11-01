@@ -96,11 +96,11 @@ JSONPath.toker = (function() {
     t: 'rp'
   },
   {
-    re: /^"(([^\\]+|\\.)*)"/,
+    re: /^"(([^\\"]+|\\.)*)"/,
     t: 'str'
   },
   {
-    re: /^'(([^\\]+|\\.)*)'/,
+    re: /^'(([^\\']+|\\.)*)'/,
     t: 'str'
   }];
 
@@ -212,7 +212,7 @@ JSONPath.parse = (function() {
     if (pp.length == 1) return pp[0];
     return new JSONPathNode(function(key) {
       for (var i = 0; i < pp.length; i++) {
-        if (pp.match(key)) return true;
+        if (pp[i].match(key)) return true;
       }
       return false;
     },

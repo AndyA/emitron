@@ -94,6 +94,18 @@ test("toker", function() {
     t: 'slice',
     m: ['10:100:2', 10, 100, 2]
   }]);
+  testToker('"foo","bar"', [{
+    t: 'str',
+    m: ['"foo"', 'foo']
+  },
+  {
+    t: 'comma',
+    m: [',']
+  },
+  {
+    t: 'str',
+    m: ['"bar"', 'bar']
+  }]);
 });
 
 test("match", function() {
@@ -116,10 +128,22 @@ test("match", function() {
     want: []
   },
   {
+    name: 'Slice miss',
+    path: '$[4:12:3]',
+    test: '$.6',
+    want: null
+  },
+  {
     name: 'Slice outside range',
     path: '$[4:12:3]',
     test: '$.13',
     want: null
+  },
+  {
+    name: 'Alternation',
+    path: '$["foo","bar"]',
+    test: '$.bar',
+    want: []
   }];
   for (var tn = 0; tn < data.length; tn++) {
     var tc = data[tn];
