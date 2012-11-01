@@ -155,7 +155,7 @@ JSONPath.parse = (function() {
     }
   }
 
-  function mkCounter(from, to, step) {
+  function mkSliceIter(from, to, step) {
     if (step == null) step = 1;
     return function() {
       var i = from;
@@ -173,13 +173,8 @@ JSONPath.parse = (function() {
   }
 
   function mkKeyIter(obj) {
-    if (obj instanceof Array) return mkCounter(0, obj.length);
+    if (obj instanceof Array) return mkSliceIter(0, obj.length);
     return mkListIter(getKeys(obj));
-  }
-
-  function hasKey(obj, key) {
-    if (obj instanceof Array) return key >= 0 && key < obj.length;
-    return obj.hasOwnProperty(key);
   }
 
   function mkLiteral(t) {
@@ -209,7 +204,7 @@ JSONPath.parse = (function() {
       return key >= from && key < to && key % step == 0;
     },
     function(obj) {
-      return mkCounter(from, to, step);
+      return mkSliceIter(from, to, step);
     });
   }
 
