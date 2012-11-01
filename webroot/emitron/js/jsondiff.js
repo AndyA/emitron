@@ -1,0 +1,5 @@
+function JSONDiff() {
+
+}
+
+JSONDiff.prototype = {}
