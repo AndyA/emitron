@@ -155,6 +155,20 @@ test("iter", function() {
     '$.foo.0', '$.foo.1', '$.foo.2', '$.foo.3', //
     '$.foo.10', '$.foo.12', '$.foo.14', '$.foo.16', //
     '$.foo.18', '$.foo.99']
+  },
+  {
+    name: 'Missing key',
+    data: {
+      foo: 1
+    },
+    path: '$.bar',
+    want: ['$.bar']
+  },
+  {
+    name: 'Deeply missing',
+    data: {},
+    path: '$.foo.bar',
+    want: []
   }];
 
   for (var tn = 0; tn < data.length; tn++) {

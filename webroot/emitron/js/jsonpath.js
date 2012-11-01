@@ -331,6 +331,7 @@ JSONVisitor.prototype = {
           ipos = vpos--;
         }
         else {
+          if (pd[vpos] == null) return null;
           pv[vpos++] = v;
           pd[vpos] = pd[vpos - 1][v];
         }
