@@ -96,27 +96,30 @@ test("toker", function() {
   }]);
 });
 
+function resolve_path(data, path) {
+  //
+}
+
 test("iter", function() {
   var data = [{
     name: 'Root only',
-    in:{},
+    data: {},
     path: '$',
     want: ['$']
   },
   {
     name: 'Slice',
-    in:[],
+    data: [],
     path: '$[0:3]',
     want: ['$.0', '$.1', '$.2']
   }];
 
-  expect(data.length * 2);
   for (var tn = 0; tn < data.length; tn++) {
     var tc = data[tn];
-    var p = new JSONVisitor(tc. in );
+    var p = new JSONVisitor(tc.data);
     var got = [];
     var ii = p.iter(tc.path);
-    for (var i = 0; i < tc.want.length; i++) got.push(ii()[3]);
+    for (var i = 0; i < tc.want.length; i++) got.push(ii()[0]);
     deepEqual(got, tc.want, tc.name + ": iter");
     deepEqual(ii(), null, tc.name + ": iter exhausted");
   }

@@ -315,29 +315,27 @@ JSONVisitor.prototype = {
     var pd = [this.data];
     var ipos = 0;
     var vpos = 0;
+    var v;
     return function() {
-      while (1) {
-        while (vpos < p.length) {
-          while (ipos <= vpos) {
-            pi[ipos] = p[ipos].iter(pd[ipos]);
-            ipos++;
-          }
-          pv[vpos] = pi[vpos]();
-          if (pv[vpos] === null) {
-            ipos = --vpos;
-            if (vpos == 0) return null;
-            break;
-          }
-          else {
-            pd[vpos + 1] = pd[vpos][pv[vpos]];
-            vpos++;
-          }
+      while (vpos < p.length) {
+        while (ipos <= vpos) {
+          pi[ipos] = p[ipos].iter(pd[ipos]);
+          ipos++;
         }
-        if (vpos == p.length) {
-          vpos--;
-          return[pd[p.length], vpos >= 0 ? pd[vpos] : null, pv[vpos], pv.join('.')];
+        v = pi[vpos]();
+        if (v === null) {
+          if (vpos == 0) return null;
+          ipos = vpos--;
+        }
+        else {
+          pv[vpos++] = v;
+          pd[vpos] = pd[vpos - 1][v];
         }
       }
+      // path, value, context, key
+      var rv = [pv.join('.'), pd[vpos], pd[vpos - 1], pv[vpos]];
+      vpos--;
+      return rv;
     }
   },
   each: (function() {
