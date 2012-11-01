@@ -97,8 +97,22 @@ test("toker", function() {
 });
 
 function resolve_path(data, path) {
-  //
+  var pds = null;
+  var p = path.split('.');
+  var ds = {
+    '$': data
+  };
+  var key;
+  while (p.length) {
+    pds = ds;
+    key = p.shift();
+    ds = ds[key];
+  }
+  if (pds instanceof Array) key *= 1;
+  return[path, ds, pds, key];
 }
+
+module("JSONVisitor");
 
 test("iter", function() {
   var data = [{
@@ -112,21 +126,51 @@ test("iter", function() {
     data: [],
     path: '$[0:3]',
     want: ['$.0', '$.1', '$.2']
+  },
+  {
+    name: 'Wildcard',
+    data: {
+      foo: 1,
+      bar: 2,
+      baz: 3
+    },
+    path: '$[*]',
+    want: ['$.bar', '$.baz', '$.foo']
+  },
+  {
+    name: 'Wildcard, slice, sequence',
+    data: {
+      foo: [],
+      bar: [],
+      baz: []
+    },
+    path: '$[*][0:4,10:20:2,99]',
+    want: [ // (comments to force formatting)
+    '$.bar.0', '$.bar.1', '$.bar.2', '$.bar.3', //
+    '$.bar.10', '$.bar.12', '$.bar.14', '$.bar.16', //
+    '$.bar.18', '$.bar.99', //
+    '$.baz.0', '$.baz.1', '$.baz.2', '$.baz.3', //
+    '$.baz.10', '$.baz.12', '$.baz.14', '$.baz.16', //
+    '$.baz.18', '$.baz.99', //
+    '$.foo.0', '$.foo.1', '$.foo.2', '$.foo.3', //
+    '$.foo.10', '$.foo.12', '$.foo.14', '$.foo.16', //
+    '$.foo.18', '$.foo.99']
   }];
 
   for (var tn = 0; tn < data.length; tn++) {
     var tc = data[tn];
     var p = new JSONVisitor(tc.data);
-    var got = [];
     var ii = p.iter(tc.path);
-    for (var i = 0; i < tc.want.length; i++) got.push(ii()[0]);
-    deepEqual(got, tc.want, tc.name + ": iter");
+    for (var i = 0; i < tc.want.length; i++) {
+      var want = resolve_path(tc.data, tc.want[i]);
+      var got = ii();
+      deepEqual(got, want, tc.name + ": " + tc.want[i]);
+    }
     deepEqual(ii(), null, tc.name + ": iter exhausted");
   }
 
 });
 
-module("JSONVisitor");
 test("each", function() {
   var in1 = {
     seq: ['first', {
@@ -139,41 +183,25 @@ test("each", function() {
     name: 'Simple concrete path',
     in:in1,
     path: '$.seq.0',
-    want: [
-      ['first', ['first', {
-        index: 2
-      },
-      3], "0"]]
+    want: ['$.seq.0']
   },
   {
     name: 'Complex concrete path',
     in:in1,
     path: '$["seq"][0]',
-    want: [
-      ['first', ['first', {
-        index: 2
-      },
-      3], "0"]]
-  },
-  {
-    name: 'Wildcard',
-    in:in1,
-    path: '$[*]',
-    want: [
-      [
-        ['first', {
-          index: 2
-        },
-        3], in1, "seq"],
-      ['sequence', in1, "name"]]
+    want: ['$.seq.0']
   }];
   expect(data.length);
   for (var tn = 0; tn < data.length; tn++) {
     var tc = data[tn];
     var rec = new Recorder();
     var p = new JSONVisitor(tc. in );
+    var want = [];
+    for (var i = 0; i < tc.want.length; i++) {
+      want.push(resolve_path(tc. in , tc.want[i]));
+    }
     p.each(tc.path, rec.callback());
-    deepEqual(rec.getLog(), tc.want, tc.name + ": each");
+    deepEqual(rec.getLog(), want, tc.name + ": each");
   }
 
 });

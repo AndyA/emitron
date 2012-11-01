@@ -21,13 +21,13 @@ JSONPatch.prototype = {
       var path = this.patchPath(pp);
       switch (pp.op) {
       case 'add':
-        this.p.each(path, function(v, elt, key) {
+        this.p.each(path, function(p, v, elt, key) {
           if (elt instanceof Array) elt.splice(key, 0, pp.value);
           else elt[key] = pp.value;
         });
         break;
       case 'remove':
-        this.p.each(path, function(v, elt, key) {
+        this.p.each(path, function(p, v, elt, key) {
           if (elt instanceof Array) elt.splice(key, 1);
           else delete elt[key];
         });
