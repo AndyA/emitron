@@ -201,7 +201,7 @@ JSONPath.parse = (function() {
     var to = t.m[2];
     var step = t.m.length > 3 ? t.m[3] : 1;
     return new JSONPathNode(function(key) {
-      return key >= from && key < to && key % step == 0;
+      return key >= from && key < to && (key-from) % step == 0;
     },
     function(obj) {
       return mkSliceIter(from, to, step);
@@ -293,6 +293,18 @@ JSONPath.prototype = {
   },
   getPath: function() {
     return this.path;
+  },
+  match: function(path) {
+    var pp = this.getPath().slice();
+    if (! (path.substring && /^\$(?:\.\w+)*$/.test(path))) {
+      throw "match needs a simple path";
+    }
+    var mp = path.split('.');
+    while (pp.length && mp.length) {
+      if (!pp.shift().match(mp.shift())) return null;
+    }
+    if (pp.length) return null;
+    return mp;
   },
 };
 

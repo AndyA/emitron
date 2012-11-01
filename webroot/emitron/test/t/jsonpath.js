@@ -96,6 +96,41 @@ test("toker", function() {
   }]);
 });
 
+test("match", function() {
+  var data = [{
+    name: 'Exact',
+    path: '$.a.b',
+    test: '$.a.b',
+    want: []
+  },
+  {
+    name: 'Submatch',
+    path: '$.a.b',
+    test: '$.a.b.c',
+    want: ['c']
+  },
+  {
+    name: 'Slice',
+    path: '$[4:12:3]',
+    test: '$.7',
+    want: []
+  },
+  {
+    name: 'Slice outside range',
+    path: '$[4:12:3]',
+    test: '$.13',
+    want: null
+  }];
+  for (var tn = 0; tn < data.length; tn++) {
+    var tc = data[tn];
+    var jp = new JSONPath(tc.path);
+    var got = jp.match(tc.test);
+    deepEqual(got, tc.want, tc.name + ": " + tc.path + " ?= " + tc.test);
+  }
+});
+
+module("JSONVisitor");
+
 function resolve_path(data, path) {
   var pds = null;
   var p = path.split('.');
@@ -111,8 +146,6 @@ function resolve_path(data, path) {
   if (pds instanceof Array) key *= 1;
   return[path, ds, pds, key];
 }
-
-module("JSONVisitor");
 
 test("iter", function() {
   var data = [{
