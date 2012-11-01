@@ -145,19 +145,12 @@ function JSONPathNode(match, iter) {
   this.iter = iter;
 }
 
-// Parse a JSONPath expression. Returns a list that may contain a
-// mixture of literal element keys and objects.
-//
-// closures. Literal keys are
-// simply used to index into the current object. Closures may be
-// called with the current object; they will return an iterator
-// that enumerates the selected keys within that object.
-//
-// The path may be relative (no leading '$')
 JSONPath.parse = (function() {
   function mkListIter(l) {
+    var i = 0;
     return function() {
-      return l.pop()
+      if (i == l.length) return null;
+      return l[i++];
     }
   }
 
@@ -193,7 +186,7 @@ JSONPath.parse = (function() {
       return key == v;
     },
     function(obj) {
-      return mkListIter(hasKey(obj, v) ? [v] : []);
+      return mkListIter([v]);
     });
   }
 
@@ -214,8 +207,6 @@ JSONPath.parse = (function() {
       return key >= from && key < to && key % step == 0;
     },
     function(obj) {
-      if (!obj instanceof Array || from >= obj.length) return mkListIter([]);
-      if (to > obj.length) to = obj.length;
       return mkCounter(from, to, step);
     });
   }
@@ -271,10 +262,6 @@ JSONPath.parse = (function() {
   }
 
   return function(path) {
-    if (/^\$(?:\.\w+)*$/.test(path)) {
-      // fast case: a simple literal absolute path
-      return path.split('.');
-    }
     var tokr = JSONPath.toker(path);
     var t = tokr();
     if (!t) throw "Empty path";
@@ -320,22 +307,22 @@ JSONVisitor.prototype = {
   getData: function() {
     return this.data['$'];
   },
-  // Visit every matching element in the data structure.
-  // The callback gets the following args:
-  //   * container        The containing object
-  //   * key              The key of the target object
-  visit: function(path, cb) {
-    var p = JSONPath.bless(path).getPath();
-    var dp = this.data;
-    while (p.length > 1) {
-      var key = p.shift();
-      dp = dp[key];
+  each: (function() {
+    function expand(p, pos, obj, cb) {
+      var ii = p[pos].iter(obj);
+      if (pos < p.length - 1) {
+        for (var key = ii(); key != null; key = ii()) {
+          expand(p, pos + 1, obj[key], cb);
+        }
+        return;
+      }
+      // reached end of path
+      for (var key = ii(); key != null; key = ii()) {
+        cb(obj[key], obj, key);
+      }
     }
-    cb(dp, p.shift());
-  },
-  each: function(path, cb) {
-    this.visit(path, function(container, key) {
-      cb(container[key]);
-    });
-  }
+    return function(path, cb) {
+      expand(JSONPath.bless(path).getPath(), 0, this.data, cb);
+    }
+  })()
 }

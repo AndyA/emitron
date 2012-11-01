@@ -96,46 +96,54 @@ test("toker", function() {
   }]);
 });
 
-//test("parse", function() {
-//  raises(function() {
-//    JSONPath.parse('');
-//  },
-//  /Empty/, 'Exception on empty path');
-//  deepEqual(JSONPath.parse('$'), ['$'], 'Parsed $');
-//  deepEqual(JSONPath.parse('$.foo'), ['$', 'foo'], 'Parsed $.foo');
-//  deepEqual(JSONPath.parse('$.foo.0.bar'), ['$', 'foo', '0', 'bar'], 'Parsed $.foo.0.bar');
-//});
 module("JSONVisitor");
-test("visit", function() {
-  var data = {
+test("each", function() {
+  var in1 = {
     seq: ['first', {
       index: 2
     },
     3],
     name: 'sequence'
   };
-  var rec = new Recorder();
-  var p = new JSONVisitor(data);
-  p.visit('$.seq.0', rec.callback());
-  deepEqual(rec.getLog(), [
-    [
-      ['first', {
+  var data = [{
+    name: 'Simple concrete path',
+    in:in1,
+    path: '$.seq.0',
+    want: [
+      ['first', ['first', {
         index: 2
       },
-      3], "0"]], 'visit');
-});
+      3], "0"]]
+  },
+  {
+    name: 'Complex concrete path',
+    in:in1,
+    path: '$["seq"][0]',
+    want: [
+      ['first', ['first', {
+        index: 2
+      },
+      3], "0"]]
+  },
+  {
+    name: 'Wildcard',
+    in:in1,
+    path: '$[*]',
+    want: [
+      [
+        ['first', {
+          index: 2
+        },
+        3], in1, "seq"],
+      ['sequence', in1, "name"]]
+  }];
+  expect(data.length);
+  for (var tn = 0; tn < data.length; tn++) {
+    var tc = data[tn];
+    var rec = new Recorder();
+    var p = new JSONVisitor(tc. in );
+    p.each(tc.path, rec.callback());
+    deepEqual(rec.getLog(), tc.want, tc.name + ": each");
+  }
 
-test("each", function() {
-  var data = {
-    seq: ['first', {
-      index: 2
-    },
-    3],
-    name: 'sequence'
-  };
-  var rec = new Recorder();
-  var p = new JSONVisitor(data);
-  p.each('$.seq.0', rec.callback());
-  deepEqual(rec.getLog(), [
-    ['first']], 'each');
 });
