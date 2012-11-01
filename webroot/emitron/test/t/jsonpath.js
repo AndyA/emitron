@@ -88,12 +88,39 @@ test("toker", function() {
   }]);
   testToker('10:100', [{
     t: 'slice',
-    m: ['10:100', '10', '100']
+    m: ['10:100', 10, 100]
   }]);
   testToker('10:100:2', [{
     t: 'slice',
-    m: ['10:100:2', '10', '100', '2']
+    m: ['10:100:2', 10, 100, 2]
   }]);
+});
+
+test("iter", function() {
+  var data = [{
+    name: 'Root only',
+    in:{},
+    path: '$',
+    want: ['$']
+  },
+  {
+    name: 'Slice',
+    in:[],
+    path: '$[0:3]',
+    want: ['$.0', '$.1', '$.2']
+  }];
+
+  expect(data.length * 2);
+  for (var tn = 0; tn < data.length; tn++) {
+    var tc = data[tn];
+    var p = new JSONVisitor(tc. in );
+    var got = [];
+    var ii = p.iter(tc.path);
+    for (var i = 0; i < tc.want.length; i++) got.push(ii()[3]);
+    deepEqual(got, tc.want, tc.name + ": iter");
+    deepEqual(ii(), null, tc.name + ": iter exhausted");
+  }
+
 });
 
 module("JSONVisitor");

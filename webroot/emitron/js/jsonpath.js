@@ -128,7 +128,8 @@ JSONPath.toker = (function() {
           };
         case 'slice':
           var m = [tok.m[0]];
-          m.push.apply(m, tok.m[0].split(':'));
+          var part = tok.m[0].split(':');
+          while (part.length) m.push(part.shift() * 1);
           return {
             t: 'slice',
             m: m
@@ -294,7 +295,7 @@ JSONPath.prototype = {
   },
   getPath: function() {
     return this.path;
-  }
+  },
 };
 
 function JSONVisitor(data) {
@@ -306,6 +307,38 @@ function JSONVisitor(data) {
 JSONVisitor.prototype = {
   getData: function() {
     return this.data['$'];
+  },
+  iter: function(path) {
+    var p = JSONPath.bless(path).getPath();
+    var pi = [];
+    var pv = [];
+    var pd = [this.data];
+    var ipos = 0;
+    var vpos = 0;
+    return function() {
+      while (1) {
+        while (vpos < p.length) {
+          while (ipos <= vpos) {
+            pi[ipos] = p[ipos].iter(pd[ipos]);
+            ipos++;
+          }
+          pv[vpos] = pi[vpos]();
+          if (pv[vpos] === null) {
+            ipos = --vpos;
+            if (vpos == 0) return null;
+            break;
+          }
+          else {
+            pd[vpos + 1] = pd[vpos][pv[vpos]];
+            vpos++;
+          }
+        }
+        if (vpos == p.length) {
+          vpos--;
+          return[pd[p.length], vpos >= 0 ? pd[vpos] : null, pv[vpos], pv.join('.')];
+        }
+      }
+    }
   },
   each: (function() {
     function expand(p, pos, obj, cb) {
