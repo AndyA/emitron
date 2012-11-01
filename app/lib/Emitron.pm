@@ -14,7 +14,7 @@ get '/' => sub {
   template 'index';
 };
 
-sub _model_message {
+sub model_message {
   my $sn  = shift;
   my $now = $model->revision;
   return if $sn == $now;
@@ -26,13 +26,6 @@ sub _model_message {
     data   => $model->checkout( $now ),
     serial => $now
   };
-}
-
-sub model_message {
-  my $sn  = shift;
-  my $msg = _model_message( $sn );
-  debug("Sending ", $msg);
-  return $msg;
 }
 
 get '/api/ev/:serial?' => sub {
