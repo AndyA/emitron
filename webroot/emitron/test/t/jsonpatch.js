@@ -27,8 +27,7 @@ test("patchPath", function() {
 });
 
 asyncTest("patch", function() {
-  TestData.withData('data/diffpatch.json', function(data) {
-    expect(data.length);
+  function testPatch(data) {
     for (var tn = 0; tn < data.length; tn++) {
       var tc = data[tn];
       var p = new JSONPatch(tc.a);
@@ -36,5 +35,7 @@ asyncTest("patch", function() {
       deepEqual(p.getData(), tc.b, tc.name);
     }
     start();
-  });
+  }
+  TestData.withData('data/diffpatch.json', testPatch);
+  TestData.withData('data/patchonly.json', testPatch);
 });
