@@ -1,6 +1,7 @@
 function TestData() {}
 
 TestData.data = {};
+TestData.cacheBust = new Date().getTime();
 
 TestData.withData = function(url, cb) {
   function callback(data) {
@@ -13,8 +14,33 @@ TestData.withData = function(url, cb) {
     return;
   }
 
-  $.get(url, function(data) {
+  $.get(url + '?_=' + this.cacheBust, function(data) {
     TestData.data[url] = data;
     callback(data);
+  });
+}
+
+function dataDrivenTest(name, url, cb, opt) {
+  var before = function() {};
+  var after = before;
+  var clone = {};
+  if (opt && opt.readOnly) {
+    before = function(d, n) {
+      clone = $.extend(true, ({}), d);
+    }
+    after = function(d, b) {
+      deepEqual(d, clone, "input unchanged");
+    }
+  }
+  asyncTest(name, function() {
+    TestData.withData(url, function(data) {
+      if (data.length == 0) expect(0);
+      for (var tn = 0; tn < data.length; tn++) {
+        before(data[tn], tn);
+        cb(data[tn], tn);
+        after(data[tn], tn);
+      }
+      start();
+    });
   });
 }

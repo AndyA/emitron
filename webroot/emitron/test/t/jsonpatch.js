@@ -26,16 +26,11 @@ test("patchPath", function() {
   }), '$.foo');
 });
 
-asyncTest("patch", function() {
-  function testPatch(data) {
-    for (var tn = 0; tn < data.length; tn++) {
-      var tc = data[tn];
-      var p = new JSONPatch(tc.a);
-      p.patch(tc.diff);
-      deepEqual(p.getData(), tc.b, tc.name);
-    }
-    start();
-  }
-  TestData.withData('data/diffpatch.json', testPatch);
-  TestData.withData('data/patchonly.json', testPatch);
-});
+function testPatch(tc) {
+  var p = new JSONPatch(tc.a);
+  p.patch(tc.diff);
+  deepEqual(p.getData(), tc.b, tc.name);
+}
+
+dataDrivenTest('diff', 'data/diffpatch.json', testPatch);
+dataDrivenTest('diff (non patch data)', 'data/patchonly.json', testPatch);
