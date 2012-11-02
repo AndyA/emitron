@@ -49,7 +49,7 @@
          "$.foo",
          "$.bar"
       ],
-      "name" : "simple",
+      "name" : "multi match",
       "data" : {
          "bar" : [
             1,

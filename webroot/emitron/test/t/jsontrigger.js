@@ -17,7 +17,6 @@ test("fire", function() {
     ['$.bar.boffle', 1, 2, 3], ];
 
   deepEqual(rec.getLog(), want, "fire");
-
 });
 
 dataDrivenTest("trigger", 'data/trigger.json', function(tc, tn) {
@@ -28,5 +27,7 @@ dataDrivenTest("trigger", 'data/trigger.json', function(tc, tn) {
   }
   jt.trigger(tc.patch);
   deepEqual(rec.getLog(), tc.want, tc.name + ": trigger");
-
+},
+{
+  readOnly: true
 });

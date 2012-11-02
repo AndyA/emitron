@@ -1,0 +1,73 @@
+[
+   {
+      "want" : [
+         [
+            "$.bar",
+            [
+               ""
+            ]
+         ]
+      ],
+      "on" : [
+         "$.foo",
+         "$.bar"
+      ],
+      "name" : "Replace data",
+      "data" : {
+         "bar" : "Hello Again!",
+         "foo" : [
+            1,
+            2,
+            3
+         ]
+      },
+      "newdata" : {
+         "bar" : "Hello!",
+         "foo" : [
+            1,
+            2,
+            3
+         ]
+      }
+   },
+   {
+      "want" : [
+         [
+            "$.foo",
+            [
+               "0",
+               "1"
+            ]
+         ]
+      ],
+      "on" : [
+         "$.foo",
+         "$.bar"
+      ],
+      "name" : "Patch data",
+      "data" : {
+         "bar" : "Hello Again!",
+         "foo" : [
+            1,
+            2,
+            3
+         ]
+      },
+      "patch" : [
+         {
+            "path" : "$.foo.0",
+            "op" : "remove"
+         },
+         {
+            "path" : "$.foo.0",
+            "op" : "remove"
+         },
+         {
+            "value" : 0,
+            "path" : "$.foo",
+            "op" : "add",
+            "element" : 1
+         }
+      ]
+   }
+]
