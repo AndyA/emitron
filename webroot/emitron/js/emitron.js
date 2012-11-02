@@ -1,4 +1,4 @@
-var model = new JSONPatch({});
+var model = new Model({});
 
 $(function() {
   var here = new URLParser(window.location.href);
@@ -15,15 +15,9 @@ $(function() {
     console.log(msg);
   });
 
-  ev.on('model', function(ev, data) {
-    model.setData(data);
-    console.log("Data replaced: ", model.getData());
+  model.subscribe(ev);
+  model.on('$.args', function() {
+    $('#main').append($('<pre></pre>').text(model.getData().args.join(' '))).append($('<br></br>'));
   });
-
-  ev.on('model-patch', function(ev, data) {
-    model.patch(data);
-    console.log("Data patched: ", data, model.getData());
-  });
-
   ev.listen();
 });

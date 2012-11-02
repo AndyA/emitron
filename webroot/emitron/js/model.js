@@ -26,12 +26,10 @@ Model.prototype = {
     var self = this;
     ev.on('model', function(ev, data) {
       self.setData(data);
-      console.log("Data replaced: ", self.getData());
     });
 
     ev.on('model-patch', function(ev, data) {
       self.patch(data);
-      console.log("Data patched: ", data, self.getData());
     });
   }
 }
