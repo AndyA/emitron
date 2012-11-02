@@ -1,40 +1,53 @@
-function JSONTrigger() {
-
+function JSONTrigger(data) {
+  this.handler = [];
+  if (data) this.setData(data);
 }
 
-JSONTrigger.prototype = {
-  getData: function() {
-    return this.p.getData();
-  },
-  setData: function(data) {
-    this.p = new JSONVisitor(data);
-  },
-  patchPath: function(patch) {
-    var p = [];
-    if (patch.path != null) p.push(patch.path);
-    if (patch.element != null) p.push(patch.element);
-    return p.join('.');
-  },
-  patch: function(jp) {
-    for (var i = 0; i < jp.length; i++) {
-      var pp = jp[i];
-      var path = this.patchPath(pp);
-      switch (pp.op) {
-      case 'add':
-        this.p.each(path, function(p, v, elt, key) {
-          if (elt instanceof Array) elt.splice(key, 0, pp.value);
-          else elt[key] = pp.value;
-        });
-        break;
-      case 'remove':
-        this.p.each(path, function(p, v, elt, key) {
-          if (elt instanceof Array) elt.splice(key, 1);
-          else delete elt[key];
-        });
-        break;
-      default:
-        throw "Bad op: " + pp.op;
+JSONTrigger.prototype = (function() {
+
+  function getKeys(obj) {
+    var k = [];
+    for (var key in obj) if (obj.hasOwnProperty(key)) k.push(key);
+    k.sort(); // mainly to make testing easier
+    return k;
+  }
+
+  return $.extend(({}), JSONPatch.prototype, {
+    on: function(path, cb) {
+      var pp = JSONPath.bless(path);
+      this.handler.push({
+        path: path,
+        pp: pp,
+        cb: cb
+      });
+    },
+    fire: function(path) {
+      var hh = this.handler;
+      for (var i = 0; i < hh.length; i++) {
+        var h = hh[i];
+        if (h.pp.match(path)) h.cb.apply(this, arguments);
       }
-    }
-  },
-}
+    },
+    trigger: function(jp) {
+      var hh = this.handler;
+      var hit = [];
+      for (var i = 0; i < hh.length; i++) hit[i] = {};
+      for (i = 0; i < jp.length; i++) {
+        var pp = jp[i];
+        var path = this.patchPath(pp);
+        for (var j = 0; j < hh.length; j++) {
+          var h = hh[j];
+          var m = h.pp.match(path);
+          if (m) hit[j][m.join('.')] = true;
+        }
+      }
+      for (i = 0; i < hh.length; i++) {
+        var m = getKeys(hit[i]);
+        if (m.length) {
+          var h = hh[i];
+          h.cb.apply(this, [h.path, m]);
+        }
+      }
+    },
+  });
+})();

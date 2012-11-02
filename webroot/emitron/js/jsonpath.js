@@ -201,7 +201,7 @@ JSONPath.parse = (function() {
     var to = t.m[2];
     var step = t.m.length > 3 ? t.m[3] : 1;
     return new JSONPathNode(function(key) {
-      return key >= from && key < to && (key-from) % step == 0;
+      return key >= from && key < to && (key - from) % step == 0;
     },
     function(obj) {
       return mkSliceIter(from, to, step);
@@ -312,6 +312,11 @@ function JSONVisitor(data) {
   this.data = {
     '$': data
   };
+}
+
+JSONVisitor.bless = function(path) {
+  if (path instanceof JSONVisitor) return path;
+  return new JSONVisitor(path);
 }
 
 JSONVisitor.prototype = {

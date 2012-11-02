@@ -1,5 +1,5 @@
 function JSONPatch(data) {
-  this.setData(data);
+  if (data) this.setData(data);
 }
 
 JSONPatch.prototype = {
@@ -7,7 +7,7 @@ JSONPatch.prototype = {
     return this.p.getData();
   },
   setData: function(data) {
-    this.p = new JSONVisitor(data);
+    this.p = JSONVisitor.bless(data);
   },
   patchPath: function(patch) {
     var p = [];

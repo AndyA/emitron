@@ -1,1 +1,96 @@
-[]
+[
+   {
+      "want" : [
+         [
+            "$.foo",
+            [
+               ""
+            ]
+         ]
+      ],
+      "on" : [
+         "$.foo"
+      ],
+      "name" : "simple",
+      "data" : {
+         "foo" : 1
+      },
+      "patch" : [
+         {
+            "path" : "$.foo",
+            "op" : "remove"
+         },
+         {
+            "value" : 2,
+            "path" : "$",
+            "op" : "add",
+            "element" : "foo"
+         }
+      ]
+   },
+   {
+      "want" : [
+         [
+            "$.foo",
+            [
+               "desc",
+               "state"
+            ]
+         ],
+         [
+            "$.bar",
+            [
+               "0",
+               "5"
+            ]
+         ]
+      ],
+      "on" : [
+         "$.foo",
+         "$.bar"
+      ],
+      "name" : "simple",
+      "data" : {
+         "bar" : [
+            1,
+            2,
+            3,
+            4,
+            5
+         ],
+         "foo" : {
+            "desc" : "An object"
+         }
+      },
+      "patch" : [
+         {
+            "value" : "six",
+            "path" : "$.bar",
+            "op" : "add",
+            "element" : 5
+         },
+         {
+            "path" : "$.foo.desc",
+            "op" : "remove"
+         },
+         {
+            "value" : "Or maybe not",
+            "path" : "$.foo",
+            "op" : "add",
+            "element" : "desc"
+         },
+         {
+            "value" : "uncertain",
+            "path" : "$.foo",
+            "op" : "add",
+            "element" : "state"
+         },
+         {
+            "value" : "zero",
+            "path" : "$.bar",
+            "op" : "add",
+            "element" : 0
+         }
+      ]
+   }
+]
