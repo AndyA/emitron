@@ -37,14 +37,15 @@ sub new {
     use POSIX '_exit';
     eval q{END { _exit 0 }};
 
-    print "$$ Running worker\n";
     my $sel = IO::Select->new( $child_rdr );
 
     while () {
       Emitron::Message->new( signal => 'READY' )->send( $child_wtr );
       my @rdy = $sel->can_read;
-      my $msg = Emitron::Message->recv( $child_rdr );
-      $worker->( $msg, $child_wtr );
+      if ( @rdy ) {
+        my $msg = Emitron::Message->recv( $child_rdr );
+        $worker->( $msg, $child_wtr );
+      }
     }
 
     close $_ for $child_rdr, $child_wtr;
@@ -66,6 +67,19 @@ sub state {
   my $self = shift;
   return $self->{state} unless @_;
   return $self->{state} = shift;
+}
+
+sub is_ready { 'READY' eq shift->state }
+
+sub send {
+  my ( $self, $msg ) = @_;
+  $msg->send( $self->writer );
+  $self->state( 'BUSY' );
+}
+
+sub signal {
+  my ( $self, $msg ) = @_;
+  $self->state( $msg->msg ) if $msg->type eq 'signal';
 }
 
 1;
