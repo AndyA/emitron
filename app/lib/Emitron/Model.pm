@@ -4,10 +4,11 @@ use strict;
 use warnings;
 
 use Carp qw( croak );
+use File::Spec;
 use Path::Class;
 use Storable;
 
-use accessors::ro qw( root );
+use accessors::ro qw( root prune );
 
 =head1 NAME
 
@@ -17,7 +18,7 @@ Emitron::Model - versioned model
 
 sub new {
   my $class = shift;
-  return bless {@_}, $class;
+  return bless { @_, prune => 50 }, $class;
 }
 
 sub _obj_name { file( shift->root, @_ ) }
@@ -49,22 +50,34 @@ sub _with_write_lock {
 
 sub gc {
   my $self = shift;
+  my $rev  = shift || $self->revision;
+  my $min  = $rev - $self->prune;
+  my $root = $self->root;
+  my @dbf  = map { File::Spec->catfile( $root, $_ ) }
+   grep { /^r(\d+)$/ && $1 < $min } do {
+    opendir my $dir, $root
+     or croak "Can't open $root: $!";
+    readdir $dir;
+   };
+  unlink @dbf;
 }
 
 sub commit {
-  my ( $self, $data ) = @_;
+  my ( $self, $data, $expect ) = @_;
   my $rev;
   $self->_with_write_lock(
     sub {
       my $fh = shift;
       chomp( $rev = <$fh> );
       $rev ||= 0;
+      if ( defined $expect && $expect != $rev ) { undef $rev; return }
       my $stash = $self->_stash( ++$rev );
       store $data, $stash or croak "Failed to write $stash: $!";
       seek $fh, 0, 0;
       print $fh "$rev\n";
     }
   );
+  $self->gc( $rev );
   return $rev;
 }
 
@@ -84,6 +97,17 @@ sub revision {
   flock $fh, 1 or croak "Can't lock $idx: $!\n";    # Shared
   chomp( my $rev = <$fh> );
   return $rev;
+}
+
+sub transaction {
+  my ( $self, $cb ) = @_;
+  while () {
+    my $rev   = $self->revision;
+    my $data  = $self->checkout( $rev );
+    my $ndata = $cb->( $data, $rev );
+    my $nrev  = $self->commit( $ndata, $rev );
+    return $nrev if defined $nrev;
+  }
 }
 
 1;
