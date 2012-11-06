@@ -21,15 +21,5 @@ Model.prototype = {
   },
   on: function(path, cb) {
     this.t.on(path, cb);
-  },
-  subscribe: function(ev) {
-    var self = this;
-    ev.on('model', function(ev, data) {
-      self.setData(data);
-    });
-
-    ev.on('model-patch', function(ev, data) {
-      self.patch(data);
-    });
   }
 }

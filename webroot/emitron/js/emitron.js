@@ -8,6 +8,7 @@ $(function() {
   ev.on('test', function(ev, data) {
     console.log("Got message: " + ev + ": " + data.sequence);
   });
+
   ev.on('error', function(ev, data) {
     var msg = "Error";
     if (data.status) msg += ": " + data.status;
@@ -15,7 +16,14 @@ $(function() {
     console.log(msg);
   });
 
-  model.subscribe(ev);
+  ev.on('model', function(ev, data) {
+    model.setData(data);
+  });
+
+  ev.on('model-patch', function(ev, data) {
+    model.patch(data);
+  });
+
   model.on('$.args', function() {
     $('#main').append($('<pre></pre>').text(model.getData().args.join(' '))).append($('<br></br>'));
   });
