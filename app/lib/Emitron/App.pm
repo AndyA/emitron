@@ -25,7 +25,10 @@ sub new {
 
 sub run {
   my $self = shift;
-  Emitron::Runner->new( workers => $self->make_workers )->run;
+  Emitron::Runner->new(
+    workers    => $self->make_workers,
+    post_event => $self->make_event_cleanup
+  )->run;
 }
 
 sub make_workers {
@@ -36,23 +39,47 @@ sub make_workers {
   return \@w;
 }
 
+sub queue {
+  my $self = shift;
+  return $self->{queue}
+   ||= Emitron::Model::Watched->new( root => QUEUE )->init;
+}
+
+sub make_event_cleanup {
+  my $self  = shift;
+  my $queue = $self->queue;
+  return sub {
+    my $msg = shift;
+    if ( $msg->source eq 'api' ) {
+      $queue->remove( $msg->{cleanup} );
+    }
+  };
+}
+
 sub make_event_watcher {
   my $self = shift;
-  my $queue = Emitron::Model::Watched->new( root => QUEUE )->init;
   # AWOOGA: This means we drop any existing messages...
-  my $rev = $queue->revision;
-  my $ser = 0;
+  my $queue = $self->queue;
+  my $first = $queue->earliest;
+  my $rev   = defined $first ? $first - 1 : undef;
+  my $ser   = 0;
   return sub {
     my ( undef, $wtr ) = @_;
     while () {
-      $ser = $queue->wait( $ser, 10 );
       my $nrev = $queue->revision;
-      for my $r ( $rev + 1 .. $nrev ) {
-        my $msg = $queue->checkout( $r );
-        Emitron::Message->new( message => $msg )->send( $wtr )
-         if defined $msg;
+      if ( defined $rev ) {
+        for my $r ( $rev + 1 .. $nrev ) {
+          my $msg = $queue->checkout( $r );
+          Emitron::Message->new(
+            message => $msg,
+            source  => 'api',
+            cleanup => $r
+           )->send( $wtr )
+           if defined $msg;
+        }
       }
       $rev = $nrev;
+      $ser = $queue->wait( $ser, 10 );
     }
   };
 }
@@ -63,7 +90,9 @@ sub make_worker {
     my ( $get, $wtr ) = @_;
     while ( my $msg = $get->() ) {
       my $data = $msg->msg;
-      print Dumper( $data );
+      print "[$$] ", Dumper( $data );
+      sleep 5;
+      print "[$$] Done\n";
       #      Emitron::Message->new( message => $data )->send( $wtr );
     }
   };

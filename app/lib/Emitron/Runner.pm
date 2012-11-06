@@ -17,15 +17,16 @@ Emitron::Runner - App core
 
 =cut
 
-use accessors::ro qw( workers );
+use accessors::ro qw( workers post_event );
 
 sub new {
   my $class = shift;
   return bless {
-    rds     => IO::Select->new,
-    active  => {},
-    workers => [],
-    mq      => [],
+    rds        => IO::Select->new,
+    active     => {},
+    workers    => [],
+    mq         => [],
+    post_event => sub { },
     @_
   }, $class;
 }
@@ -67,7 +68,9 @@ sub run {
 
       if ( $msg->type eq 'signal' ) {
         $wrk->signal( $msg );
-        delete $ar->{msg} if $wrk->is_ready;
+        if ( $wrk->is_ready && defined( my $m = delete $ar->{msg} ) ) {
+          $self->{post_event}( $m );
+        }
       }
       else {
         $self->enqueue( $msg );

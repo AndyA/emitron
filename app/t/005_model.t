@@ -83,7 +83,7 @@ with_model(
 sub with_model {
   my $cb    = shift;
   my $dir   = File::Temp->newdir;
-  my $model = Emitron::Model->new( root => $dir );
+  my $model = Emitron::Model->new( root => $dir, prune => 50 );
   $model->init;
   $cb->( $model, $dir );
 }

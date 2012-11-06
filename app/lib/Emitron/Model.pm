@@ -5,6 +5,7 @@ use warnings;
 
 use Carp qw( croak );
 use File::Spec;
+use List::Util qw( min );
 use Path::Class;
 use Storable;
 
@@ -18,7 +19,7 @@ Emitron::Model - versioned model
 
 sub new {
   my $class = shift;
-  return bless { prune => 50, @_ }, $class;
+  return bless {@_}, $class;
 }
 
 sub _obj_name { file( shift->root, @_ ) }
@@ -50,9 +51,11 @@ sub _with_write_lock {
 }
 
 sub gc {
-  my $self = shift;
+  my $self  = shift;
+  my $prune = $self->prune;
+  return unless defined $prune;
   my $rev  = shift || $self->revision;
-  my $min  = $rev - $self->prune;
+  my $min  = $rev - $prune;
   my $root = $self->root;
   my @dbf  = map { File::Spec->catfile( $root, $_ ) }
    grep { /^r(\d+)$/ && $1 < $min } do {
@@ -61,6 +64,18 @@ sub gc {
     readdir $dir;
    };
   unlink @dbf;
+}
+
+sub earliest {
+  my $self = shift;
+  my $root = $self->root;
+  my @dbf
+   = sort { $a <=> $b } map { /(\d+)/, $1 } grep { /^r\d+$/ } do {
+    opendir my $dir, $root
+     or croak "Can't open $root: $!";
+    readdir $dir;
+   };
+  return shift @dbf;
 }
 
 sub commit {
@@ -98,6 +113,11 @@ sub revision {
   flock $fh, 1 or croak "Can't lock $idx: $!\n";    # Shared
   chomp( my $rev = <$fh> );
   return $rev;
+}
+
+sub remove {
+  my ( $self, @revs ) = @_;
+  unlink map { $self->_stash( $_ ) } @revs;
 }
 
 sub transaction {
