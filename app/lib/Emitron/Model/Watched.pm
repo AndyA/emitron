@@ -16,9 +16,9 @@ Emitron::Model::Watched - A model with an associated global event
 sub _evfile { shift->_obj_name( 'event' ) }
 
 sub commit {
-  my ( $self, $data ) = @_;
-  my $rev = $self->SUPER::commit( $data );
-  eventsignal( $self->_evfile, $rev );
+  my ( $self, @args ) = @_;
+  my $rev = $self->SUPER::commit( @args );
+  eventsignal( $self->_evfile, $rev ) if defined $rev;
   return $rev;
 }
 
