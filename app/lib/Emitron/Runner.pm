@@ -24,8 +24,7 @@ sub new {
   return bless {
     rds     => IO::Select->new,
     active  => {},
-    curmsg  => {},
-    workers => 10,
+    workers => [],
     mq      => [],
     @_
   }, $class;
@@ -37,71 +36,72 @@ sub enqueue {
 }
 
 sub run {
-  my $self   = shift;
-  my $active = $self->{active};
-  my $curmsg = $self->{curmsg};
-  my $mq     = $self->{mq};
-  my $rds    = $self->{rds};
+  my $self    = shift;
+  my $active  = $self->{active};
+  my $mq      = $self->{mq};
+  my $rds     = $self->{rds};
+  my $workers = $self->{workers};
 
   while () {
-    while ( keys %$active < $self->workers ) {
-      my $ttl = int( rand( 20 ) );
-      my $wrk = Emitron::Worker->new(
-        sub {
-          my ( $msg, $wtr ) = @_;
-          die if --$ttl <= 0;
-          sleep rand() * 3;
-          my $data = $msg->msg;
-          $data->{touched}++;
-          print "[$$] Processed $data->{id} ($data->{touched})\n";
-          Emitron::Message->new( message => $data )->send( $wtr );
-        }
-      );
-      $active->{ $wrk->pid } = $wrk;
-      print "New worker ", $wrk->pid, "\n";
+    while ( @$workers ) {
+      my $cb  = shift @$workers;
+      my $wrk = Emitron::Worker->new( $cb );
+      $active->{ $wrk->pid } = {
+        cb  => $cb,
+        wrk => $wrk,
+      };
       $rds->add( [ $wrk->reader, $wrk->pid ] );
     }
 
     my @rdy = $rds->can_read( 10 );
 
     for my $rd ( @rdy ) {
-      my $wrk = $active->{ $rd->[1] };
-      die unless defined $wrk;
+      my $ar = $active->{ $rd->[1] };
+      die unless defined $ar;
+      my $wrk = $ar->{wrk};
       my $msg = Emitron::Message->recv( $wrk->reader );
-      next unless defined $msg;    # TODO
+      unless ( defined $msg ) {
+        $self->recycle( $wrk->pid );
+        next;
+      }
 
       if ( $msg->type eq 'signal' ) {
         $wrk->signal( $msg );
-        delete $curmsg->{ $wrk->pid } if $wrk->is_ready;
+        delete $ar->{msg} if $wrk->is_ready;
       }
       else {
         $self->enqueue( $msg );
       }
     }
 
-    my @active = sort { $a->pid <=> $b->pid } values %$active;
-    print
-     join( ', ', map { sprintf "%s: %s", $_->pid, $_->state } @active ),
+    print join( ', ',
+      map { sprintf "%s: %s", $_->pid, $_->state }
+      sort { $a->pid <=> $b->pid } map { $_->{wrk} } values %$active ),
      "\n";
 
-    my @ready = grep { $_->is_ready } values %$active;
+    my @ready = grep { $_->{wrk}->is_ready } values %$active;
     while ( @ready && @$mq ) {
       my $msg = shift @$mq;
-      my $wrk = shift @ready;
-      $curmsg->{ $wrk->pid } = $msg;
-      $wrk->send( $msg );
+      my $ar  = shift @ready;
+      $ar->{msg} = $msg;
+      $ar->{wrk}->send( $msg );
     }
 
     while () {
       my $pid = waitpid -1, WNOHANG;
       last unless defined $pid && $pid > 0;
-      print "Reaping $pid\n";
-      if ( my $wrk = delete $active->{$pid} ) {
-        $rds->remove( $wrk->reader );
-        if ( my $msg = delete $curmsg->{$pid} ) {
-          unshift @$mq, $msg;
-        }
-      }
+      $self->recycle( $pid );
+    }
+  }
+}
+
+sub recycle {
+  my ( $self, $pid ) = @_;
+  if ( my $ar = delete $self->{active}{$pid} ) {
+    $self->{rds}->remove( $ar->{wrk}->reader );
+    push @{ $self->{workers} }, $ar->{cb};
+    if ( my $msg = delete $ar->{msg} ) {
+      unshift @{ $self->{mq} }, $msg;
     }
   }
 }
