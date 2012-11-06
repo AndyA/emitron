@@ -30,7 +30,7 @@ sub _stash { shift->_obj_name( "r$_[0]" ) }
 sub init {
   my $self = shift;
   my $idx  = $self->_index;
-  return if -f $idx;
+  return $self if -f $idx;
   dir( $self->root )->mkpath;
   print { $idx->openw } "0\n";
   $self->commit( {} );

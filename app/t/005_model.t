@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 22;
+use Test::More tests => 23;
 
 use Emitron::Model;
 use Data::Dumper;
@@ -14,7 +14,9 @@ use Scalar::Util qw( refaddr );
   my $model = Emitron::Model->new( root => $dir );
   isa_ok $model, 'Emitron::Model';
   my $model2 = $model->init;
+  my $model3 = $model->init;
   is refaddr( $model ), refaddr( $model2 ), 'init returns model';
+  is refaddr( $model ), refaddr( $model3 ), 'second init returns model';
 }
 
 with_model(
