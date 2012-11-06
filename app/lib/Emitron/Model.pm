@@ -18,7 +18,7 @@ Emitron::Model - versioned model
 
 sub new {
   my $class = shift;
-  return bless { @_, prune => 50 }, $class;
+  return bless { prune => 50, @_ }, $class;
 }
 
 sub _obj_name { file( shift->root, @_ ) }
