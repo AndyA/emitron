@@ -77,6 +77,8 @@ sub recv {
   return bless $msg, $class;
 }
 
+sub is_safe { shift->source eq 'internal' }
+
 1;
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl
