@@ -2,16 +2,24 @@
 
 use strict;
 use warnings;
-use Test::More tests => 21;
+use Test::More tests => 22;
 
 use Emitron::Model;
 use Data::Dumper;
 use File::Temp;
+use Scalar::Util qw( refaddr );
+
+{
+  my $dir = File::Temp->newdir;
+  my $model = Emitron::Model->new( root => $dir );
+  isa_ok $model, 'Emitron::Model';
+  my $model2 = $model->init;
+  is refaddr( $model ), refaddr( $model2 ), 'init returns model';
+}
 
 with_model(
   sub {
     my ( $model, $dir ) = @_;
-    isa_ok $model, 'Emitron::Model';
     my @rmap = ();
     for my $rev ( 1 .. 10 ) {
       my $rec = { r => $rev };
@@ -71,9 +79,8 @@ with_model(
 );
 
 sub with_model {
-  my $cb = shift;
-
-  my $dir = File::Temp->newdir;
+  my $cb    = shift;
+  my $dir   = File::Temp->newdir;
   my $model = Emitron::Model->new( root => $dir );
   $model->init;
   $cb->( $model, $dir );

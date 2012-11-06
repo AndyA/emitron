@@ -34,6 +34,7 @@ sub init {
   dir( $self->root )->mkpath;
   print { $idx->openw } "0\n";
   $self->commit( {} );
+  return $self;
 }
 
 sub _with_write_lock {
