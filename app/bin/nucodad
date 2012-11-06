@@ -1,0 +1,653 @@
+#!/usr/bin/perl
+#
+# Nucoda daemon
+
+use strict;
+use warnings;
+
+use Config::Tiny;
+use Data::Dumper;
+use File::Basename qw( dirname basename );
+use File::Find;
+use File::Path qw( mkpath );
+use File::Spec;
+use Getopt::Long;
+use Log::Log4perl qw( get_logger );
+use POSIX qw( :sys_wait_h setsid setuid setgid );
+use Sys::Hostname qw( hostname );
+use Storable qw( freeze );
+use XML::LibXML::XPathContext;
+use XML::LibXML;
+
+our %Options;
+
+use constant CONFDIR => '/etc/nucodad';
+
+use constant BLANK_COMMENT => '.';
+
+BEGIN {
+  our $VERSION = '0.07';
+
+  %Options = (
+    conf    => File::Spec->catfile( CONFDIR, 'nucoda.ini' ),
+    logconf => File::Spec->catfile( CONFDIR, 'logger.conf' ),
+    daemon  => 0,
+    pidfile => '/var/run/nucodad.pid',
+    uid     => undef,
+    gid     => undef,
+    umask   => undef,
+    dryrun  => 0,
+    version => 0,
+  );
+
+  GetOptions(
+    'conf:s'    => \$Options{conf},
+    'logconf:s' => \$Options{logconf},
+    'daemon'    => \$Options{daemon},
+    'pidfile:s' => \$Options{pidfile},
+    'uid:s'     => \$Options{uid},
+    'gid:s'     => \$Options{gid},
+    'umask:s'   => \$Options{umask},
+    'dryrun'    => \$Options{dryrun},
+    'version'   => \$Options{version},
+  ) or syntax();
+
+  if ( $Options{version} ) {
+    print "nucodad $VERSION\n";
+    exit;
+  }
+
+  Log::Log4perl::init( $Options{logconf} );
+}
+
+our $Config = read_config( $Options{conf} );
+our $Logger = get_logger;
+my %Deferred = ();
+my %Cleanup  = ();
+my $Sequence = 1;
+
+# Make filename args absolute before we
+# daemonize (which includes a cd /)
+$Options{homedir} = '.';
+$Options{$_} = File::Spec->rel2abs( $Options{$_} )
+ for qw( conf logconf pidfile homedir );
+
+setgid( decode_gid( $Options{gid} ) ) || die $!
+ if defined $Options{gid};
+
+setuid( decode_uid( $Options{uid} ) ) || die $!
+ if defined $Options{uid};
+
+umask oct $Options{umask}
+ if defined $Options{umask};
+
+eval {
+  if ( $Options{daemon} ) {
+    daemonize();
+    open my $pf, '>', $Options{pidfile}
+     or die "Can't write $Options{pidfile}: $!\n";
+    print $pf "$$\n";
+  }
+
+  $Logger->info( "nucodad starting" );
+  run();
+  $Logger->info( "nucoda exiting" );
+};
+if ( my $err = tidy( $@ ) ) {
+  $Logger->error( "Fatal: nucodad is exiting: $err" );
+}
+
+sub run {
+  my %active = ();
+
+  my %want = (
+    recycler => 1,
+    worker   => config( 'workers' ),
+  );
+
+  while () {
+    my %got = map { $_ => 0 } keys %want;
+    $got{$_}++ for values %active;
+    # Make sure we have the right number of workers of each type.
+    for my $kind ( keys %want ) {
+      for ( $got{$kind} .. $want{$kind} - 1 ) {
+        my $pid = fork;
+        die "fork failed: $!\n" unless defined $pid;
+        unless ( $pid ) {
+          # Don't execute any END blocks
+          use POSIX '_exit';
+          eval q{END { _exit 0 }};
+          schedule( $kind );
+          event_loop( $kind );
+          CORE::exit;
+        }
+        $active{$pid} = $kind;
+        $Logger->info( ucfirst( $kind ), " $pid started" );
+      }
+    }
+    # Reap and replenish the worker pool
+    my $pid = waitpid -1, 0;
+    if ( defined $pid && exists $active{$pid} ) {
+      my $kind = delete $active{$pid};
+      $Logger->info( ucfirst( $kind ), " $pid has exited" );
+    }
+  }
+}
+
+sub event_loop {
+  my $kind = shift;
+  $Logger->info( "nucodad $kind $$ starting" );
+  while () {
+    eval { run_deferred() };
+    if ( my $err = tidy( $@ ) ) {
+      $Logger->error( "Error: $err" );
+
+      # Any error will be fatal to this instance. That's OK - we'll
+      # respawn in that case.
+      $_->( $err ) for values %Cleanup;
+    }
+    sleep 1;
+  }
+}
+
+sub defer {
+  my ( $code, $delay ) = @_;
+  my $when = time + $delay;
+  push @{ $Deferred{$when} }, $code;
+}
+
+sub run_deferred {
+  my $now = time;
+  for my $when ( grep { $_ <= $now } keys %Deferred ) {
+    $_->() for @{ delete $Deferred{$when} };
+  }
+}
+
+sub schedule {
+  my $kind     = shift;
+  my $meth     = "${kind}_scan";
+  my $watchers = read_watchers();
+  my $scanner;
+  $scanner = sub {
+    for my $watch ( sort keys %$watchers ) {
+      __PACKAGE__->$meth( $watch, $watchers->{$watch} );
+    }
+    defer $scanner, config( 'sleep' );
+  };
+  defer $scanner, 0;
+}
+
+sub search_for(&$@) {
+  my ( $cb, $file, @dir ) = @_;
+  $file = qr{^\Q$file\E$} unless 'Regexp' eq ref $file;
+  # Promote File::Find warnings to errors
+  local $SIG{__WARN__} = sub { die @_ };
+  my @got = ();
+  find {
+    no_chdir => 1,
+    wanted   => sub {
+      return unless -f;
+      push @got, $cb->( $_ ) if basename( $_ ) =~ $file;
+     }
+   },
+   map { File::Spec->rel2abs( $_, $Options{homedir} ) } @dir;
+
+  return @got;
+}
+
+sub local_name {
+  my ( $file, @id ) = @_;
+  join '.', $file, hostname, $$, @id;
+}
+
+sub recycler_scan {
+  my ( $class, $name, $conf ) = @_;
+
+  my $like = qr{ \Q$conf->{manifest}\E \.
+                 \Q@{[ hostname ]}\E \.
+                 (\d+) \.
+                 (claimed|active) $ }x;
+
+  my %by_pid = ();
+
+  search_for {
+    my $file = shift;
+    die "Strange: $file doesn't match our pattern\n"
+     unless $file =~ $like;
+    my ( $pid, $state ) = ( $1, $2 );
+    push @{ $by_pid{$pid} }, $file;
+  }
+  qr{^$like}, $conf->{path};
+
+  for my $pid ( keys %by_pid ) {
+    unless ( kill 0, $pid ) {
+      JOB: for my $job ( @{ $by_pid{$pid} } ) {
+        my $original
+         = File::Spec->catfile( dirname( $job ), $conf->{manifest} );
+        if ( -f $original ) {
+          $Logger->warn(
+            "Strange: tried to recycle $job but $original already exists"
+          );
+          next JOB;
+        }
+        rename $job, $original
+         or die "Can't rename $job as $original: $!\n";
+        $Logger->info( "Recycled orphan $job as $original" );
+      }
+    }
+  }
+}
+
+sub worker_scan {
+  my ( $class, $name, $conf ) = @_;
+
+  my @avail = search_for { $_[0] } $conf->{manifest}, $conf->{path};
+
+  # Claim any new manifests. We rename them to something specific to us.
+  # In the event of a race with another worker the rename may fail -
+  # which is fine - it just means we didn't get the job.
+  #
+  # Assumption: we're assuming here that the manifest file appears
+  # atomically. That's been agreed with the Java peeps.
+
+  CLAIM: {
+    last CLAIM unless @avail;
+    my $manifest = shift @avail;
+    redo CLAIM unless -f $manifest;
+
+    my $claimed = local_name( $manifest, 'claimed' );
+    my $active  = local_name( $manifest, 'active' );
+
+    rename $manifest, $claimed
+     or die "Can't rename $manifest as $claimed. "
+     . "Maybe another worker got to it first. "
+     . "This is normal. The error was: $!\n";
+
+    $Cleanup{$manifest} = sub {
+      my $err = shift;
+      job_error( $manifest, $err, $claimed, $active );
+    };
+
+    $Logger->info( "Claimed $manifest as $claimed" );
+
+    defer sub { start_job( $conf, $manifest ) }, 0;
+  }
+}
+
+sub job_error {
+  my ( $manifest, $err, @work ) = @_;
+  for my $file ( grep -f, @work ) {
+    my $error = local_name( $manifest, 'error' );
+    rename $file, $error or die "Failed to rename $file as $error\n";
+    $Logger->info( "Renamed $file as $error due to $err" );
+  }
+  delete $Cleanup{$manifest};
+}
+
+sub ready {
+  my ( $old_state, $new_state ) = @_;
+  return unless same_state( $old_state, $new_state );
+  return if grep { !defined } values %$new_state;
+  return 1;
+}
+
+sub same_state {
+  my ( $old_state, $new_state ) = @_;
+  return freeze( $old_state ) eq freeze( $new_state );
+}
+
+sub start_job {
+  my ( $conf, $manifest ) = @_;
+
+  my $claimed = local_name( $manifest, 'claimed' );
+  my $active  = local_name( $manifest, 'active' );
+
+  rename $claimed, $active
+   or die "Can't rename $claimed as $active: $!\n";
+
+  $Logger->info( "Waiting for $manifest to become ready" );
+
+  my $job_dir   = dirname $manifest;
+  my @manifest  = read_lines( $active );
+  my $old_state = file_state( $job_dir, @manifest );
+  my $wait      = $conf->{stable_wait};
+
+  my $tries = 0;
+
+  my $cb;
+  $cb = sub {
+    $Logger->debug( "Checking readiness of files for $manifest" );
+    my $new_state = file_state( $job_dir, @manifest );
+    log_state( $new_state );
+    if ( ready( $old_state, $new_state ) ) {
+      undef $cb;    # break circular reference
+      defer sub { process_job( $conf, $manifest, $new_state ) }, 0;
+    }
+    else {
+      $tries = 0 unless same_state( $old_state, $new_state );
+      die "Giving up waiting for files to arrive for $manifest"
+       if ++$tries > $conf->{stable_tries};
+      $old_state = $new_state;
+      defer $cb, $wait;
+    }
+  };
+
+  defer $cb, $wait;
+}
+
+sub process_job {
+  my ( $conf, $manifest, $state ) = @_;
+
+  $Logger->info( "Processing $manifest" );
+  my $job_dir = dirname $manifest;
+
+  my @fcp_xml
+   = grep { /\.(?:xml|fcx)$/i } map { $state->{$_}{file} } keys %$state;
+
+  die "No FCP XML file found in $manifest\n" unless @fcp_xml;
+  die "Multiple FCP XML files found in manifest:\n  ",
+   join( "\n  ", sort @fcp_xml ), "\n"
+   if @fcp_xml > 1;
+
+  my $fcptmp  = local_name( $fcp_xml[0], 'xml' );
+  my $aaftmp  = local_name( $fcp_xml[0], 'aaf' );
+  my $logfile = local_name( $fcp_xml[0], 'log' );
+
+  $Logger->info( "Fixing up paths in $fcp_xml[0] as $fcptmp" );
+  fix_fcp( $conf, $job_dir, $fcp_xml[0], $fcptmp );
+
+  my $project = join '-', hostname, $$, time, $Sequence++;
+
+  $Logger->info( "Running nucoda (log = $logfile)" );
+
+  {
+    open my $lh, '>', $logfile or die "Can't write $logfile: $!\n";
+
+    my $ll = sub {
+      my $line = shift;
+      $line =~ s/\r//g;    # Windows innit.
+      $Logger->debug( $line );
+      print $lh "$line\n";
+    };
+
+    nucoda( $ll, '--project', $project, '--format-spec',
+      config( 'nucoda.format_spec' ) );
+    nucoda( $ll, '--project', $project, '--import',
+      to_win( $conf, $fcptmp ) );
+    nucoda( $ll, '--project', $project, '--export-aaf',
+      to_win( $conf, $aaftmp ) );
+    nucoda( $ll, '--remove-project', $project );
+  }
+
+  $Logger->info( "Completed $manifest" );
+  my $active = local_name( $manifest, 'active' );
+  my $done   = local_name( $manifest, 'done' );
+  rename $active, $done or die "Can't rename $active as $done: $!\n";
+  delete $Cleanup{$manifest};
+
+  if ( defined( my $odir = $conf->{output_dir} ) ) {
+    my $dest
+     = File::Spec->catdir( $odir, from_file( $conf, $job_dir ) );
+    $Logger->info( "Moving job to $dest" );
+    die "Can't move $job_dir to $dest: directory already exists\n"
+     if -d $dest;
+    mkpath( dirname( $dest ) );
+    rename $job_dir, $dest
+     or die "Can't move $job_dir to $dest: $!\n";
+  }
+}
+
+sub log_state {
+  my $state = shift;
+  for my $file ( sort keys %$state ) {
+    my $info = $state->{$file};
+    my $desc
+     = $info
+     ? sprintf( 'file=%s, size=%s, mtime=%s',
+      $info->{file}, $info->{size}, $info->{mtime} )
+     : 'not found';
+    $Logger->debug( "$file: $desc" );
+  }
+}
+
+sub file_state {
+  my ( $jobdir, @files ) = @_;
+  my $found = scan_dir( $jobdir );
+  my $state = {};
+  FILE: for my $file ( @files ) {
+    my @got = @{ $found->{ basename( $file ) } || [] };
+    if ( @got == 1 ) {
+      if ( my @st = stat $got[0] ) {
+        $state->{$file} = {
+          file  => $got[0],
+          size  => $st[7],
+          mtime => $st[9],
+        };
+        next FILE;
+      }
+    }
+    elsif ( @got > 1 ) {
+      die "Multiple matches found for $file in $jobdir";
+    }
+    $state->{$file} = undef;
+  }
+  return $state;
+}
+
+sub read_lines {
+  my $file = shift;
+  open my $fh, '<', $file or die "Can't read $file: $!\n";
+  chomp( my @lines = <$fh> );
+  return @lines;
+}
+
+sub read_watchers {
+  my @watchers = map { tidy( $_ ) } split /,/, config( 'watch' );
+  my @missing = grep { !$Config->{$_} } @watchers;
+  die "No config section for the following watchers: ",
+   join( ', ', @missing ), "\n"
+   if @missing;
+  return { map { $_ => { %{ $Config->{$_} || {} } } } @watchers };
+}
+
+sub nucoda {
+  my $cb = shift;
+  remote_cmd( $cb, config( 'nucoda.nucoda' ), @_ );
+}
+
+sub win32_quote {
+  my $str = shift;
+  return $str unless $str =~ /\s/;
+  return qq{"$str"};
+}
+
+sub win32_cmd {
+  join ' ', call => map { win32_quote( $_ ) } @_;
+}
+
+sub remote_cmd {
+  my $cb   = shift;
+  my $cmd  = win32_cmd( @_ );
+  my $host = config( 'nucoda.host' );
+  $Logger->info( "Executing |$cmd| on $host" );
+  $cb->( "C:\\> $cmd" );
+  if ( $Options{dryrun} ) {
+    sleep 2;
+  }
+  else {
+    local $ENV{TERM} = config( 'nucoda.term' );
+    my @id
+     = ( defined $Config->{nucoda}{ssh_id} )
+     ? ( '-i', $Config->{nucoda}{ssh_id} )
+     : ();
+    my @cmd = (
+      config( 'ssh' ),
+      @id, join( '@', config( 'nucoda.user' ), $host ), $cmd
+    );
+    open my $ch, '-|', @cmd or die "Can't fork: $!\n";
+    while ( <$ch> ) {
+      chomp;
+      $cb->( $_ );
+    }
+    close $ch or die "Command failed: $! $?\n";
+  }
+}
+
+sub hacks_and_quirks {
+  my $xml = shift;
+  my $xpc = XML::LibXML::XPathContext->new( $xml );
+
+  # TAF-2983 - Nucoda crashes on empty comments in markers
+  my @paths = $xpc->findnodes( '//marker/comment' );
+  for my $p ( @paths ) {
+    my $v = $p->textContent;
+    next if defined $v && $v !~ /^\s*$/;
+    $p->addChild( $xml->createTextNode( BLANK_COMMENT ) );
+  }
+
+}
+
+sub fix_fcp {
+  my ( $conf, $pdir, $infile, $outfile ) = @_;
+
+  my $xml = XML::LibXML->load_xml( location => $infile );
+  my $xpc = XML::LibXML::XPathContext->new( $xml );
+
+  my $dir   = scan_dir( $pdir );
+  my @paths = $xpc->findnodes( '//pathurl' );
+
+  for my $p ( @paths ) {
+    my $path = $p->textContent;
+    my $key  = url_leaf( $path );
+    my @ess  = @{ $dir->{$key} || [] };
+    die "No match found for $key ($path)\n" unless @ess;
+    die "Multiple matches for $key ($path)\n" if @ess > 1;
+    my $npath = to_url( $conf, $ess[0] );
+    my ( $head, @tail ) = $p->childNodes;
+    $head->replaceNode( $xml->createTextNode( $npath ) );
+    $p->removeChild( $_ ) for @tail;
+  }
+
+  #  Not doing any hacks any more.
+  #  hacks_and_quirks( $xml );
+  mkpath( dirname( $outfile ) );
+  open my $fh, '>', $outfile or die "Can't write $outfile: $!\n";
+  print $fh $xml->toString;
+  return $outfile;
+}
+
+sub scan_dir {
+  my $dir      = shift;
+  my $name_map = {};
+  find {
+    no_chdir => 1,
+    wanted   => sub {
+      return unless -f;
+      my $key = basename $_;
+      push @{ $name_map->{$key} }, $_;
+     }
+  }, $dir;
+  return $name_map;
+}
+
+sub rel_file {
+  my ( $base, $name ) = @_;
+  my $ldr = quotemeta File::Spec->rel2abs( $base ) . '/';
+  $name = File::Spec->rel2abs( $name );
+  $name =~ s/^$ldr//;
+  return $name;
+}
+
+sub from_file {
+  my ( $conf, $name ) = @_;
+  return rel_file( $conf->{path}, $name );
+}
+
+sub to_url {
+  my ( $conf, $name ) = @_;
+  my $rname = from_file( $conf, $name );
+  $rname =~ s/([\s%'"])/sprintf '%%%02x', ord $1/eg;
+  return join '/', $conf->{path_url}, $rname;
+}
+
+sub url_leaf {
+  my $url = shift;
+  $url =~ s/%([0-9a-f]{2})/chr hex $1/eg;
+  $url =~ s#.*/##;
+  return $url;
+}
+
+sub to_win {
+  my ( $conf, $name ) = @_;
+  my $rname = from_file( $conf, $name );
+  $rname =~ s/\//\\/g;
+  return join '\\', $conf->{path_win}, $rname;
+}
+
+sub config {
+  my @path = split /\./, $_[0];
+  die "Too many elements in config path $_[0]"
+   if @path > 2;
+  unshift @path, '_' if @path < 2;
+  my $v = $Config->{ $path[0] }{ $path[1] };
+  die "No config item $_[0]"
+   unless defined $v;
+  return $v;
+}
+
+sub read_config {
+  my $conf = shift;
+  -f $conf or die "Can't find $conf\n";
+  return Config::Tiny->read( $conf )
+   or die $Config::Tiny::errstr;
+}
+
+sub decode_uid {
+  my $uid = shift;
+  my @info = ( $uid =~ /^\d+$/ ) ? getpwuid( $uid ) : getpwnam( $uid );
+  return $info[2];
+}
+
+sub decode_gid {
+  my $gid = shift;
+  my @info = ( $gid =~ /^\d+$/ ) ? getgrgid( $gid ) : getgrnam( $gid );
+  return $info[2];
+}
+
+sub daemonize {
+  chdir '/' or die "Can't chdir to /: $!";
+  open STDIN,  '/dev/null'  or die "Can't read /dev/null: $!";
+  open STDOUT, '>/dev/null' or die "Can't write to /dev/null: $!";
+  defined( my $pid = fork ) or die "Can't fork: $!";
+  exit if $pid;
+  setsid or die "Can't start a new session: $!";
+  open STDERR, '>&STDOUT' or die "Can't dup stdout: $!";
+}
+
+sub tidy {
+  my $s = shift;
+  for ( $s ) { s/^\s+//; s/\s+$//; s/\s+/ /g }
+  return $s;
+}
+
+sub syntax {
+  print <<EOT;
+Syntax: nucodad [options]
+
+Options:
+  --conf    file  xcode service config file
+  --logconf file  Log4perl config file
+  --pidfile file  File for daemon to dump pid in
+  --daemon        Daemonize
+  --uid uid       Switch to the specified uid
+  --gid gid       Switch to the specified gid
+  --umask umask   umask to run with
+  --dryrun        Don't attempt to call nucoda
+  --version       Display version an exit
+
+EOT
+  exit;
+}
+
+# vim:ts=2:sw=2:sts=2:et:ft=perl
+
