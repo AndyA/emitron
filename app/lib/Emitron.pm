@@ -2,13 +2,13 @@ package Emitron;
 use Dancer ':syntax';
 use Emitron::Model::Watched;
 
-use constant SEMFILE => '/tmp/emitron.event';
-use constant MODEL   => '/tmp/emitron.model';
+use constant QUEUE => '/tmp/emitron.queue';
+use constant MODEL => '/tmp/emitron.model';
 
 our $VERSION = '0.1';
 
-my $model = Emitron::Model::Watched->new( root => MODEL );
-$model->init;
+my $model = Emitron::Model::Watched->new( root => MODEL )->init;
+my $queue = Emitron::Model::Watched->new( root => QUEUE )->init;
 
 get '/' => sub {
   template 'index';
@@ -27,6 +27,12 @@ sub model_message {
     serial => $now
   };
 }
+
+get '/api/ping' => sub {
+  my $msg = { type => 'ping' };
+  $queue->commit( $msg );
+  return $msg;
+};
 
 get '/api/ev/:serial?' => sub {
   my $sn = param( 'serial' ) || 0;
