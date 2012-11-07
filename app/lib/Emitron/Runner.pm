@@ -18,7 +18,7 @@ Emitron::Runner - App core
 
 =cut
 
-use accessors::ro qw( workers post_event );
+use accessors::ro qw( post_event );
 
 sub new {
   my $class = shift;
@@ -46,11 +46,11 @@ sub run {
 
   while () {
     while ( @$workers ) {
-      my $cb  = shift @$workers;
-      my $wrk = Emitron::Worker->new( $cb );
+      my $handler = shift @$workers;
+      my $wrk     = Emitron::Worker->new( $handler );
       $active->{ $wrk->pid } = {
-        cb  => $cb,
-        wrk => $wrk,
+        handler => $handler,
+        wrk     => $wrk,
       };
       $rds->add( [ $wrk->reader, $wrk->pid ] );
     }
@@ -78,7 +78,7 @@ sub run {
       }
     }
 
-    debug 'Worker status: ',
+    info 'Worker status: ',
      join( ', ',
       map { sprintf "%s: %s", $_->pid, $_->state }
       sort { $a->pid <=> $b->pid } map { $_->{wrk} } values %$active );
@@ -103,7 +103,7 @@ sub recycle {
   my ( $self, $pid ) = @_;
   if ( my $ar = delete $self->{active}{$pid} ) {
     $self->{rds}->remove( $ar->{wrk}->reader );
-    push @{ $self->{workers} }, $ar->{cb};
+    push @{ $self->{workers} }, $ar->{handler};
     if ( my $msg = delete $ar->{msg} ) {
       unshift @{ $self->{mq} }, $msg;
     }

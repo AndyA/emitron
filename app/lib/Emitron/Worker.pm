@@ -45,7 +45,7 @@ sub new {
       }
     };
 
-    $worker->( $get_msg, $child_wtr );
+    $worker->run( $get_msg, $child_wtr );
 
     close $_ for $child_rdr, $child_wtr;
     exit;
