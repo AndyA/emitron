@@ -7,12 +7,13 @@ use Data::Dumper;
 use Emitron::CRTMPServer;
 use Emitron::Logger;
 use Emitron::Message;
+use Emitron::MessageDespatcher;
 use Emitron::Model::Watched;
 use Emitron::Runner;
 use Emitron::Worker::Base;
+use Emitron::Worker::CRTMPServerWatcher;
 use Emitron::Worker::Drone;
 use Emitron::Worker::EventWatcher;
-use Emitron::Worker::CRTMPServerWatcher;
 use Emitron::Worker;
 use Time::HiRes qw( sleep );
 
@@ -45,8 +46,14 @@ sub make_workers {
   push @w,
    Emitron::Worker::CRTMPServerWatcher->new(
     uri => 'http://localhost:6502' );
-  for ( 1 .. 3 ) {
-    push @w, Emitron::Worker::Drone->new;
+  my $desp = Emitron::MessageDespatcher->new;
+  $desp->on(
+    model => sub {
+      debug "Model update: ", @_;
+    }
+  );
+  for ( 1 .. 5 ) {
+    push @w, Emitron::Worker::Drone->new( despatcher => $desp );
   }
   return \@w;
 }

@@ -7,6 +7,8 @@ use Emitron::Logger;
 
 use base qw( Emitron::Worker::Base );
 
+use accessors::ro qw( despatcher );
+
 =head1 NAME
 
 Emitron::Worker::Drone - Process messages
@@ -16,7 +18,7 @@ Emitron::Worker::Drone - Process messages
 sub run {
   my $self = shift;
   while ( my $msg = $self->get_message ) {
-    debug 'Got message: ', $msg;
+    $self->despatcher->despatch($msg);
   }
 }
 
