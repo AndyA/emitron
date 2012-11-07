@@ -4,10 +4,14 @@ use strict;
 use warnings;
 
 use Data::Dumper;
+use Emitron::BackOff;
+use Emitron::CRTMPServer;
 use Emitron::Message;
 use Emitron::Model::Watched;
 use Emitron::Runner;
 use Emitron::Worker;
+use JSON;
+use Time::HiRes qw( sleep );
 
 use constant QUEUE => '/tmp/emitron.queue';
 use constant MODEL => '/tmp/emitron.model';
@@ -35,6 +39,7 @@ sub make_workers {
   my $self = shift;
   my @w    = ();
   push @w, $self->make_event_watcher;
+  push @w, $self->make_crtmpserver_watcher;
   push @w, $self->make_worker for 1 .. 3;
   return \@w;
 }
@@ -79,6 +84,36 @@ sub make_event_watcher {
       }
       $rev = $nrev;
       $ser = $queue->wait( $ser, 10 );
+    }
+  };
+}
+
+sub make_crtmpserver_watcher {
+  my $self = shift;
+  my $prev = undef;
+  my $srv = Emitron::CRTMPServer->new( uri => 'http://localhost:6502' );
+  my $bo = Emitron::BackOff->new( base => 1, max => 10 );
+  return sub {
+    my ( undef, $wtr ) = @_;
+    while () {
+      my $streams = eval { $srv->api( 'listStreams' ) };
+      if ( my $err = $@ ) {
+        print "$err\n";
+        sleep $bo->bad;
+      }
+      elsif ( $streams ) {
+        my $next = encode_json $streams;
+        unless ( defined $prev && $prev eq $next ) {
+          Emitron::Message->new(
+            model => {
+              path => '$.ms.streams',
+              data => $streams,
+            }
+          )->send( $wtr );
+          $prev = $next;
+        }
+        sleep $bo->good;
+      }
     }
   };
 }
