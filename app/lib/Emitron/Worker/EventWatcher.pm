@@ -16,7 +16,7 @@ Emitron::Worker::EventWatcher - Listen for events from web app
 =cut
 
 sub run {
-  my ( $self, undef, $wtr ) = @_;
+  my $self = shift;
 
   my $queue = $self->queue;
   my $first = $queue->earliest;
@@ -28,12 +28,11 @@ sub run {
     if ( defined $rev ) {
       for my $r ( $rev + 1 .. $nrev ) {
         my $msg = $queue->checkout( $r );
-        Emitron::Message->new(
+        $self->post_message(
           message => $msg,
           source  => 'api',
           cleanup => $r
-         )->send( $wtr )
-         if defined $msg;
+        ) if defined $msg;
       }
     }
     $rev = $nrev;

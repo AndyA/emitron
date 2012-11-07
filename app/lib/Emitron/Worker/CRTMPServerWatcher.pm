@@ -18,7 +18,7 @@ Emitron::Worker::CRTMPServerWatcher - Poll crtmpserver
 =cut
 
 sub run {
-  my ( $self, undef, $wtr ) = @_;
+  my $self = shift;
 
   my $prev = undef;
   my $srv = Emitron::CRTMPServer->new( uri => 'http://localhost:6502' );
@@ -33,12 +33,12 @@ sub run {
     elsif ( $streams ) {
       my $next = encode_json $streams;
       unless ( defined $prev && $prev eq $next ) {
-        Emitron::Message->new(
+        $self->post_message(
           model => {
             path => '$.ms.streams',
             data => $streams,
           }
-        )->send( $wtr );
+        );
         $prev = $next;
       }
       sleep $bo->good;

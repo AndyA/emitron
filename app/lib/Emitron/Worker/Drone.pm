@@ -14,10 +14,9 @@ Emitron::Worker::Drone - Process messages
 =cut
 
 sub run {
-  my ( $self, $get, $wtr ) = @_;
-  while ( my $msg = $get->() ) {
-    debug 'Got message, type: ', $msg->type, ', source: ',
-     $msg->source, ', msg: ', $msg->msg;
+  my $self = shift;
+  while ( my $msg = $self->get_message ) {
+    debug 'Got message: ', $msg;
   }
 }
 

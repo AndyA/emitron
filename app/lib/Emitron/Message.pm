@@ -19,6 +19,7 @@ sub new {
     type   => $type,
     msg    => $msg,
     source => 'internal',
+    worker => $$,
     %opts
   }, $class;
 }

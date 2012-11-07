@@ -37,15 +37,7 @@ sub new {
     use POSIX '_exit';
     eval q{END { _exit 0 }};
 
-    my $sel     = IO::Select->new( $child_rdr );
-    my $get_msg = sub {
-      Emitron::Message->new( signal => 'READY' )->send( $child_wtr );
-      while () {
-        return Emitron::Message->recv( $child_rdr ) if $sel->can_read;
-      }
-    };
-
-    $worker->run( $get_msg, $child_wtr );
+    $worker->start( $child_rdr, $child_wtr );
 
     close $_ for $child_rdr, $child_wtr;
     exit;
