@@ -57,8 +57,7 @@ sub make_event_cleanup {
 }
 
 sub make_event_watcher {
-  my $self = shift;
-  # AWOOGA: This means we drop any existing messages...
+  my $self  = shift;
   my $queue = $self->queue;
   my $first = $queue->earliest;
   my $rev   = defined $first ? $first - 1 : undef;
