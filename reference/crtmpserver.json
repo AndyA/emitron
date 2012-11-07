@@ -1,0 +1,325 @@
+{
+   "admin" : {
+      "configuration" : {
+         "acceptors" : [
+            {
+               "ip" : "0.0.0.0",
+               "port" : 1112,
+               "protocol" : "inboundJsonCli",
+               "sslCert" : "",
+               "sslKey" : "",
+               "useLengthPadding" : true
+            }
+         ],
+         "aliases" : [
+            "admin_alias1",
+            "admin_alias2",
+            "admin_alias3"
+         ],
+         "appDir" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/admin/",
+         "clientSideBuffer" : 5,
+         "default" : false,
+         "description" : "Application for administering",
+         "externSeekGenerator" : false,
+         "generateMetaFiles" : false,
+         "initApplicationFunction" : "GetApplication_admin",
+         "initFactoryFunction" : "GetFactory_admin",
+         "keyframeSeek" : false,
+         "library" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/admin/libadmin.so",
+         "mediaFolder" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/admin/media/",
+         "name" : "admin",
+         "protocol" : "dynamiclinklibrary",
+         "renameBadFiles" : false,
+         "rtcpDetectionInterval" : 10,
+         "seekGranularity" : 1,
+         "validateHandshake" : false
+      },
+      "streams" : {}
+   },
+   "appselector" : {
+      "configuration" : {
+         "acceptors" : [
+            {
+               "ip" : "0.0.0.0",
+               "port" : 1935,
+               "protocol" : "inboundRtmp",
+               "sslCert" : "",
+               "sslKey" : ""
+            },
+            {
+               "ip" : "0.0.0.0",
+               "port" : 8081,
+               "protocol" : "inboundRtmps",
+               "sslCert" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/appselector/server.crt",
+               "sslKey" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/appselector/server.key"
+            },
+            {
+               "ip" : "0.0.0.0",
+               "port" : 8080,
+               "protocol" : "inboundRtmpt",
+               "sslCert" : "",
+               "sslKey" : ""
+            }
+         ],
+         "aliases" : [],
+         "appDir" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/appselector/",
+         "clientSideBuffer" : 5,
+         "default" : true,
+         "description" : "Application for selecting the rest of the applications",
+         "externSeekGenerator" : false,
+         "generateMetaFiles" : false,
+         "initApplicationFunction" : "GetApplication_appselector",
+         "initFactoryFunction" : "GetFactory_appselector",
+         "keyframeSeek" : false,
+         "library" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/appselector/libappselector.so",
+         "mediaFolder" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/appselector/media/",
+         "name" : "appselector",
+         "protocol" : "dynamiclinklibrary",
+         "renameBadFiles" : false,
+         "rtcpDetectionInterval" : 10,
+         "seekGranularity" : 1,
+         "validateHandshake" : false
+      },
+      "streams" : {}
+   },
+   "flvplayback" : {
+      "configuration" : {
+         "acceptors" : [
+            {
+               "ip" : "0.0.0.0",
+               "port" : 6666,
+               "protocol" : "inboundLiveFlv",
+               "sslCert" : "",
+               "sslKey" : "",
+               "waitForMetadata" : true
+            },
+            {
+               "ip" : "0.0.0.0",
+               "port" : 9999,
+               "protocol" : "inboundTcpTs",
+               "sslCert" : "",
+               "sslKey" : ""
+            },
+            {
+               "ip" : "0.0.0.0",
+               "port" : 5544,
+               "protocol" : "inboundRtsp",
+               "sslCert" : "",
+               "sslKey" : ""
+            }
+         ],
+         "aliases" : [
+            "simpleLive",
+            "vod",
+            "live",
+            "WeeklyQuest",
+            "SOSample",
+            "oflaDemo"
+         ],
+         "appDir" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/flvplayback/",
+         "clientSideBuffer" : 12,
+         "default" : false,
+         "description" : "FLV Playback Sample",
+         "externSeekGenerator" : false,
+         "externalStreams" : [],
+         "generateMetaFiles" : false,
+         "initApplicationFunction" : "GetApplication_flvplayback",
+         "initFactoryFunction" : "GetFactory_flvplayback",
+         "keyframeSeek" : true,
+         "library" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/flvplayback/libflvplayback.so",
+         "mediaFolder" : "/Volumes/Storage/media/mp4/",
+         "name" : "flvplayback",
+         "protocol" : "dynamiclinklibrary",
+         "renameBadFiles" : false,
+         "rtcpDetectionInterval" : 10,
+         "seekGranularity" : 1,
+         "validateHandshake" : false
+      },
+      "streams" : {
+         "orac" : {
+            "creationTimestamp" : 1352318644039.57,
+            "type" : "INR"
+         }
+      }
+   },
+   "newstream" : {
+      "configuration" : {
+         "acceptors" : [
+            {
+               "ip" : "0.0.0.0",
+               "port" : 6502,
+               "protocol" : "inboundHttpJsonVariant",
+               "sslCert" : "",
+               "sslKey" : ""
+            }
+         ],
+         "aliases" : [
+            "newstream_alias1",
+            "newstream_alias2",
+            "newstream_alias3"
+         ],
+         "appDir" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/newstream/",
+         "clientSideBuffer" : 5,
+         "default" : false,
+         "description" : "Live streaming from http://thespace.org/",
+         "externSeekGenerator" : false,
+         "generateMetaFiles" : false,
+         "initApplicationFunction" : "GetApplication_newstream",
+         "initFactoryFunction" : "GetFactory_newstream",
+         "keyframeSeek" : false,
+         "library" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/newstream/libnewstream.so",
+         "mediaFolder" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/newstream/media/",
+         "name" : "newstream",
+         "protocol" : "dynamiclinklibrary",
+         "renameBadFiles" : false,
+         "rtcpDetectionInterval" : 10,
+         "seekGranularity" : 1,
+         "validateHandshake" : false
+      },
+      "streams" : {}
+   },
+   "proxypublish" : {
+      "configuration" : {
+         "abortOnConnectError" : true,
+         "acceptors" : [
+            {
+               "ip" : "0.0.0.0",
+               "port" : 6665,
+               "protocol" : "inboundLiveFlv",
+               "sslCert" : "",
+               "sslKey" : ""
+            }
+         ],
+         "aliases" : [],
+         "appDir" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/proxypublish/",
+         "clientSideBuffer" : 5,
+         "default" : false,
+         "description" : "Application for forwarding streams to another RTMP server",
+         "externSeekGenerator" : false,
+         "externalStreams" : [],
+         "generateMetaFiles" : false,
+         "initApplicationFunction" : "GetApplication_proxypublish",
+         "initFactoryFunction" : "GetFactory_proxypublish",
+         "keyframeSeek" : false,
+         "library" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/proxypublish/libproxypublish.so",
+         "mediaFolder" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/proxypublish/media/",
+         "name" : "proxypublish",
+         "protocol" : "dynamiclinklibrary",
+         "renameBadFiles" : false,
+         "rtcpDetectionInterval" : 10,
+         "seekGranularity" : 1,
+         "targetServers" : [],
+         "validateHandshake" : false
+      },
+      "streams" : {}
+   },
+   "samplefactory" : {
+      "configuration" : {
+         "acceptors" : [
+            {
+               "ip" : "0.0.0.0",
+               "port" : 8989,
+               "protocol" : "httpEchoProtocol",
+               "sslCert" : "",
+               "sslKey" : ""
+            },
+            {
+               "ip" : "0.0.0.0",
+               "port" : 8988,
+               "protocol" : "echoProtocol",
+               "sslCert" : "",
+               "sslKey" : ""
+            }
+         ],
+         "aliases" : [
+            "httpOutboundTest"
+         ],
+         "appDir" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/samplefactory/",
+         "clientSideBuffer" : 5,
+         "default" : false,
+         "description" : "asdsadasdsa",
+         "externSeekGenerator" : false,
+         "generateMetaFiles" : false,
+         "initApplicationFunction" : "GetApplication_samplefactory",
+         "initFactoryFunction" : "GetFactory_samplefactory",
+         "keyframeSeek" : false,
+         "library" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/samplefactory/libsamplefactory.so",
+         "mediaFolder" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/samplefactory/media/",
+         "name" : "samplefactory",
+         "protocol" : "dynamiclinklibrary",
+         "renameBadFiles" : false,
+         "rtcpDetectionInterval" : 10,
+         "seekGranularity" : 1,
+         "validateHandshake" : false
+      },
+      "streams" : {}
+   },
+   "stresstest" : {
+      "configuration" : {
+         "acceptors" : [],
+         "active" : false,
+         "aliases" : [],
+         "appDir" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/stresstest/",
+         "clientSideBuffer" : 5,
+         "default" : false,
+         "description" : "Application for stressing a streaming server",
+         "externSeekGenerator" : false,
+         "generateMetaFiles" : false,
+         "initApplicationFunction" : "GetApplication_stresstest",
+         "initFactoryFunction" : "GetFactory_stresstest",
+         "keyframeSeek" : false,
+         "library" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/stresstest/libstresstest.so",
+         "mediaFolder" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/stresstest/media/",
+         "name" : "stresstest",
+         "numberOfConnections" : 10,
+         "protocol" : "dynamiclinklibrary",
+         "randomAccessStreams" : false,
+         "renameBadFiles" : false,
+         "rtcpDetectionInterval" : 10,
+         "seekGranularity" : 1,
+         "streams" : [
+            "mp4:lg.mp4"
+         ],
+         "targetApp" : "vod",
+         "targetServer" : "localhost",
+         "validateHandshake" : true
+      },
+      "streams" : {}
+   },
+   "vptests" : {
+      "configuration" : {
+         "acceptors" : [
+            {
+               "ip" : "0.0.0.0",
+               "port" : 1111,
+               "protocol" : "inboundHttpXmlVariant",
+               "sslCert" : "",
+               "sslKey" : ""
+            }
+         ],
+         "aliases" : [
+            "vptests_alias1",
+            "vptests_alias2",
+            "vptests_alias3"
+         ],
+         "appDir" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/vptests/",
+         "clientSideBuffer" : 5,
+         "default" : false,
+         "description" : "Variant protocol tests",
+         "externSeekGenerator" : false,
+         "generateMetaFiles" : false,
+         "initApplicationFunction" : "GetApplication_vptests",
+         "initFactoryFunction" : "GetFactory_vptests",
+         "keyframeSeek" : false,
+         "library" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/vptests/libvptests.so",
+         "mediaFolder" : "/home/andy/Works/Media/crtmpserver/builders/cmake/applications/vptests/media/",
+         "name" : "vptests",
+         "protocol" : "dynamiclinklibrary",
+         "renameBadFiles" : false,
+         "rtcpDetectionInterval" : 10,
+         "seekGranularity" : 1,
+         "validateHandshake" : false
+      },
+      "streams" : {}
+   }
+}
