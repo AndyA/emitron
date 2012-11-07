@@ -4,10 +4,11 @@ use strict;
 use warnings;
 
 use Carp qw( croak );
+use Emitron::Logger;
 use File::Spec;
+use JSON;
 use List::Util qw( min );
 use Path::Class;
-use JSON;
 
 use accessors::ro qw( root prune );
 
@@ -110,7 +111,10 @@ sub commit {
       print $fh "$rev\n";
     }
   );
-  $self->gc( $rev );
+  if ( defined $rev ) {
+    $self->gc( $rev );
+    debug "Committed change $rev";
+  }
   return $rev;
 }
 
@@ -140,10 +144,11 @@ sub remove {
 sub transaction {
   my ( $self, $cb ) = @_;
   while () {
-    my $rev   = $self->revision;
-    my $data  = $self->checkout( $rev );
+    my $rev  = $self->revision;
+    my $data = $self->checkout( $rev );
+    debug "Starting transaction";
     my $ndata = $cb->( $data, $rev );
-    my $nrev  = $self->commit( $ndata, $rev );
+    my $nrev = $self->commit( $ndata, $rev );
     return $nrev if defined $nrev;
   }
 }

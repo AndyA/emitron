@@ -27,5 +27,10 @@ $(function() {
   model.on('$.args', function() {
     $('#main').append($('<pre></pre>').text(model.getData().args.join(' '))).append($('<br></br>'));
   });
+
+  model.on('$.streams', function() {
+    console.log("Streams: ", model.getData().streams);
+  });
+
   ev.listen();
 });

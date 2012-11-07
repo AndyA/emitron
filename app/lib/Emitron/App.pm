@@ -5,6 +5,7 @@ use warnings;
 
 use Data::Dumper;
 use Emitron::CRTMPServer;
+use Emitron::Handler::Model;
 use Emitron::Logger;
 use Emitron::Message;
 use Emitron::MessageDespatcher;
@@ -34,28 +35,42 @@ sub new {
 sub run {
   my $self = shift;
   Emitron::Runner->new(
-    workers    => $self->make_workers,
+    workers    => $self->make_workers( $self->make_handlers ),
     post_event => $self->make_event_cleanup
   )->run;
 }
 
-sub make_workers {
+sub make_handlers {
   my $self = shift;
-  my @w    = ();
+  return ( Emitron::Handler::Model->new( model => $self->model ) );
+}
+
+sub make_workers {
+  my ( $self, @handlers ) = @_;
+  my @w = ();
+
   push @w, Emitron::Worker::EventWatcher->new( queue => $self->queue );
+
   push @w,
    Emitron::Worker::CRTMPServerWatcher->new(
-    uri => 'http://localhost:6502' );
+    uri     => 'http://localhost:6502',
+    verb    => 'listStreams',
+    backoff => Emitron::BackOff->new( base => 1, max => 10 )
+   );
+
   my $desp = Emitron::MessageDespatcher->new;
-  $desp->on(
-    model => sub {
-      debug "Model update: ", @_;
-    }
-  );
+  $_->subscribe( $desp ) for @handlers;
+
   for ( 1 .. 5 ) {
     push @w, Emitron::Worker::Drone->new( despatcher => $desp );
   }
   return \@w;
+}
+
+sub model {
+  my $self = shift;
+  return $self->{model}
+   ||= Emitron::Model::Watched->new( root => MODEL, prune => 50 )->init;
 }
 
 sub queue {

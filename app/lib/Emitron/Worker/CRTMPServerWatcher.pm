@@ -9,7 +9,7 @@ use JSON;
 
 use base qw( Emitron::Worker::Base );
 
-use accessors::ro qw( uri );
+use accessors::ro qw( uri verb backoff );
 
 =head1 NAME
 
@@ -22,26 +22,25 @@ sub run {
 
   my $prev = undef;
   my $srv = Emitron::CRTMPServer->new( uri => 'http://localhost:6502' );
-  my $bo = Emitron::BackOff->new( base => 1, max => 10 );
 
   while () {
-    my $streams = eval { $srv->api( 'listStreams' ) };
+    my $streams = eval { $srv->api( $self->verb ) };
     if ( my $err = $@ ) {
       error $err;
-      sleep $bo->bad;
+      sleep $self->backoff->bad;
     }
     elsif ( $streams ) {
       my $next = encode_json $streams;
       unless ( defined $prev && $prev eq $next ) {
         $self->post_message(
-          model => {
-            path => '$.ms.streams',
+          crtmpserver => {
+            verb => $self->verb,
             data => $streams,
           }
         );
         $prev = $next;
       }
-      sleep $bo->good;
+      sleep $self->backoff->good;
     }
   }
 }
