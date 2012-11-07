@@ -46,7 +46,7 @@ sub level {
 }
 
 sub _ts {
-  my $now = shift // Time::HiRes::time;
+  my $now = shift || Time::HiRes::time;
   return join '.', ( strftime '%Y/%m/%d %H:%M:%S', gmtime( $now ) ),
    sprintf( '%06d', $now * 1_000_000 % 1_000_000 );
 }
@@ -62,8 +62,8 @@ sub _mention {
   return if $level > $LOGLEVEL;
   my $msg = join '', map { ref $_ ? _dd( $_ ) : $_ } @_;
   my $ts = _ts;
-  print color $LOGCOLOUR[$level] // 'white';
-  print "$ts: $_\n" for split /\n/, $msg;
+  print color $LOGCOLOUR[$level] || 'white';
+  print "$ts [$$] $_\n" for split /\n/, $msg;
   print color 'reset';
 }
 

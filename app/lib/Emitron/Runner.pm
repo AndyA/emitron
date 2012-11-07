@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Carp qw( croak );
+use Emitron::Logger;
 use Emitron::Message;
 use Emitron::Worker;
 use IO::Handle;
@@ -77,10 +78,10 @@ sub run {
       }
     }
 
-    print join( ', ',
+    debug 'Worker status: ',
+     join( ', ',
       map { sprintf "%s: %s", $_->pid, $_->state }
-      sort { $a->pid <=> $b->pid } map { $_->{wrk} } values %$active ),
-     "\n";
+      sort { $a->pid <=> $b->pid } map { $_->{wrk} } values %$active );
 
     my @ready = grep { $_->{wrk}->is_ready } values %$active;
     while ( @ready && @$mq ) {

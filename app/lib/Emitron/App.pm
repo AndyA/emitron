@@ -6,6 +6,7 @@ use warnings;
 use Data::Dumper;
 use Emitron::BackOff;
 use Emitron::CRTMPServer;
+use Emitron::Logger;
 use Emitron::Message;
 use Emitron::Model::Watched;
 use Emitron::Runner;
@@ -98,7 +99,7 @@ sub make_crtmpserver_watcher {
     while () {
       my $streams = eval { $srv->api( 'listStreams' ) };
       if ( my $err = $@ ) {
-        print "$err\n";
+        error $err;
         sleep $bo->bad;
       }
       elsif ( $streams ) {
@@ -123,11 +124,8 @@ sub make_worker {
   return sub {
     my ( $get, $wtr ) = @_;
     while ( my $msg = $get->() ) {
-      my $data = $msg->msg;
-      print "[$$] ", Dumper( $data );
-      sleep 5;
-      print "[$$] Done\n";
-      #      Emitron::Message->new( message => $data )->send( $wtr );
+      info 'Got message, type: ', $msg->type, ', source: ',
+       $msg->source, ', msg: ', $msg->msg;
     }
   };
 }

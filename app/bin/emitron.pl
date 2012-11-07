@@ -7,6 +7,9 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 
 use Emitron::App;
+use Emitron::Logger;
+
+Emitron::Logger->level( Emitron::Logger->DEBUG );
 
 Emitron::App->new->run;
 
