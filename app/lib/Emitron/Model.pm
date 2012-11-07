@@ -7,7 +7,7 @@ use Carp qw( croak );
 use File::Spec;
 use List::Util qw( min );
 use Path::Class;
-use Storable;
+use JSON;
 
 use accessors::ro qw( root prune );
 
@@ -26,7 +26,7 @@ sub _obj_name { file( shift->root, @_ ) }
 
 sub _index { shift->_obj_name( 'index' ) }
 
-sub _stash { shift->_obj_name( "r$_[0]" ) }
+sub _stash { shift->_obj_name( "r$_[0].json" ) }
 
 sub init {
   my $self = shift;
@@ -58,7 +58,7 @@ sub gc {
   my $min  = $rev - $prune;
   my $root = $self->root;
   my @dbf  = map { File::Spec->catfile( $root, $_ ) }
-   grep { /^r(\d+)$/ && $1 < $min } do {
+   grep { /^r(\d+)\.json$/ && $1 < $min } do {
     opendir my $dir, $root
      or croak "Can't open $root: $!";
     readdir $dir;
@@ -70,12 +70,29 @@ sub earliest {
   my $self = shift;
   my $root = $self->root;
   my @dbf
-   = sort { $a <=> $b } map { /(\d+)/, $1 } grep { /^r\d+$/ } do {
+   = sort { $a <=> $b } map { /(\d+)/, $1 } grep { /^r\d+\.json$/ } do {
     opendir my $dir, $root
      or croak "Can't open $root: $!";
     readdir $dir;
    };
   return shift @dbf;
+}
+
+sub _store {
+  my ( $self, $file, $data ) = @_;
+  open my $fh, '>', $file or croak "Failed to write $file: $!";
+  print $fh encode_json( $data );
+}
+
+sub _retrieve {
+  my ( $self, $file ) = @_;
+  return decode_json(
+    do {
+      local $/;
+      open my $fh, '<', $file or croak "Failed to read $file: $!";
+      <$fh>;
+     }
+  );
 }
 
 sub commit {
@@ -88,7 +105,7 @@ sub commit {
       $rev ||= 0;
       if ( defined $expect && $expect != $rev ) { undef $rev; return }
       my $stash = $self->_stash( ++$rev );
-      store $data, $stash or croak "Failed to write $stash: $!";
+      $self->_store( $stash, $data );
       seek $fh, 0, 0;
       print $fh "$rev\n";
     }
@@ -103,7 +120,7 @@ sub checkout {
   return if $rev <= 0 || $rev > $now;
   my $stash = $self->_stash( $rev );
   return unless -f $stash;
-  return retrieve $stash or croak "Failed to read $stash: $!";
+  return $self->_retrieve( $stash );
 }
 
 sub revision {
