@@ -58,10 +58,17 @@ sub _munge_streams {
       my $rec = $stms->{$stm};
       $rec->{name}        = $stm;
       $rec->{application} = $app;
+      $rec->{preview}     = $self->_preview_url( $stm );
       $out->{$stm}        = $rec;
     }
   }
   return $out;
+}
+
+sub _preview_url {
+  my ( $self, $name ) = @_;
+  # TODO hardwired for now
+  return 'rtmp://newstream.fenkle/live/' . $name;
 }
 
 1;
