@@ -60,11 +60,11 @@ sub _dd {
 sub _mention {
   my $level = shift;
   return if $level > $LOGLEVEL;
-  my $msg = join '', map { ref $_ ? _dd( $_ ) : $_ } @_;
-  my $ts = _ts;
-  print color $LOGCOLOUR[$level] || 'white';
-  print "$ts [$$] $_\n" for split /\n/, $msg;
-  print color 'reset';
+  my $msg  = join '', map { ref $_ ? _dd( $_ ) : $_ } @_;
+  my $ts   = _ts;
+  my $attr = $LOGCOLOUR[$level] || 'white';
+
+  print colored( "$ts [$$] $_", $attr ), "\n" for split /\n/, $msg;
 }
 
 1;
