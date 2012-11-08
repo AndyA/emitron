@@ -35,6 +35,8 @@ JSONTrigger.prototype = (function() {
       for (i = 0; i < jp.length; i++) {
         var pp = jp[i];
         var path = this.patchPath(pp);
+        // TODO if we're adding an object we should walk
+        // into it expanding any paths it contains
         for (var j = 0; j < hh.length; j++) {
           var h = hh[j];
           var m = h.pp.match(path);
