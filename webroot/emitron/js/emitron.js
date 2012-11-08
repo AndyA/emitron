@@ -29,7 +29,9 @@ $(function() {
   });
 
   model.on('$.streams', function() {
-    console.log("Streams: ", model.getData().streams);
+    model.each('$.streams.*', function(path, data) {
+      console.log(path, ": ", data);
+    });
   });
 
   ev.listen();

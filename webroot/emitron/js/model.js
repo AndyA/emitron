@@ -12,6 +12,9 @@ Model.prototype = {
     this.t.setData(this.visitor);
     if (prev) this.t.trigger(new JSONDiff().diff(prev.getData(), data));
   },
+  each: function(path, cb) {
+    this.visitor.each(path, cb);
+  },
   getData: function() {
     return this.visitor.getData();
   },

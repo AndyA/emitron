@@ -22,19 +22,46 @@ sub subscribe {
     crtmpserver => sub {
       my $ev = shift;
       debug "Media server update: ", $ev;
-      my $msg = $ev->msg;
-
-      # Quick and a little dirty
-      $self->model->transaction(
-        sub {
-          my ( $data, $rev ) = @_;
-          $data->{streams} = $msg->{data};
-          return $data;
-        }
-      );
-
+      $self->despatch( $ev->msg );
     }
   );
+}
+
+sub despatch {
+  my ( $self, $msg ) = @_;
+  $self->handle( $msg->{verb} )->( $self, $msg->{data} );
+}
+
+sub _handle_UNKNOWN {
+  my ( $self, $data ) = @_;
+}
+
+sub _handle_listStreams {
+  my ( $self, $data ) = @_;
+
+  # Quick and a little dirty
+  $self->model->transaction(
+    sub {
+      my ( $model, $rev ) = @_;
+      $model->{streams} = $self->_munge_streams( $data );
+      return $model;
+    }
+  );
+}
+
+sub _munge_streams {
+  my ( $self, $data ) = @_;
+  my $out = {};
+  for my $app ( keys %$data ) {
+    my $stms = $data->{$app}->{streams} || {};
+    for my $stm ( keys %$stms ) {
+      my $rec = $stms->{$stm};
+      $rec->{name}        = $stm;
+      $rec->{application} = $app;
+      $out->{$stm}        = $rec;
+    }
+  }
+  return $out;
 }
 
 1;
