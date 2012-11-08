@@ -28,7 +28,9 @@ $(function() {
     $('#main').append($('<pre></pre>').text(model.getData().args.join(' '))).append($('<br></br>'));
   });
 
-  model.on('$.streams', function() {
+  model.on('$.streams', function(path, delta) {
+    console.log('path: ', path);
+    console.log('delta: ', delta);
     model.each('$.streams.*', function(path, data) {
       console.log(path, ": ", data);
     });
