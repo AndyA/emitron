@@ -326,9 +326,9 @@ function JSONVisitor(data) {
   };
 }
 
-JSONVisitor.bless = function(path) {
-  if (path instanceof JSONVisitor) return path;
-  return new JSONVisitor(path);
+JSONVisitor.bless = function(data) {
+  if (data instanceof JSONVisitor) return data;
+  return new JSONVisitor(data);
 }
 
 JSONVisitor.prototype = {
