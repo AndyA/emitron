@@ -260,11 +260,14 @@ JSONPath.parse = (function() {
     return mkMulti(pp);
   }
 
-  return function(path) {
-    var tokr = JSONPath.toker(path);
+  function parseDotDot(tokr) {
+    throw "Don't handle ..";
+  }
+
+  function parsePath(tokr) {
+    var pp = [];
     var t = tokr();
     if (!t) throw "Empty path";
-    var pp = [];
     while (t) {
       switch (t.t) {
       case 'lit':
@@ -274,9 +277,13 @@ JSONPath.parse = (function() {
         pp.push(mkAny(t));
         break;
       case 'dot':
+        // do nothing
         break;
       case 'lb':
         pp.push(parseBrackets(tokr));
+        break;
+      case 'dotdot':
+        pp.push(parseDotDot(tokr));
         break;
       default:
         throw "Syntax error";
@@ -284,6 +291,11 @@ JSONPath.parse = (function() {
       t = tokr();
     }
     return pp;
+  }
+
+  return function(path) {
+    var tokr = JSONPath.toker(path);
+    return parsePath(tokr);
   }
 })();
 
