@@ -4,6 +4,16 @@ TestData.data = {};
 TestData.cacheBust = new Date().getTime();
 
 TestData.withData = function(url, cb) {
+  var octo = url.indexOf('#');
+  if (octo >= 0) {
+    var frag = url.substr(octo + 1);
+    url = url.substr(0, octo);
+    var ocb = cb;
+    cb = function(data) {
+      ocb(data[frag]);
+    }
+  }
+
   function callback(data) {
     // Clone data
     cb($.extend(true, (data instanceof Array ? [] : {}), data));
