@@ -12,6 +12,33 @@ JSONTrigger.prototype = (function() {
     return k;
   }
 
+  function visit(obj, cb, path) {
+    if (obj == null) return;
+    if (!path) path = ['$'];
+
+    if (obj instanceof Array) {
+      for (var i = 0; i < obj.length; i++) {
+        path.push(i);
+        visit(obj[i], cb, path);
+        path.pop();
+      }
+      return;
+    }
+
+    if (obj.substring || obj.toFixed) {
+      cb(path.join('.'), obj);
+      return;
+    }
+
+    for (var i in obj) {
+      if (obj.hasOwnProperty(i)) {
+        path.push(i);
+        visit(obj[i], cb, path);
+        path.pop();
+      }
+    }
+  }
+
   var $super = JSONPatch.prototype;
 
   return $.extend(({}), $super, {
@@ -39,6 +66,20 @@ JSONTrigger.prototype = (function() {
         before: before,
         after: after
       };
+    },
+    changeList: function(jp) {
+      var cs = this.changeSet(jp);
+      var list = {};
+
+      visit(cs.before.getData(), function(path, v) {
+        list[path] = 1;
+      });
+
+      visit(cs.after.getData(), function(path, v) {
+        list[path] |= 2;
+      });
+
+      return list;
     },
     on: function(path, cb) {
       var pp = JSONPath.bless(path);

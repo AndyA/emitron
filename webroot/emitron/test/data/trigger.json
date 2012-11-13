@@ -1,4 +1,100 @@
 {
+   "changeList" : [
+      {
+         "data" : {},
+         "list" : {},
+         "name" : "Empty",
+         "patch" : []
+      },
+      {
+         "data" : {},
+         "list" : {
+            "$.foo.0" : 2,
+            "$.foo.1" : 2
+         },
+         "name" : "Add",
+         "patch" : [
+            {
+               "element" : 0,
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "Zero"
+            },
+            {
+               "element" : 1,
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "One"
+            }
+         ]
+      },
+      {
+         "data" : {
+            "bar" : {
+               "one" : "One",
+               "zero" : "Zero"
+            }
+         },
+         "list" : {
+            "$.bar.one" : 3,
+            "$.bar.zero" : 1,
+            "$.foo.0" : 2,
+            "$.foo.1" : 2
+         },
+         "name" : "Add/Remove",
+         "patch" : [
+            {
+               "element" : 0,
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "Zero"
+            },
+            {
+               "op" : "remove",
+               "path" : "$.bar.one"
+            },
+            {
+               "element" : "one",
+               "op" : "add",
+               "path" : "$.bar",
+               "value" : "Zero"
+            },
+            {
+               "op" : "remove",
+               "path" : "$.bar.zero"
+            },
+            {
+               "element" : 1,
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "One"
+            }
+         ]
+      },
+      {
+         "data" : {
+            "foo" : {
+               "one" : "One",
+               "zero" : "Zero"
+            }
+         },
+         "list" : {
+            "$.foo.one" : 1,
+            "$.foo.zero" : 1
+         },
+         "name" : "Remove",
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo.one"
+            },
+            {
+               "op" : "remove",
+               "path" : "$.foo.zero"
+            }
+         ]
+      }
+   ],
    "changeSet" : [
       {
          "after" : {},

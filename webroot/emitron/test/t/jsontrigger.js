@@ -47,3 +47,9 @@ dataDrivenTest("changeSet", 'data/trigger.json#changeSet', function(tc) {
   deepEqual(cs.before.getData(), tc.before, tc.name + ": before");
   deepEqual(cs.after.getData(), tc.after, tc.name + ": after");
 });
+
+dataDrivenTest("changeList", 'data/trigger.json#changeList', function(tc) {
+  var jt = new JSONTrigger(tc.data);
+  var list = jt.changeList(tc.patch);
+  deepEqual(list, tc.list, tc.name + ": list");
+});
