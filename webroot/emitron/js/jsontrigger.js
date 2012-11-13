@@ -21,27 +21,23 @@ JSONTrigger.prototype = (function() {
     changeSet: function(jp) {
       var before = new JSONVisitor({});
       var after = new JSONVisitor({});
-      var union = new JSONVisitor({});
       for (var i = 0; i < jp.length; i++) {
         var pp = jp[i];
         var path = this.patchPath(pp);
         switch (pp.op) {
         case "add":
           after.set(path, pp.value);
-          union.set(path, pp.value);
           break;
         case "remove":
           this.p.each(path, function(p, v, c, k) {
             before.set(p, v);
-            union.set(p, v);
           });
           break;
         }
       }
       return {
         before: before,
-        after: after,
-        union: union
+        after: after
       };
     },
     on: function(path, cb) {

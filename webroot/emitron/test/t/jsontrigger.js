@@ -46,5 +46,4 @@ dataDrivenTest("changeSet", 'data/trigger.json#changeSet', function(tc) {
   var cs = jt.changeSet(tc.patch);
   deepEqual(cs.before.getData(), tc.before, tc.name + ": before");
   deepEqual(cs.after.getData(), tc.after, tc.name + ": after");
-  deepEqual(cs.union.getData(), tc.union, tc.name + ": union");
 });
