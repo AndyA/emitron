@@ -335,42 +335,62 @@ JSONVisitor.prototype = {
   getData: function() {
     return this.data['$'];
   },
-  iter: function(path) {
+  iter: function(path, autoviv) {
     var p = JSONPath.bless(path).getPath();
     var pi = [];
-    var pv = [];
+    var pk = [];
     var pd = [this.data];
     var ipos = 0;
     var vpos = 0;
-    var v;
+    var k;
+
+    function isEmpty(obj) {
+      if (obj instanceof Array) return false;
+      for (var k in obj) if (obj.hasOwnProperty(k)) return false;
+      return true;
+    }
+
     return function() {
       while (vpos < p.length) {
         while (ipos <= vpos) {
           pi[ipos] = p[ipos].iter(pd[ipos]);
           ipos++;
         }
-        v = pi[vpos]();
-        if (v === null) {
+        k = pi[vpos]();
+        if (k === null) {
           if (vpos == 0) return null;
           ipos = vpos--;
         }
         else {
           if (pd[vpos] == null) return null;
-          pv[vpos++] = v;
-          pd[vpos] = pd[vpos - 1][v];
+          pk[vpos++] = k;
+          pd[vpos] = pd[vpos - 1][k];
+          if (autoviv && pd[vpos] == null) {
+            if (/^\d+$/.test(k) && isEmpty(pd[vpos - 1])) {
+              // Convert empty parent to array
+              pd[vpos - 1] = pd[vpos - 2][pk[vpos - 2]] = [];
+            }
+            if (vpos < p.length) pd[vpos] = pd[vpos - 1][k] = {};
+          }
         }
       }
-      var key = pv[vpos - 1];
+      var key = pk[vpos - 1];
       var ctx = pd[vpos - 1];
       if (ctx instanceof Array) key *= 1;
       // path, value, context, key
-      var rv = [pv.join('.'), pd[vpos], ctx, key];
+      var rv = [pk.join('.'), pd[vpos], ctx, key];
       vpos--;
       return rv;
     }
   },
-  each: function(path, cb) {
-    var ii = this.iter(path);
+  each: function(path, cb, autoviv) {
+    var ii = this.iter(path, autoviv);
     for (var i = ii(); i !== null; i = ii()) cb.apply(this, i);
+  },
+  set: function(path, value) {
+    this.each(path, function(k, v, ctx, key) {
+      ctx[key] = value;
+    },
+    true);
   }
 }

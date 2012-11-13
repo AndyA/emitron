@@ -166,6 +166,70 @@
          "want" : []
       }
    ],
+   "set" : [
+      {
+         "data" : {},
+         "name" : "simple",
+         "path" : "$.foo.0",
+         "value" : "Hello!",
+         "want" : {
+            "foo" : [
+               "Hello!"
+            ]
+         }
+      },
+      {
+         "data" : {},
+         "name" : "alternation",
+         "path" : "$[foo,bar,baz].b0rk[a,b,c]",
+         "value" : "Hello!",
+         "want" : {
+            "bar" : {
+               "b0rk" : {
+                  "a" : "Hello!",
+                  "b" : "Hello!",
+                  "c" : "Hello!"
+               }
+            },
+            "baz" : {
+               "b0rk" : {
+                  "a" : "Hello!",
+                  "b" : "Hello!",
+                  "c" : "Hello!"
+               }
+            },
+            "foo" : {
+               "b0rk" : {
+                  "a" : "Hello!",
+                  "b" : "Hello!",
+                  "c" : "Hello!"
+               }
+            }
+         }
+      },
+      {
+         "data" : {},
+         "name" : "slice",
+         "path" : "$.sparse[0:4].0",
+         "value" : "Bang!",
+         "want" : {
+            "sparse" : [
+               [
+                  "Bang!"
+               ],
+               [
+                  "Bang!"
+               ],
+               [
+                  "Bang!"
+               ],
+               [
+                  "Bang!"
+               ]
+            ]
+         }
+      }
+   ],
    "toker" : [
       {
          "path" : "$",
@@ -371,6 +435,51 @@
                "t" : "str"
             }
          ]
+      }
+   ],
+   "vivify" : [
+      {
+         "data" : {},
+         "name" : "simple",
+         "path" : "$.foo.0",
+         "want" : {
+            "foo" : []
+         }
+      },
+      {
+         "data" : {},
+         "name" : "root array",
+         "path" : "$.0",
+         "want" : []
+      },
+      {
+         "data" : {},
+         "name" : "alternation",
+         "path" : "$[foo,bar,baz].b0rk[a,b,c]",
+         "want" : {
+            "bar" : {
+               "b0rk" : {}
+            },
+            "baz" : {
+               "b0rk" : {}
+            },
+            "foo" : {
+               "b0rk" : {}
+            }
+         }
+      },
+      {
+         "data" : {},
+         "name" : "slice",
+         "path" : "$.sparse[0:4].0",
+         "want" : {
+            "sparse" : [
+               [],
+               [],
+               [],
+               []
+            ]
+         }
       }
    ]
 }

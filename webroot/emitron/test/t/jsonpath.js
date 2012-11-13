@@ -48,6 +48,19 @@ dataDrivenTest("iter", "data/path.json#iter", function(tc) {
   deepEqual(ii(), null, tc.name + ": iter exhausted");
 });
 
+dataDrivenTest("vivify", "data/path.json#vivify", function(tc) {
+  var p = new JSONVisitor(tc.data);
+  var ii = p.iter(tc.path, true);
+  while (ii()); // drain
+  deepEqual(p.getData(), tc.want, tc.name + ": vivified");
+});
+
+dataDrivenTest("set", "data/path.json#set", function(tc) {
+  var p = new JSONVisitor(tc.data);
+  p.set(tc.path, tc.value);
+  deepEqual(p.getData(), tc.want, tc.name + ": set");
+});
+
 dataDrivenTest("each", "data/path.json#each", function(tc) {
   var rec = new Recorder();
   var p = new JSONVisitor(tc. in );
