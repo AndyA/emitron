@@ -5,7 +5,8 @@
          "before" : {},
          "data" : {},
          "name" : "Empty",
-         "patch" : []
+         "patch" : [],
+         "union" : {}
       },
       {
          "after" : {
@@ -30,7 +31,13 @@
                "path" : "$.foo",
                "value" : "One"
             }
-         ]
+         ],
+         "union" : {
+            "foo" : [
+               "Zero",
+               "One"
+            ]
+         }
       },
       {
          "after" : {},
@@ -56,7 +63,13 @@
                "op" : "remove",
                "path" : "$.foo.zero"
             }
-         ]
+         ],
+         "union" : {
+            "foo" : {
+               "one" : "One",
+               "zero" : "Zero"
+            }
+         }
       }
    ],
    "trigger" : [
