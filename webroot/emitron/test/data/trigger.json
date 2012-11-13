@@ -1,5 +1,5 @@
 {
-   "changeList" : [
+   "changeSet" : [
       {
          "data" : {},
          "list" : {},
@@ -9,109 +9,11 @@
       {
          "data" : {},
          "list" : {
-            "$.foo.0" : 2,
-            "$.foo.1" : 2
-         },
-         "name" : "Add",
-         "patch" : [
-            {
-               "element" : 0,
-               "op" : "add",
-               "path" : "$.foo",
-               "value" : "Zero"
-            },
-            {
-               "element" : 1,
-               "op" : "add",
-               "path" : "$.foo",
-               "value" : "One"
-            }
-         ]
-      },
-      {
-         "data" : {
-            "bar" : {
-               "one" : "One",
-               "zero" : "Zero"
-            }
-         },
-         "list" : {
-            "$.bar.one" : 3,
-            "$.bar.zero" : 1,
-            "$.foo.0" : 2,
-            "$.foo.1" : 2
-         },
-         "name" : "Add/Remove",
-         "patch" : [
-            {
-               "element" : 0,
-               "op" : "add",
-               "path" : "$.foo",
-               "value" : "Zero"
-            },
-            {
-               "op" : "remove",
-               "path" : "$.bar.one"
-            },
-            {
-               "element" : "one",
-               "op" : "add",
-               "path" : "$.bar",
-               "value" : "Zero"
-            },
-            {
-               "op" : "remove",
-               "path" : "$.bar.zero"
-            },
-            {
-               "element" : 1,
-               "op" : "add",
-               "path" : "$.foo",
-               "value" : "One"
-            }
-         ]
-      },
-      {
-         "data" : {
-            "foo" : {
-               "one" : "One",
-               "zero" : "Zero"
-            }
-         },
-         "list" : {
-            "$.foo.one" : 1,
-            "$.foo.zero" : 1
-         },
-         "name" : "Remove",
-         "patch" : [
-            {
-               "op" : "remove",
-               "path" : "$.foo.one"
-            },
-            {
-               "op" : "remove",
-               "path" : "$.foo.zero"
-            }
-         ]
-      }
-   ],
-   "changeSet" : [
-      {
-         "after" : {},
-         "before" : {},
-         "data" : {},
-         "name" : "Empty",
-         "patch" : []
-      },
-      {
-         "after" : {
             "foo" : [
-               "Zero",
-               "One"
+               2,
+               2
             ]
          },
-         "before" : {},
-         "data" : {},
          "name" : "Add",
          "patch" : [
             {
@@ -129,17 +31,16 @@
          ]
       },
       {
-         "after" : {},
-         "before" : {
+         "data" : {
             "foo" : {
                "one" : "One",
                "zero" : "Zero"
             }
          },
-         "data" : {
+         "list" : {
             "foo" : {
-               "one" : "One",
-               "zero" : "Zero"
+               "one" : 1,
+               "zero" : 1
             }
          },
          "name" : "Remove",
@@ -151,6 +52,52 @@
             {
                "op" : "remove",
                "path" : "$.foo.zero"
+            }
+         ]
+      },
+      {
+         "data" : {
+            "foo" : {
+               "one" : "One",
+               "zero" : "Zero"
+            }
+         },
+         "list" : {
+            "foo" : {
+               "one" : 1,
+               "zero" : 3
+            }
+         },
+         "name" : "Remove/Add",
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo.one"
+            },
+            {
+               "op" : "remove",
+               "path" : "$.foo.zero"
+            },
+            {
+               "element" : "zero",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : 0
+            }
+         ]
+      },
+      {
+         "data" : {},
+         "list" : {
+            "streams" : 2
+         },
+         "name" : "Remove",
+         "patch" : [
+            {
+               "element" : "streams",
+               "op" : "add",
+               "path" : "$",
+               "value" : {}
             }
          ]
       }
@@ -179,9 +126,7 @@
          "want" : [
             [
                "$.foo",
-               [
-                  ""
-               ]
+               3
             ]
          ]
       },
@@ -236,17 +181,11 @@
          "want" : [
             [
                "$.foo",
-               [
-                  "desc",
-                  "state"
-               ]
+               3
             ],
             [
                "$.bar",
-               [
-                  "0",
-                  "5"
-               ]
+               2
             ]
          ]
       }

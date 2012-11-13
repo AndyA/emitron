@@ -13,6 +13,7 @@ JSONTrigger.prototype = (function() {
   }
 
   function visit(obj, cb, path) {
+    var empty = true;
     if (obj == null) return;
     if (!path) path = ['$'];
 
@@ -35,8 +36,18 @@ JSONTrigger.prototype = (function() {
         path.push(i);
         visit(obj[i], cb, path);
         path.pop();
+        empty = false;
       }
     }
+
+    if (empty) cb(path.join('.'), obj);
+  }
+
+  function setBit(v, path, bit) {
+    v.each(path, function(p, v, ctx, key) {
+      ctx[key] |= bit;
+    },
+    true);
   }
 
   var $super = JSONPatch.prototype;
@@ -46,39 +57,27 @@ JSONTrigger.prototype = (function() {
     // to be integrated with the patch code - cos correct intepretation
     // of array changes needs the array to be mutated.
     changeSet: function(jp) {
-      var before = new JSONVisitor({});
-      var after = new JSONVisitor({});
+      var list = new JSONVisitor({});
       for (var i = 0; i < jp.length; i++) {
         var pp = jp[i];
         var path = this.patchPath(pp);
         switch (pp.op) {
         case "add":
-          after.set(path, pp.value);
+          visit(pp.value, function(pa, val) {
+            setBit(list, pa, 2);
+          },
+          [path]);
           break;
         case "remove":
           this.p.each(path, function(p, v, c, k) {
-            before.set(p, v);
+            visit(v, function(pa, val) {
+              setBit(list, pa, 1);
+            },
+            [path]);
           });
           break;
         }
       }
-      return {
-        before: before,
-        after: after
-      };
-    },
-    changeList: function(jp) {
-      var cs = this.changeSet(jp);
-      var list = {};
-
-      visit(cs.before.getData(), function(path, v) {
-        list[path] = 1;
-      });
-
-      visit(cs.after.getData(), function(path, v) {
-        list[path] |= 2;
-      });
-
       return list;
     },
     on: function(path, cb) {
@@ -96,32 +95,28 @@ JSONTrigger.prototype = (function() {
         if (h.pp.match(path)) h.cb.apply(this, arguments);
       }
     },
+    triggerSet: function(cs) {
+      var hh = this.handler;
+
+      for (var j = 0; j < hh.length; j++) {
+        var h = hh[j];
+        cs.each(h.pp, function(path, v, c, k) {
+          var flags = 0;
+          visit(v, function(p, value) {
+            flags |= value;
+          },
+          []);
+          if (flags) h.cb.apply(this, [path, flags]);
+        });
+      }
+    },
     patch: function(jp) {
+      var cs = this.changeSet(jp);
       $super.patch.apply(this, [jp]);
-      this.trigger(jp);
+      this.triggerSet(cs);
     },
     trigger: function(jp) {
-      var hh = this.handler;
-      var hit = [];
-      for (var i = 0; i < hh.length; i++) hit[i] = {};
-      for (i = 0; i < jp.length; i++) {
-        var pp = jp[i];
-        var path = this.patchPath(pp);
-        // TODO if we're adding an object we should walk
-        // into it expanding any paths it contains
-        for (var j = 0; j < hh.length; j++) {
-          var h = hh[j];
-          var m = h.pp.match(path);
-          if (m) hit[j][m.join('.')] = true;
-        }
-      }
-      for (i = 0; i < hh.length; i++) {
-        var m = getKeys(hit[i]);
-        if (m.length) {
-          var h = hh[i];
-          h.cb.apply(this, [h.path, m]);
-        }
-      }
+      this.triggerSet(this.changeSet(jp));
     },
   });
 })();
