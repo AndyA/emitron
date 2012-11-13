@@ -40,3 +40,10 @@ function testPatch(tc) {
 
 dataDrivenTest('patch', 'data/diffpatch.json', testPatch);
 dataDrivenTest('patch (non diff data)', 'data/patchonly.json', testPatch);
+
+dataDrivenTest("changeSet", 'data/trigger.json#changeSet', function(tc) {
+  var jt = new JSONTrigger(tc.data);
+  var cs = jt.changeSet(tc.patch);
+  deepEqual(cs.before.getData(), tc.before, tc.name + ": before");
+  deepEqual(cs.after.getData(), tc.after, tc.name + ": after");
+});

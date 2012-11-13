@@ -1,4 +1,64 @@
 {
+   "changeSet" : [
+      {
+         "after" : {},
+         "before" : {},
+         "data" : {},
+         "name" : "Empty",
+         "patch" : []
+      },
+      {
+         "after" : {
+            "foo" : [
+               "Zero",
+               "One"
+            ]
+         },
+         "before" : {},
+         "data" : {},
+         "name" : "Add",
+         "patch" : [
+            {
+               "element" : 0,
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "Zero"
+            },
+            {
+               "element" : 1,
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "One"
+            }
+         ]
+      },
+      {
+         "after" : {},
+         "before" : {
+            "foo" : {
+               "one" : "One",
+               "zero" : "Zero"
+            }
+         },
+         "data" : {
+            "foo" : {
+               "one" : "One",
+               "zero" : "Zero"
+            }
+         },
+         "name" : "Remove",
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo.one"
+            },
+            {
+               "op" : "remove",
+               "path" : "$.foo.zero"
+            }
+         ]
+      }
+   ],
    "trigger" : [
       {
          "data" : {

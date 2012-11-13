@@ -15,6 +15,31 @@ JSONTrigger.prototype = (function() {
   var $super = JSONPatch.prototype;
 
   return $.extend(({}), $super, {
+    // TODO: properly modelling changes in arrays requires this code
+    // to be integrated with the patch code - cos correct intepretation
+    // of array changes needs the array to be mutated.
+    changeSet: function(jp) {
+      var before = new JSONVisitor({});
+      var after = new JSONVisitor({});
+      for (var i = 0; i < jp.length; i++) {
+        var pp = jp[i];
+        var path = this.patchPath(pp);
+        switch (pp.op) {
+        case "add":
+          after.set(path, pp.value);
+          break;
+        case "remove":
+          this.p.each(path, function(p, v, c, k) {
+            before.set(p, v);
+          });
+          break;
+        }
+      }
+      return {
+        before: before,
+        after: after
+      };
+    },
     on: function(path, cb) {
       var pp = JSONPath.bless(path);
       this.handler.push({
