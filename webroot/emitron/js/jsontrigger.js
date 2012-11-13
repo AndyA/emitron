@@ -12,7 +12,9 @@ JSONTrigger.prototype = (function() {
     return k;
   }
 
-  return $.extend(({}), JSONPatch.prototype, {
+  var $super = JSONPatch.prototype;
+
+  return $.extend(({}), $super, {
     on: function(path, cb) {
       var pp = JSONPath.bless(path);
       this.handler.push({
@@ -27,6 +29,10 @@ JSONTrigger.prototype = (function() {
         var h = hh[i];
         if (h.pp.match(path)) h.cb.apply(this, arguments);
       }
+    },
+    patch: function(jp) {
+      $super.patch.apply(this, [jp]);
+      this.trigger(jp);
     },
     trigger: function(jp) {
       var hh = this.handler;

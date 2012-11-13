@@ -18,7 +18,6 @@ Model.prototype = {
   },
   patch: function(jp) {
     this.t.patch(jp);
-    this.t.trigger(jp);
   },
   on: function(path, cb) {
     this.t.on(path, cb);

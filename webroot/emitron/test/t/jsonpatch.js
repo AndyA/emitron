@@ -32,5 +32,5 @@ function testPatch(tc) {
   deepEqual(p.getData(), tc.b, tc.name);
 }
 
-dataDrivenTest('diff', 'data/diffpatch.json', testPatch);
-dataDrivenTest('diff (non patch data)', 'data/patchonly.json', testPatch);
+dataDrivenTest('patch', 'data/diffpatch.json', testPatch);
+dataDrivenTest('patch (non diff data)', 'data/patchonly.json', testPatch);

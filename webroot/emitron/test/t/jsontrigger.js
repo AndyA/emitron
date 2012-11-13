@@ -31,3 +31,12 @@ dataDrivenTest("trigger", 'data/trigger.json', function(tc, tn) {
 {
   readOnly: true
 });
+
+function testPatch(tc) {
+  var p = new JSONTrigger(tc.a);
+  p.patch(tc.diff);
+  deepEqual(p.getData(), tc.b, tc.name);
+}
+
+dataDrivenTest('patch', 'data/diffpatch.json', testPatch);
+dataDrivenTest('patch (non diff data)', 'data/patchonly.json', testPatch);
