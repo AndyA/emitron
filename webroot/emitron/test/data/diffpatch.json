@@ -12,23 +12,23 @@
          ],
          "foo" : 1
       },
-      "name" : "Type change/hash",
       "diff" : [
          {
-            "path" : "$.bar",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.bar"
          },
          {
+            "element" : "bar",
+            "op" : "add",
+            "path" : "$",
             "value" : [
                1,
                2,
                3
-            ],
-            "path" : "$",
-            "element" : "bar",
-            "op" : "add"
+            ]
          }
-      ]
+      ],
+      "name" : "Type change/hash"
    },
    {
       "a" : {
@@ -39,19 +39,19 @@
          "bar" : "three",
          "foo" : 1
       },
-      "name" : "Hash",
       "diff" : [
          {
-            "path" : "$.bar",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.bar"
          },
          {
-            "value" : "three",
-            "path" : "$",
             "element" : "bar",
-            "op" : "add"
+            "op" : "add",
+            "path" : "$",
+            "value" : "three"
          }
-      ]
+      ],
+      "name" : "Hash"
    },
    {
       "a" : [
@@ -64,45 +64,45 @@
          3,
          2
       ],
-      "name" : "Array",
       "diff" : [
          {
-            "path" : "$.1",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.1"
          },
          {
-            "value" : 3,
-            "path" : "$",
             "element" : 1,
-            "op" : "add"
-         },
-         {
-            "path" : "$.2",
-            "op" : "remove"
-         },
-         {
-            "value" : 2,
+            "op" : "add",
             "path" : "$",
+            "value" : 3
+         },
+         {
+            "op" : "remove",
+            "path" : "$.2"
+         },
+         {
             "element" : 2,
-            "op" : "add"
+            "op" : "add",
+            "path" : "$",
+            "value" : 2
          }
-      ]
+      ],
+      "name" : "Array"
    },
    {
       "a" : "One",
       "b" : 2,
-      "name" : "Root scalar",
       "diff" : [
          {
-            "path" : "$",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$"
          },
          {
-            "value" : 2,
             "element" : "$",
-            "op" : "add"
+            "op" : "add",
+            "value" : 2
          }
-      ]
+      ],
+      "name" : "Root scalar"
    },
    {
       "a" : {},
@@ -111,17 +111,17 @@
             "Snoofus?"
          ]
       },
-      "name" : "Add key",
       "diff" : [
          {
+            "element" : "args",
+            "op" : "add",
+            "path" : "$",
             "value" : [
                "Snoofus?"
-            ],
-            "path" : "$",
-            "element" : "args",
-            "op" : "add"
+            ]
          }
-      ]
+      ],
+      "name" : "Add key"
    },
    {
       "a" : [],
@@ -135,57 +135,57 @@
          7,
          8
       ],
-      "name" : "Populate array (push)",
       "diff" : [
          {
-            "value" : 1,
-            "path" : "$",
             "element" : 0,
-            "op" : "add"
+            "op" : "add",
+            "path" : "$",
+            "value" : 1
          },
          {
-            "value" : 2,
-            "path" : "$",
             "element" : 1,
-            "op" : "add"
+            "op" : "add",
+            "path" : "$",
+            "value" : 2
          },
          {
-            "value" : 3,
-            "path" : "$",
             "element" : 2,
-            "op" : "add"
+            "op" : "add",
+            "path" : "$",
+            "value" : 3
          },
          {
-            "value" : 4,
-            "path" : "$",
             "element" : 3,
-            "op" : "add"
+            "op" : "add",
+            "path" : "$",
+            "value" : 4
          },
          {
-            "value" : 5,
-            "path" : "$",
             "element" : 4,
-            "op" : "add"
+            "op" : "add",
+            "path" : "$",
+            "value" : 5
          },
          {
-            "value" : 6,
-            "path" : "$",
             "element" : 5,
-            "op" : "add"
+            "op" : "add",
+            "path" : "$",
+            "value" : 6
          },
          {
-            "value" : 7,
-            "path" : "$",
             "element" : 6,
-            "op" : "add"
+            "op" : "add",
+            "path" : "$",
+            "value" : 7
          },
          {
-            "value" : 8,
-            "path" : "$",
             "element" : 7,
-            "op" : "add"
+            "op" : "add",
+            "path" : "$",
+            "value" : 8
          }
-      ]
+      ],
+      "name" : "Populate array (push)"
    },
    {
       "a" : [
@@ -199,41 +199,41 @@
          8
       ],
       "b" : [],
-      "name" : "Empty array (shift)",
       "diff" : [
          {
-            "path" : "$.0",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.0"
          },
          {
-            "path" : "$.0",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.0"
          },
          {
-            "path" : "$.0",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.0"
          },
          {
-            "path" : "$.0",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.0"
          },
          {
-            "path" : "$.0",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.0"
          },
          {
-            "path" : "$.0",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.0"
          },
          {
-            "path" : "$.0",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.0"
          },
          {
-            "path" : "$.0",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.0"
          }
-      ]
+      ],
+      "name" : "Empty array (shift)"
    },
    {
       "a" : {
@@ -245,16 +245,16 @@
       "b" : {
          "args" : []
       },
-      "name" : "Empty array",
       "diff" : [
          {
-            "path" : "$.args.0",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.args.0"
          },
          {
-            "path" : "$.args.0",
-            "op" : "remove"
+            "op" : "remove",
+            "path" : "$.args.0"
          }
-      ]
+      ],
+      "name" : "Empty array"
    }
 ]

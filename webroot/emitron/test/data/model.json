@@ -1,18 +1,5 @@
 [
    {
-      "want" : [
-         [
-            "$.bar",
-            [
-               ""
-            ]
-         ]
-      ],
-      "on" : [
-         "$.foo",
-         "$.bar"
-      ],
-      "name" : "Replace data",
       "data" : {
          "bar" : "Hello Again!",
          "foo" : [
@@ -21,6 +8,7 @@
             3
          ]
       },
+      "name" : "Replace data",
       "newdata" : {
          "bar" : "Hello!",
          "foo" : [
@@ -28,9 +16,50 @@
             2,
             3
          ]
-      }
+      },
+      "on" : [
+         "$.foo",
+         "$.bar"
+      ],
+      "want" : [
+         [
+            "$.bar",
+            [
+               ""
+            ]
+         ]
+      ]
    },
    {
+      "data" : {
+         "bar" : "Hello Again!",
+         "foo" : [
+            1,
+            2,
+            3
+         ]
+      },
+      "name" : "Patch data",
+      "on" : [
+         "$.foo",
+         "$.bar"
+      ],
+      "patch" : [
+         {
+            "op" : "remove",
+            "path" : "$.foo.0"
+         },
+         {
+            "op" : "remove",
+            "path" : "$.foo.0"
+         },
+         {
+            "element" : 1,
+            "op" : "add",
+            "path" : "$.foo",
+            "value" : 0
+         }
+      ],
       "want" : [
          [
             "$.foo",
@@ -39,35 +68,6 @@
                "1"
             ]
          ]
-      ],
-      "on" : [
-         "$.foo",
-         "$.bar"
-      ],
-      "name" : "Patch data",
-      "data" : {
-         "bar" : "Hello Again!",
-         "foo" : [
-            1,
-            2,
-            3
-         ]
-      },
-      "patch" : [
-         {
-            "path" : "$.foo.0",
-            "op" : "remove"
-         },
-         {
-            "path" : "$.foo.0",
-            "op" : "remove"
-         },
-         {
-            "value" : 0,
-            "path" : "$.foo",
-            "op" : "add",
-            "element" : 1
-         }
       ]
    }
 ]
