@@ -19,7 +19,7 @@ test("fire", function() {
   deepEqual(rec.getLog(), want, "fire");
 });
 
-dataDrivenTest("trigger", 'data/trigger.json', function(tc, tn) {
+dataDrivenTest("trigger", 'data/trigger.json#trigger', function(tc, tn) {
   var jt = new JSONTrigger(tc.data);
   var rec = new Recorder();
   for (var i = 0; i < tc.on.length; i++) {

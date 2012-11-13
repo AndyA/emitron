@@ -1,96 +1,98 @@
-[
-   {
-      "data" : {
-         "foo" : 1
-      },
-      "name" : "simple",
-      "on" : [
-         "$.foo"
-      ],
-      "patch" : [
-         {
-            "op" : "remove",
-            "path" : "$.foo"
+{
+   "trigger" : [
+      {
+         "data" : {
+            "foo" : 1
          },
-         {
-            "element" : "foo",
-            "op" : "add",
-            "path" : "$",
-            "value" : 2
-         }
-      ],
-      "want" : [
-         [
-            "$.foo",
+         "name" : "simple",
+         "on" : [
+            "$.foo"
+         ],
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo"
+            },
+            {
+               "element" : "foo",
+               "op" : "add",
+               "path" : "$",
+               "value" : 2
+            }
+         ],
+         "want" : [
             [
-               ""
+               "$.foo",
+               [
+                  ""
+               ]
             ]
          ]
-      ]
-   },
-   {
-      "data" : {
-         "bar" : [
-            1,
-            2,
-            3,
-            4,
-            5
-         ],
-         "foo" : {
-            "desc" : "An object"
-         }
       },
-      "name" : "multi match",
-      "on" : [
-         "$.foo",
-         "$.bar"
-      ],
-      "patch" : [
-         {
-            "element" : 5,
-            "op" : "add",
-            "path" : "$.bar",
-            "value" : "six"
+      {
+         "data" : {
+            "bar" : [
+               1,
+               2,
+               3,
+               4,
+               5
+            ],
+            "foo" : {
+               "desc" : "An object"
+            }
          },
-         {
-            "op" : "remove",
-            "path" : "$.foo.desc"
-         },
-         {
-            "element" : "desc",
-            "op" : "add",
-            "path" : "$.foo",
-            "value" : "Or maybe not"
-         },
-         {
-            "element" : "state",
-            "op" : "add",
-            "path" : "$.foo",
-            "value" : "uncertain"
-         },
-         {
-            "element" : 0,
-            "op" : "add",
-            "path" : "$.bar",
-            "value" : "zero"
-         }
-      ],
-      "want" : [
-         [
+         "name" : "multi match",
+         "on" : [
             "$.foo",
-            [
-               "desc",
-               "state"
-            ]
+            "$.bar"
          ],
-         [
-            "$.bar",
+         "patch" : [
+            {
+               "element" : 5,
+               "op" : "add",
+               "path" : "$.bar",
+               "value" : "six"
+            },
+            {
+               "op" : "remove",
+               "path" : "$.foo.desc"
+            },
+            {
+               "element" : "desc",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "Or maybe not"
+            },
+            {
+               "element" : "state",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "uncertain"
+            },
+            {
+               "element" : 0,
+               "op" : "add",
+               "path" : "$.bar",
+               "value" : "zero"
+            }
+         ],
+         "want" : [
             [
-               "0",
-               "5"
+               "$.foo",
+               [
+                  "desc",
+                  "state"
+               ]
+            ],
+            [
+               "$.bar",
+               [
+                  "0",
+                  "5"
+               ]
             ]
          ]
-      ]
-   }
-]
+      }
+   ]
+}
