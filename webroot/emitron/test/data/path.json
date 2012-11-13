@@ -1,0 +1,376 @@
+{
+   "each" : [
+      {
+         "in" : {
+            "name" : "sequence",
+            "seq" : [
+               "first",
+               {
+                  "index" : 2
+               },
+               3
+            ]
+         },
+         "name" : "Simple concrete path",
+         "path" : "$.seq.0",
+         "want" : [
+            "$.seq.0"
+         ]
+      },
+      {
+         "in" : {
+            "name" : "sequence",
+            "seq" : [
+               "first",
+               {
+                  "index" : 2
+               },
+               3
+            ]
+         },
+         "name" : "Complex concrete path",
+         "path" : "$['seq'][0]",
+         "want" : [
+            "$.seq.0"
+         ]
+      }
+   ],
+   "iter" : [
+      {
+         "data" : {},
+         "name" : "Root only",
+         "path" : "$",
+         "want" : [
+            "$"
+         ]
+      },
+      {
+         "data" : [],
+         "name" : "Slice",
+         "path" : "$[0:3]",
+         "want" : [
+            "$.0",
+            "$.1",
+            "$.2"
+         ]
+      },
+      {
+         "data" : {
+            "bar" : 2,
+            "baz" : 3,
+            "foo" : 1
+         },
+         "name" : "Wildcard",
+         "path" : "$[*]",
+         "want" : [
+            "$.bar",
+            "$.baz",
+            "$.foo"
+         ]
+      },
+      {
+         "data" : {
+            "bar" : [],
+            "baz" : [],
+            "foo" : []
+         },
+         "name" : "Wildcard, slice, sequence",
+         "path" : "$[*][0:4,10:20:2,99]",
+         "want" : [
+            "$.bar.0",
+            "$.bar.1",
+            "$.bar.2",
+            "$.bar.3",
+            "$.bar.10",
+            "$.bar.12",
+            "$.bar.14",
+            "$.bar.16",
+            "$.bar.18",
+            "$.bar.99",
+            "$.baz.0",
+            "$.baz.1",
+            "$.baz.2",
+            "$.baz.3",
+            "$.baz.10",
+            "$.baz.12",
+            "$.baz.14",
+            "$.baz.16",
+            "$.baz.18",
+            "$.baz.99",
+            "$.foo.0",
+            "$.foo.1",
+            "$.foo.2",
+            "$.foo.3",
+            "$.foo.10",
+            "$.foo.12",
+            "$.foo.14",
+            "$.foo.16",
+            "$.foo.18",
+            "$.foo.99"
+         ]
+      },
+      {
+         "data" : {
+            "foo" : 1
+         },
+         "name" : "Missing key",
+         "path" : "$.bar",
+         "want" : [
+            "$.bar"
+         ]
+      },
+      {
+         "data" : {},
+         "name" : "Deeply missing",
+         "path" : "$.foo.bar",
+         "want" : []
+      }
+   ],
+   "match" : [
+      {
+         "name" : "Exact",
+         "path" : "$.a.b",
+         "test" : "$.a.b",
+         "want" : []
+      },
+      {
+         "name" : "Submatch",
+         "path" : "$.a.b",
+         "test" : "$.a.b.c",
+         "want" : [
+            "c"
+         ]
+      },
+      {
+         "name" : "Slice",
+         "path" : "$[4:12:3]",
+         "test" : "$.7",
+         "want" : []
+      },
+      {
+         "name" : "Slice miss",
+         "path" : "$[4:12:3]",
+         "test" : "$.6",
+         "want" : null
+      },
+      {
+         "name" : "Slice outside range",
+         "path" : "$[4:12:3]",
+         "test" : "$.13",
+         "want" : null
+      },
+      {
+         "name" : "Alternation",
+         "path" : "$[\"foo\",\"bar\"]",
+         "test" : "$.bar",
+         "want" : []
+      }
+   ],
+   "toker" : [
+      {
+         "path" : "$",
+         "want" : [
+            {
+               "m" : [
+                  "$",
+                  "$"
+               ],
+               "t" : "lit"
+            }
+         ]
+      },
+      {
+         "path" : "foo",
+         "want" : [
+            {
+               "m" : [
+                  "foo",
+                  "foo"
+               ],
+               "t" : "lit"
+            }
+         ]
+      },
+      {
+         "path" : "$.foo",
+         "want" : [
+            {
+               "m" : [
+                  "$",
+                  "$"
+               ],
+               "t" : "lit"
+            },
+            {
+               "m" : [
+                  "."
+               ],
+               "t" : "dot"
+            },
+            {
+               "m" : [
+                  "foo",
+                  "foo"
+               ],
+               "t" : "lit"
+            }
+         ]
+      },
+      {
+         "path" : "$['root'][0][\"leaf\"]",
+         "want" : [
+            {
+               "m" : [
+                  "$",
+                  "$"
+               ],
+               "t" : "lit"
+            },
+            {
+               "m" : [
+                  "["
+               ],
+               "t" : "lb"
+            },
+            {
+               "m" : [
+                  "'root'",
+                  "root"
+               ],
+               "t" : "str"
+            },
+            {
+               "m" : [
+                  "]"
+               ],
+               "t" : "rb"
+            },
+            {
+               "m" : [
+                  "["
+               ],
+               "t" : "lb"
+            },
+            {
+               "m" : [
+                  "0",
+                  "0"
+               ],
+               "t" : "lit"
+            },
+            {
+               "m" : [
+                  "]"
+               ],
+               "t" : "rb"
+            },
+            {
+               "m" : [
+                  "["
+               ],
+               "t" : "lb"
+            },
+            {
+               "m" : [
+                  "\"leaf\"",
+                  "leaf"
+               ],
+               "t" : "str"
+            },
+            {
+               "m" : [
+                  "]"
+               ],
+               "t" : "rb"
+            }
+         ]
+      },
+      {
+         "path" : "''",
+         "want" : [
+            {
+               "m" : [
+                  "''",
+                  ""
+               ],
+               "t" : "str"
+            }
+         ]
+      },
+      {
+         "path" : "'\\n\\x41\\101'",
+         "want" : [
+            {
+               "m" : [
+                  "'\\n\\x41\\101'",
+                  "\nAA"
+               ],
+               "t" : "str"
+            }
+         ]
+      },
+      {
+         "path" : "^",
+         "want" : [
+            {
+               "m" : [
+                  "^"
+               ],
+               "t" : "unknown"
+            }
+         ]
+      },
+      {
+         "path" : "10:100",
+         "want" : [
+            {
+               "m" : [
+                  "10:100",
+                  10,
+                  100
+               ],
+               "t" : "slice"
+            }
+         ]
+      },
+      {
+         "path" : "10:100:2",
+         "want" : [
+            {
+               "m" : [
+                  "10:100:2",
+                  10,
+                  100,
+                  2
+               ],
+               "t" : "slice"
+            }
+         ]
+      },
+      {
+         "path" : "'foo','bar'",
+         "want" : [
+            {
+               "m" : [
+                  "'foo'",
+                  "foo"
+               ],
+               "t" : "str"
+            },
+            {
+               "m" : [
+                  ","
+               ],
+               "t" : "comma"
+            },
+            {
+               "m" : [
+                  "'bar'",
+                  "bar"
+               ],
+               "t" : "str"
+            }
+         ]
+      }
+   ]
+}
