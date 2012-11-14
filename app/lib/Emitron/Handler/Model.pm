@@ -53,13 +53,14 @@ sub _munge_streams {
   my ( $self, $data ) = @_;
   my $out = {};
   for my $app ( keys %$data ) {
-    my $stms = $data->{$app}->{streams} || {};
-    for my $stm ( keys %$stms ) {
-      my $rec = $stms->{$stm};
-      $rec->{name}        = $stm;
-      $rec->{application} = $app;
-      $rec->{preview}     = $self->_preview_url( $stm );
-      $out->{$stm}        = $rec;
+    my $by_type = $data->{$app}{streams} || {};
+    for my $type ( keys %$by_type ) {
+      my $by_name = $by_type->{$type};
+      for my $name ( keys %$by_name ) {
+        my $rec = $by_name->{$name};
+        $rec->{preview} = $self->_preview_url( $name );
+        $out->{$name}{$type}{$app} = $rec;
+      }
     }
   }
   return $out;
