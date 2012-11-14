@@ -387,6 +387,13 @@ JSONVisitor.prototype = {
     var ii = this.iter(path, autoviv);
     for (var i = ii(); i !== null; i = ii()) cb.apply(this, i);
   },
+  get: function(path) {
+    var value = null;
+    this.each(path, function(k, v, ctx, key) {
+      value = ctx[key];
+    });
+    return value;
+  },
   set: function(path, value) {
     this.each(path, function(k, v, ctx, key) {
       ctx[key] = value;

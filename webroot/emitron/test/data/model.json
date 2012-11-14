@@ -24,18 +24,19 @@
       "want" : [
          [
             "$.bar",
-            3
+            "Hello Again!",
+            "Hello!"
          ]
       ]
    },
    {
       "data" : {
          "bar" : "Hello Again!",
-         "foo" : [
-            1,
-            2,
-            3
-         ]
+         "foo" : {
+            "a" : 1,
+            "b" : 2,
+            "c" : 3
+         }
       },
       "name" : "Patch data",
       "on" : [
@@ -45,23 +46,31 @@
       "patch" : [
          {
             "op" : "remove",
-            "path" : "$.foo.0"
+            "path" : "$.foo.a"
          },
          {
             "op" : "remove",
-            "path" : "$.foo.0"
+            "path" : "$.foo.b"
          },
          {
-            "element" : 1,
+            "element" : "d",
             "op" : "add",
             "path" : "$.foo",
-            "value" : 0
+            "value" : 4
          }
       ],
       "want" : [
          [
             "$.foo",
-            3
+            {
+               "a" : 1,
+               "b" : 2,
+               "c" : 3
+            },
+            {
+               "c" : 3,
+               "d" : 4
+            }
          ]
       ]
    }

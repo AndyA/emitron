@@ -5,16 +5,16 @@ function Model(data) {
 
 Model.prototype = {
   setData: function(data) {
-    var prev = this.visitor;
-    this.visitor = new JSONVisitor(data);
-    this.t.setData(this.visitor);
-    if (prev) this.t.trigger(new JSONDiff().diff(prev.getData(), data));
+    var diff = new JSONDiff().diff(this.getData(), data);
+    var cs = this.t.changeSet(diff);
+    this.t.setData(data);
+    this.t.triggerSet(cs);
   },
   each: function(path, cb) {
-    this.visitor.each(path, cb);
+    this.t.p.each(path, cb);
   },
   getData: function() {
-    return this.visitor.getData();
+    return this.t.getData();
   },
   patch: function(jp) {
     this.t.patch(jp);

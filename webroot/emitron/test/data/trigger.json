@@ -1,21 +1,12 @@
 {
    "changeSet" : [
       {
-         "after" : {},
-         "before" : {},
          "data" : {},
          "list" : {},
          "name" : "Empty",
          "patch" : []
       },
       {
-         "after" : {
-            "foo" : [
-               "Zero",
-               "One"
-            ]
-         },
-         "before" : {},
          "data" : {},
          "list" : {
             "foo" : [
@@ -40,13 +31,6 @@
          ]
       },
       {
-         "after" : {},
-         "before" : {
-            "foo" : {
-               "one" : "One",
-               "zero" : "Zero"
-            }
-         },
          "data" : {
             "foo" : {
                "one" : "One",
@@ -72,17 +56,6 @@
          ]
       },
       {
-         "after" : {
-            "foo" : {
-               "zero" : 0
-            }
-         },
-         "before" : {
-            "foo" : {
-               "one" : "One",
-               "zero" : "Zero"
-            }
-         },
          "data" : {
             "foo" : {
                "one" : "One",
@@ -114,10 +87,6 @@
          ]
       },
       {
-         "after" : {
-            "streams" : {}
-         },
-         "before" : {},
          "data" : {},
          "list" : {
             "streams" : 2
@@ -129,6 +98,54 @@
                "op" : "add",
                "path" : "$",
                "value" : {}
+            }
+         ]
+      },
+      {
+         "data" : {
+            "bar" : [
+               1,
+               2,
+               3,
+               4,
+               5
+            ],
+            "foo" : {
+               "desc" : "An object"
+            }
+         },
+         "list" : {
+            "bar" : [
+               2
+            ],
+            "foo" : {
+               "desc" : 3,
+               "state" : 2
+            }
+         },
+         "name" : "multi match",
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo.desc"
+            },
+            {
+               "element" : "desc",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "Or maybe not"
+            },
+            {
+               "element" : "state",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "uncertain"
+            },
+            {
+               "element" : 0,
+               "op" : "add",
+               "path" : "$.bar",
+               "value" : "zero"
             }
          ]
       }
@@ -157,7 +174,8 @@
          "want" : [
             [
                "$.foo",
-               3
+               1,
+               2
             ]
          ]
       },
@@ -180,12 +198,6 @@
             "$.bar"
          ],
          "patch" : [
-            {
-               "element" : 5,
-               "op" : "add",
-               "path" : "$.bar",
-               "value" : "six"
-            },
             {
                "op" : "remove",
                "path" : "$.foo.desc"
@@ -212,11 +224,31 @@
          "want" : [
             [
                "$.foo",
-               3
+               {
+                  "desc" : "An object"
+               },
+               {
+                  "desc" : "Or maybe not",
+                  "state" : "uncertain"
+               }
             ],
             [
                "$.bar",
-               2
+               [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5
+               ],
+               [
+                  "zero",
+                  1,
+                  2,
+                  3,
+                  4,
+                  5
+               ]
             ]
          ]
       }

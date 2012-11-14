@@ -1,6 +1,6 @@
 function JSONTrigger(data) {
   this.handler = [];
-  if (data) this.setData(data);
+  this.setData(data == null ? {} : data);
 }
 
 JSONTrigger.prototype = (function() {
@@ -50,6 +50,11 @@ JSONTrigger.prototype = (function() {
     true);
   }
 
+  function clone(obj) {
+    if (obj.substring || obj.toFixed) return obj;
+    return $.extend(true, (obj instanceof Array ? [] : {}), obj);
+  }
+
   var $super = JSONPatch.prototype;
 
   return $.extend(({}), $super, {
@@ -58,15 +63,13 @@ JSONTrigger.prototype = (function() {
     // of array changes needs the array to be mutated.
     changeSet: function(jp) {
       var list = new JSONVisitor({});
-      var before = new JSONVisitor({});
-      var after = new JSONVisitor({});
+      var orig = new JSONVisitor(clone(this.getData()));
 
       for (var i = 0; i < jp.length; i++) {
         var pp = jp[i];
         var path = this.patchPath(pp);
         switch (pp.op) {
         case "add":
-          after.set(path, pp.value);
           visit(pp.value, function(pa, val) {
             setBit(list, pa, 2);
           },
@@ -74,7 +77,6 @@ JSONTrigger.prototype = (function() {
           break;
         case "remove":
           this.p.each(path, function(p, v, c, k) {
-            before.set(p, v);
             visit(v, function(pa, val) {
               setBit(list, pa, 1);
             },
@@ -85,8 +87,7 @@ JSONTrigger.prototype = (function() {
       }
       return {
         list: list,
-        before: before,
-        after: after
+        orig: orig
       };
     },
     on: function(path, cb) {
@@ -109,13 +110,20 @@ JSONTrigger.prototype = (function() {
 
       for (var j = 0; j < hh.length; j++) {
         var h = hh[j];
-        cs.list.each(h.pp, function(path, v, c, k) {
+        var $this = this;
+        cs.list.each(h.pp, function(p, v, c, k) {
           var flags = 0;
-          visit(v, function(p, value) {
+          visit(v, function(path, value) {
             flags |= value;
-          },
-          []);
-          if (flags) h.cb.apply(this, [path, flags]);
+          });
+
+          if (flags) {
+            var before = cs.orig.get(h.pp);
+            var after = $this.p.get(h.pp);
+            if (before != null || after != null) {
+              h.cb.apply($this, [h.path, before, after]);
+            }
+          }
         });
       }
     },

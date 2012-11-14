@@ -19,17 +19,20 @@ test("fire", function() {
   deepEqual(rec.getLog(), want, "fire");
 });
 
+dataDrivenTest("changeSet", 'data/trigger.json#changeSet', function(tc) {
+  var jt = new JSONTrigger(tc.data);
+  var cs = jt.changeSet(tc.patch);
+  deepEqual(cs.list.getData(), tc.list, tc.name + ": list");
+});
+
 dataDrivenTest("trigger", 'data/trigger.json#trigger', function(tc, tn) {
   var jt = new JSONTrigger(tc.data);
   var rec = new Recorder();
   for (var i = 0; i < tc.on.length; i++) {
     jt.on(tc.on[i], rec.callback());
   }
-  jt.trigger(tc.patch);
+  jt.patch(tc.patch);
   deepEqual(rec.getLog(), tc.want, tc.name + ": trigger");
-},
-{
-  readOnly: true
 });
 
 function testPatch(tc) {
@@ -40,11 +43,3 @@ function testPatch(tc) {
 
 dataDrivenTest('patch', 'data/diffpatch.json', testPatch);
 dataDrivenTest('patch (non diff data)', 'data/patchonly.json', testPatch);
-
-dataDrivenTest("changeSet", 'data/trigger.json#changeSet', function(tc) {
-  var jt = new JSONTrigger(tc.data);
-  var cs = jt.changeSet(tc.patch);
-  deepEqual(cs.list.getData(), tc.list, tc.name + ": list");
-  deepEqual(cs.before.getData(), tc.before, tc.name + ": before");
-  deepEqual(cs.after.getData(), tc.after, tc.name + ": after");
-});
