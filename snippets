@@ -17,6 +17,9 @@ Works but suspect A/V sync
     rtpmp4gdepay ! queue ! mpegtsmux name=muxer ! filesink location=foo.ts phool. ! \
     rtph264depay ! queue ! muxer.
 
+Should be equivalent to hlspipe.py. But it probably won't be because
+there's no way they'll stay in sync.
+
   gst-launch \
     mpegtsmux name=muxer ! filesink location=hlspipe.ts \
     rtspsrc location=rtsp://newstream.fenkle:5544/igloo name=src \
@@ -64,3 +67,8 @@ ffmpeg: the mother of all command-lines
 
   http://smorgasbork.com/component/content/article/35-linux/ \
     92-ffmpeg-the-mother-of-all-command-lines
+
+Run the HLS live packager on a stream
+
+ rm -rf webroot/live/hls/test && \
+  ./tools/hlslive.sh -l -b rtsp://newstream.fenkle:5544/orac webroot/live/hls/test
