@@ -124,7 +124,8 @@ JSONTrigger.prototype = (function() {
             var before = cs.orig.get(p);
             var after = $this.p.get(p);
             if (before != null || after != null) {
-              h.cb.apply($this, [p, before, after]);
+              var args = [p, before, after];
+              h.cb.apply($this, args.concat(h.pp.capture(p)));
             }
           }
         });
