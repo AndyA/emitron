@@ -1,4 +1,4 @@
-.PHONY: all clean realclean send preview prores
+.PHONY: all mp4 clean 
 
 SRCD=incoming
 DSTD=media
