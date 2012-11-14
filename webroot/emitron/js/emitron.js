@@ -42,12 +42,12 @@ $(function() {
     var app = pp[4];
 
     if (before && !after) {
-      var id = before.name + '_preview';
+      var id = name + '_preview';
       $('#' + id).remove();
     }
 
     if (!before && after) {
-      var id = after.name + '_preview';
+      var id = name + '_preview';
       $('#main').append($('<div></div>').attr({
         id: id
       }));
@@ -62,7 +62,7 @@ $(function() {
       };
 
       var attr = {
-        name: after.name
+        name: name
       };
 
       swfobject.embedSWF("StrobeMediaPlayback.swf", id, 256, 144, //
