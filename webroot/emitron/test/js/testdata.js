@@ -46,9 +46,12 @@ function dataDrivenTest(name, url, cb, opt) {
     TestData.withData(url, function(data) {
       if (data.length == 0) expect(0);
       for (var tn = 0; tn < data.length; tn++) {
-        before(data[tn], tn);
-        cb(data[tn], tn);
-        after(data[tn], tn);
+        var tc = data[tn];
+        if (!tc.disabled) {
+          before(tc, tn);
+          cb(tc, tn);
+          after(tc, tn);
+        }
       }
       start();
     });
