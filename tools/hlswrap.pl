@@ -12,6 +12,9 @@ use Time::HiRes qw( sleep );
 use XML::LibXML::XPathContext;
 use XML::LibXML;
 
+# TODO: Seems we currently undereport the bit rate - probably because
+# the first fragment comes up small.
+
 use constant GOP  => 8;
 use constant FRAG => '%05d.ts';
 

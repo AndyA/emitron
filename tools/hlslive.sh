@@ -21,6 +21,11 @@ fi
 
 OUTPUTFILE="$OUTPUTDIR/$( basename "$OUTPUTDIR" )"
 
+WORK="/tmp/hlslive.$$.work"
+mkdir -p "$WORK"
+LOGS="$WORK/logs"
+mkdir -p "$LOGS"
+
 GOP=8
 PRESET=veryfast
 AUDIO_OPTIONS="-acodec libfaac -ac 2"
@@ -56,10 +61,24 @@ function _shutdown() {
 
 trap _shutdown SIGINT
 
-#TEES="cvlc --rtsp-tcp '$INPUTFILE' --sout file/ts://-"
-#TEES="ffmpeg -y -i '$INPUTFILE' -acodec copy -vcodec copy -bsf:v h264_mp4toannexb -f mpegts - < /dev/null"
-TEES="cat '$INPUTFILE'"
-#TEES="buffer -i '$INPUTFILE'"
+case $INPUTFILE in
+  rtsp://*)
+    FIFO="$WORK/input.fifo"
+    FIFOS="$FIFOS $FIFO"
+    LOG="$LOGS/gst.log"
+    gst-launch \
+      mpegtsmux name=muxer ! filesink location=$FIFO \
+      rtspsrc location=$INPUTFILE name=src \
+      src. ! rtpmp4gdepay ! queue ! muxer. \
+      src. ! rtph264depay ! queue ! muxer. > "$LOG" 2>&1 &
+    TOKILL="$! $TOKILL"
+    TEES="cat '$FIFO'"
+    sleep $[GOP*2]
+    ;;
+  *)
+    TEES="cat '$INPUTFILE'"
+    ;;
+esac
 
 IDX=1
 set -x
@@ -89,7 +108,8 @@ for RT in $RATES; do
   PAD="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
 
   mkdir -p "$PFX"
-  FIFO="/tmp/hlslive.$$.$IDX.fifo"
+  FIFO="$WORK/br.$IDX.fifo"
+  LOG="$LOGS/ffmpeg.$IDX.log"
   FIFOS="$FIFOS $FIFO"
   TEES="$TEES | tee $FIFO"
   mkfifo $FIFO
@@ -101,7 +121,7 @@ for RT in $RATES; do
     -s $S -vf "$PAD,$DT" \
     -flags -global_header -threads 0 \
     -f segment -segment_time $GOP -segment_format mpegts \
-    "$FRAG" < /dev/null &
+    "$FRAG" < /dev/null > "$LOG" 2>&1 &
   IDX=$[IDX+1]
 done
 
