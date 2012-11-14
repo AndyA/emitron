@@ -26,21 +26,7 @@ $(function() {
     model.patch(data);
   });
 
-  model.on('$.args', function() {
-    $('#main').append($('<pre></pre>').text(model.getData().args.join(' '))).append($('<br></br>'));
-  });
-
-  model.on('$.streams.*.INR.*', function(path, before, after) {
-    console.log('path: ', path);
-    console.log('before: ', before);
-    console.log('after: ', after);
-
-    // hack
-    var pp = path.split('.');
-    var name = pp[2];
-    var type = pp[3];
-    var app = pp[4];
-
+  model.on('$.streams.*.INR.*', function(path, before, after, name, app) {
     if (before && !after) {
       var id = name + '_preview';
       $('#' + id).remove();
