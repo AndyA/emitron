@@ -1,0 +1,24 @@
+.PHONY: all h264 dump clean 
+
+SRCD=temp/hlstest
+
+TS=$(shell find $(SRCD) -type f -name '*.ts')
+H264=$(patsubst %.ts, %.h264, $(TS))
+DUMP=$(patsubst %.ts, %.dump, $(TS))
+
+all: dump
+
+h264: $(H264)
+
+dump: $(DUMP)
+
+$(H264): %.h264: %.ts
+	ffmpeg -y -i $< -vcodec copy -an $@
+
+$(DUMP): %.dump: %.h264
+	h264_analyze $< > $@
+
+clean:
+	rm -rf $(H264)
+
+
