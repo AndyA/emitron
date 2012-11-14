@@ -1,6 +1,5 @@
 function JSONTrigger(data) {
-  this.handler = [];
-  this.setData(data == null ? {} : data);
+  this.init(data);
 }
 
 JSONTrigger.prototype = (function() {
@@ -58,6 +57,10 @@ JSONTrigger.prototype = (function() {
   var $super = JSONPatch.prototype;
 
   return $.extend(({}), $super, {
+    init: function(data) {
+      this.handler = [];
+      $super.setData.apply(this, [data == null ? {} : data]);
+    },
     // TODO: properly modelling changes in arrays requires this code
     // to be integrated with the patch code - cos correct intepretation
     // of array changes needs the array to be mutated.
@@ -130,6 +133,12 @@ JSONTrigger.prototype = (function() {
     patch: function(jp) {
       var cs = this.changeSet(jp);
       $super.patch.apply(this, [jp]);
+      this.triggerSet(cs);
+    },
+    setData: function(data) {
+      var diff = new JSONDiff().diff(this.getData(), data);
+      var cs = this.changeSet(diff);
+      $super.setData.apply(this, [data]);
       this.triggerSet(cs);
     },
     trigger: function(jp) {

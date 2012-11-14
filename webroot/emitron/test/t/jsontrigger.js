@@ -35,6 +35,15 @@ dataDrivenTest("trigger", 'data/trigger.json#trigger', function(tc, tn) {
   deepEqual(rec.getLog(), tc.want, tc.name + ": trigger");
 });
 
+dataDrivenTest("model", 'data/trigger.json#model', function(tc, tn) {
+  var m = new JSONTrigger(tc.data);
+  var rec = new Recorder();
+  for (var i = 0; i < tc.on.length; i++) m.on(tc.on[i], rec.callback());
+  if (tc.patch) m.patch(tc.patch);
+  else if (tc.newdata) m.setData(tc.newdata);
+  deepEqual(rec.getLog(), tc.want, tc.name + ": model");
+});
+
 function testPatch(tc) {
   var p = new JSONTrigger(tc.a);
   p.patch(tc.diff);
