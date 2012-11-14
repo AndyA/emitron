@@ -1,4 +1,30 @@
 {
+   "capture" : [
+      {
+         "abstract" : "$.foo",
+         "concrete" : "$.foo",
+         "name" : "Empty",
+         "want" : []
+      },
+      {
+         "abstract" : "$.*",
+         "concrete" : "$.foo",
+         "name" : "Wild",
+         "want" : [
+            "foo"
+         ]
+      },
+      {
+         "abstract" : "$.*.box['a','b','c'].name[0:10]",
+         "concrete" : "$.foo.box.c.name.3",
+         "name" : "Wild",
+         "want" : [
+            "foo",
+            "c",
+            "3"
+         ]
+      }
+   ],
    "each" : [
       {
          "in" : {

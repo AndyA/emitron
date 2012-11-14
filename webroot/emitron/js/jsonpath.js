@@ -141,9 +141,10 @@ JSONPath.toker = (function() {
   }
 })();
 
-function JSONPathNode(match, iter) {
+function JSONPathNode(match, iter, capture) {
   this.match = match;
   this.iter = iter;
+  this.capture = capture;
 }
 
 JSONPath.parse = (function() {
@@ -184,7 +185,8 @@ JSONPath.parse = (function() {
     },
     function(obj) {
       return mkListIter([v]);
-    });
+    },
+    false);
   }
 
   function mkAny(t) {
@@ -193,7 +195,8 @@ JSONPath.parse = (function() {
     },
     function(obj) {
       return mkKeyIter(obj);
-    });
+    },
+    true);
   }
 
   function mkSlice(t) {
@@ -205,7 +208,8 @@ JSONPath.parse = (function() {
     },
     function(obj) {
       return mkSliceIter(from, to, step);
-    });
+    },
+    true);
   }
 
   function mkMulti(pp) {
@@ -229,7 +233,8 @@ JSONPath.parse = (function() {
         }
         return null;
       }
-    });
+    },
+    true);
   }
 
   function parseBrackets(tokr) {
@@ -299,26 +304,40 @@ JSONPath.parse = (function() {
   }
 })();
 
-JSONPath.prototype = {
-  parse: function(path) {
-    this.path = JSONPath.parse(path);
-  },
-  getPath: function() {
-    return this.path;
-  },
-  match: function(path) {
-    var pp = this.getPath().slice();
+JSONPath.prototype = (function() {
+  function splitSimple(path) {
     if (! (path.substring && /^\$(?:\.\w+)*$/.test(path))) {
-      throw "match needs a simple path";
+      throw "needs a simple path";
     }
-    var mp = path.split('.');
-    while (pp.length && mp.length) {
-      if (!pp.shift().match(mp.shift())) return null;
+    return path.split('.');
+  }
+  return {
+    parse: function(path) {
+      this.path = JSONPath.parse(path);
+    },
+    getPath: function() {
+      return this.path;
+    },
+    match: function(path) {
+      var pp = this.getPath().slice();
+      var mp = splitSimple(path);
+      while (pp.length && mp.length) {
+        if (!pp.shift().match(mp.shift())) return null;
+      }
+      if (pp.length) return null;
+      return mp;
+    },
+    capture: function(path) {
+      var pp = this.getPath();
+      var mp = splitSimple(path);
+      var cap = [];
+      for (var i = 0; i < pp.length; i++) {
+        if (pp[i].capture) cap.push(mp[i]);
+      }
+      return cap;
     }
-    if (pp.length) return null;
-    return mp;
-  },
-};
+  };
+})();
 
 function JSONVisitor(data) {
   this.data = {

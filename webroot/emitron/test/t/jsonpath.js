@@ -19,6 +19,12 @@ dataDrivenTest("match", "data/path.json#match", function(tc) {
   deepEqual(got, tc.want, tc.name + ": " + tc.path + " ?= " + tc.test);
 });
 
+dataDrivenTest("capture", "data/path.json#capture", function(tc) {
+  var jp = new JSONPath(tc.abstract);
+  var got = jp.capture(tc.concrete);
+  deepEqual(got, tc.want, tc.name);
+});
+
 module("JSONVisitor");
 
 function resolve_path(data, path) {
