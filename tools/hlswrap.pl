@@ -86,7 +86,7 @@ sub write_index {
   my $index = File::Spec->catfile( $dir, "index.html" );
   return if -f $index;
   open my $fh, '>', $index or die "Can't write $index: $!\n";
-  print $fh index( $name, $list );
+  print $fh make_index( $name, "$name.m3u8" );
 }
 
 sub write_master {
@@ -101,10 +101,9 @@ sub write_master {
     for my $stm ( @stm ) {
       my $sd = $stm->dir;
       die unless $sd =~ /(\d+)$/;
-      my $idx  = $1;
-      my $info = $stm->info;
-      die "Can't get info for stream" unless $info;
-      my $bw = $info->{bitrate};
+      my $idx = $1;
+      my $bw  = $stm->bitrate;
+      die "Can't get info for stream" unless $bw;
       $pl{$idx} = join "\n",
        "#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=$bw", $stm->list;
     }
@@ -122,7 +121,7 @@ sub stm::find_streams {
   opendir my $dh, $dir or die "Can't read $dir: $!\n";
   return
    map { $class->new( base => $dir, dir => $_, list => "$_.m3u8", ); }
-   grep { $_ =~ $like } readdir $dh;
+   sort grep { $_ =~ $like } readdir $dh;
 }
 
 sub stm::new {
@@ -162,9 +161,19 @@ sub stm::find_frags {
 
 sub stm::info {
   my $self = shift;
-  my $frag = $self->frags->[0];
-  return unless defined $frag;
-  return get_info( File::Spec->catfile( $self->base, $frag ) );
+  return $self->{info} ||= do {
+    my $frag = $self->frags->[0];
+    die unless defined $frag;
+    get_info( File::Spec->catfile( $self->base, $frag ) );
+  };
+}
+
+sub stm::duration {
+  return shift->info->{duration};
+}
+
+sub stm::bitrate {
+  return shift->info->{bitrate};
 }
 
 sub stm::write_list {
@@ -220,7 +229,7 @@ sub get_info {
   return \%r;
 }
 
-sub index {
+sub make_index {
   my ( $title, $media ) = @_;
   return <<EOT
 <!DOCTYPE html>
