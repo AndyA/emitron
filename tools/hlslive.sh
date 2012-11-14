@@ -78,7 +78,6 @@ case $INPUTFILE in
     } > "$LOG" 2>&1 &
     TOKILL="$! $TOKILL"
     TEES="cat '$FIFO'"
-    sleep $[GOP*2]
     ;;
   *)
     TEES="cat '$INPUTFILE'"
