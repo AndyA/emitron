@@ -328,6 +328,66 @@
                ]
             ]
          ]
+      },
+      {
+         "data" : {
+            "foo" : {
+               "r1" : {
+                  "a" : 1,
+                  "b" : 2
+               },
+               "r2" : {
+                  "c" : 3,
+                  "d" : 4
+               }
+            }
+         },
+         "name" : "wildcard match",
+         "on" : [
+            "$.foo.*"
+         ],
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo.r1.a"
+            },
+            {
+               "element" : "a",
+               "op" : "add",
+               "path" : "$.foo.r1",
+               "value" : "Or maybe not"
+            },
+            {
+               "element" : "r3",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : {
+                  "e" : 5,
+                  "f" : 6
+               }
+            }
+         ],
+         "want" : [
+            [
+               "$.foo.r1",
+               {
+                  "a" : 1,
+                  "b" : 2
+               },
+               {
+                  "a" : "Or maybe not",
+                  "b" : 2
+               }
+            ],
+            [
+               "$.foo.r3",
+               null,
+               {
+                  "e" : 5,
+                  "f" : 6
+               }
+            ]
+         ]
       }
    ]
 }

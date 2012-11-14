@@ -116,15 +116,15 @@ JSONTrigger.prototype = (function() {
         var $this = this;
         cs.list.each(h.pp, function(p, v, c, k) {
           var flags = 0;
-          visit(v, function(path, value) {
+          visit(v, function(p, value) {
             flags |= value;
           });
 
           if (flags) {
-            var before = cs.orig.get(h.pp);
-            var after = $this.p.get(h.pp);
+            var before = cs.orig.get(p);
+            var after = $this.p.get(p);
             if (before != null || after != null) {
-              h.cb.apply($this, [h.path, before, after]);
+              h.cb.apply($this, [p, before, after]);
             }
           }
         });
