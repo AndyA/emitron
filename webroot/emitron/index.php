@@ -11,7 +11,6 @@
     <script type="text/javascript" src="js/jsondiff.js"></script>
     <script type="text/javascript" src="js/jsontrigger.js"></script>
     <script type="text/javascript" src="js/ev.js"></script>
-    <script type="text/javascript" src="js/model.js"></script>
     <script type="text/javascript" src="js/emitron.js"></script>
     <link rel="stylesheet" href="css/style.css" />
   </head>
