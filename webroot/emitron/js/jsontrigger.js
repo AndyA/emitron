@@ -58,11 +58,15 @@ JSONTrigger.prototype = (function() {
     // of array changes needs the array to be mutated.
     changeSet: function(jp) {
       var list = new JSONVisitor({});
+      var before = new JSONVisitor({});
+      var after = new JSONVisitor({});
+
       for (var i = 0; i < jp.length; i++) {
         var pp = jp[i];
         var path = this.patchPath(pp);
         switch (pp.op) {
         case "add":
+          after.set(path, pp.value);
           visit(pp.value, function(pa, val) {
             setBit(list, pa, 2);
           },
@@ -70,6 +74,7 @@ JSONTrigger.prototype = (function() {
           break;
         case "remove":
           this.p.each(path, function(p, v, c, k) {
+            before.set(p, v);
             visit(v, function(pa, val) {
               setBit(list, pa, 1);
             },
@@ -78,7 +83,11 @@ JSONTrigger.prototype = (function() {
           break;
         }
       }
-      return list;
+      return {
+        list: list,
+        before: before,
+        after: after
+      };
     },
     on: function(path, cb) {
       var pp = JSONPath.bless(path);
@@ -100,7 +109,7 @@ JSONTrigger.prototype = (function() {
 
       for (var j = 0; j < hh.length; j++) {
         var h = hh[j];
-        cs.each(h.pp, function(path, v, c, k) {
+        cs.list.each(h.pp, function(path, v, c, k) {
           var flags = 0;
           visit(v, function(p, value) {
             flags |= value;

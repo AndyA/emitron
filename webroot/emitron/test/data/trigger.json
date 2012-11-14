@@ -1,12 +1,21 @@
 {
    "changeSet" : [
       {
+         "after" : {},
+         "before" : {},
          "data" : {},
          "list" : {},
          "name" : "Empty",
          "patch" : []
       },
       {
+         "after" : {
+            "foo" : [
+               "Zero",
+               "One"
+            ]
+         },
+         "before" : {},
          "data" : {},
          "list" : {
             "foo" : [
@@ -31,6 +40,13 @@
          ]
       },
       {
+         "after" : {},
+         "before" : {
+            "foo" : {
+               "one" : "One",
+               "zero" : "Zero"
+            }
+         },
          "data" : {
             "foo" : {
                "one" : "One",
@@ -56,6 +72,17 @@
          ]
       },
       {
+         "after" : {
+            "foo" : {
+               "zero" : 0
+            }
+         },
+         "before" : {
+            "foo" : {
+               "one" : "One",
+               "zero" : "Zero"
+            }
+         },
          "data" : {
             "foo" : {
                "one" : "One",
@@ -87,11 +114,15 @@
          ]
       },
       {
+         "after" : {
+            "streams" : {}
+         },
+         "before" : {},
          "data" : {},
          "list" : {
             "streams" : 2
          },
-         "name" : "Remove",
+         "name" : "Add empty",
          "patch" : [
             {
                "element" : "streams",
