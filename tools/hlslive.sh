@@ -1,9 +1,21 @@
 #!/bin/bash
 
-INPUTFILE="${1-rtsp://newstream:5544/igloo}"
-OUTPUTDIR="${2-webroot/live/hls/test}"
+while getopts 'lb' opt; do
+  case $opt in
+    b) 
+      BURNIN=1 
+      ;;
+    l) 
+      LIVE=1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+
+INPUTFILE="$1"
+OUTPUTDIR="$2"
 if [ -z "$OUTPUTDIR" ]; then
-  echo "Usage: $0 <infile> <outfile>" 1>&2
+  echo "Usage: $0 [-l] [-b] <infile> <outdir>" 1>&2
   exit 1
 fi
 
@@ -11,7 +23,6 @@ OUTPUTFILE="$OUTPUTDIR/$( basename "$OUTPUTDIR" )"
 
 GOP=8
 PRESET=veryfast
-[ -z "$BURNIN" ] && BURNIN=true
 AUDIO_OPTIONS="-acodec libfaac -ac 2"
 VIDEO_OPTIONS="-vcodec libx264"
 VIDEO_EXTRA="-preset $PRESET -sc_threshold 0"
@@ -34,9 +45,13 @@ FIFOS=""
 TEES=""
 TOKILL=""
 
+function _cleanup() {
+  rm -f $FIFOS
+}
+
 function _shutdown() {
   kill $TOKILL
-  rm -f $FIFOS
+  _cleanup
 }
 
 trap _shutdown SIGINT
@@ -58,7 +73,7 @@ for RT in $RATES; do
   S="${W}x${H}"
   KEYINT=$( perl -e "print $GOP*$R" )
 
-  if $BURNIN; then
+  if [ "$BURNIN" ]; then
     # Edit the next line with care - the leading and trailing blanks are \xA0 (non-breaking space)
     CAP=" $S ${BV}k "
     FS=72
@@ -78,19 +93,16 @@ for RT in $RATES; do
   FIFOS="$FIFOS $FIFO"
   TEES="$TEES | tee $FIFO"
   mkfifo $FIFO
-  ffmpeg -vsync 1 -f mpegts -i "$FIFO" \
+  ffmpeg -vsync cfr -f mpegts -i "$FIFO" \
     -map 0:0 -map 0:1 \
     $AUDIO_OPTIONS -r:a $AR -b:a ${BA}k \
     $VIDEO_OPTIONS -profile:v $P $VIDEO_EXTRA \
     -g $KEYINT -keyint_min $[KEYINT/2] -r:v $R -b:v ${BV}k \
-    -s $S \
-    -vf "$PAD,$DT" \
+    -s $S -vf "$PAD,$DT" \
     -flags -global_header -threads 0 \
     -f segment -segment_time $GOP -segment_format mpegts \
     "$FRAG" < /dev/null &
-
   IDX=$[IDX+1]
-
 done
 
 TEES="$TEES > /dev/null"
@@ -98,8 +110,14 @@ TEES="$TEES > /dev/null"
 eval $TEES &
 TOKILL="$! $TOKILL"
 
-perl tools/hlswrap.pl --live "$OUTPUTDIR" &
-TOKILL="$! $TOKILL"
+if [ "$LIVE" ]; then
+  perl tools/hlswrap.pl --index --gop $GOP --live "$OUTPUTDIR" &
+  TOKILL="$! $TOKILL"
+  wait
+else
+  wait
+  echo "Generating m3u8s"
+  perl tools/hlswrap.pl --index --gop $GOP "$OUTPUTDIR"
+fi
 
-wait
-_shutdown
+_cleanup

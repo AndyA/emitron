@@ -15,9 +15,13 @@ use XML::LibXML;
 use constant GOP  => 8;
 use constant FRAG => '%05d.ts';
 
-my %O = ( live => 0, );
+my %O = ( live => 0, index => 0, gop => GOP );
 
-GetOptions( 'live' => \$O{live} ) or die;
+GetOptions(
+  'live'  => \$O{live},
+  'index' => \$O{index},
+  'gop:i' => \$O{gop},
+) or die;
 
 my $dir = shift
  || die "Please name the directory containing the fragment directories";
@@ -30,7 +34,7 @@ else            { run_vod( $dir, @stm ) }
 
 sub run_live {
   my ( $dir, @stm ) = @_;
-  my @on_ready = ( sub { write_master( $dir, @stm ) } );
+  my @on_ready = ( sub { write_root( $dir, @stm ) } );
 
   $SIG{INT} = sub {
     print "Closing stream\n";
@@ -46,7 +50,7 @@ sub run_live {
     if ( @on_ready && lwm( @stm ) > 1 ) {
       $_->() for splice @on_ready;
     }
-    sleep GOP;
+    sleep $O{gop};
     if ( $got ) {
       $_->write_list for @stm;
     }
@@ -60,7 +64,13 @@ sub run_vod {
     $stm->close;
     $stm->write_list;
   }
+  write_root( $dir, @stm );
+}
+
+sub write_root {
+  my ( $dir, @stm ) = @_;
   write_master( $dir, @stm );
+  write_index( $dir ) if $O{index};
 }
 
 sub all_frags {
@@ -68,6 +78,16 @@ sub all_frags {
 }
 
 sub lwm { min( all_frags( @_ ) ) }
+
+sub write_index {
+  my $dir   = shift;
+  my $name  = basename $dir;
+  my $list  = File::Spec->catfile( $dir, "$name.m3u8" );
+  my $index = File::Spec->catfile( $dir, "index.html" );
+  return if -f $index;
+  open my $fh, '>', $index or die "Can't write $index: $!\n";
+  print $fh index( $name, $list );
+}
 
 sub write_master {
   my ( $dir, @stm ) = @_;
@@ -156,12 +176,12 @@ sub stm::write_list {
     print $fh join "\n",
      '#EXTM3U',
      '#EXT-X-VERSION:3',
-     '#EXT-X-TARGETDURATION:' . GOP,
+     '#EXT-X-TARGETDURATION:' . $O{gop},
      '#EXT-X-ALLOW-CACHE:YES',
      '#EXT-X-PLAYLIST-TYPE:EVENT',
      '#EXT-X-MEDIA-SEQUENCE:1', '';
     for my $frag ( @{ $self->frags } ) {
-      print $fh join "\n", "#EXTINF:" . GOP, $frag, '';
+      print $fh join "\n", "#EXTINF:" . $O{gop}, $frag, '';
     }
     print $fh "#EXT-X-ENDLIST\n" if $self->{closed};
   }
@@ -198,6 +218,23 @@ sub get_info {
     }
   }
   return \%r;
+}
+
+sub index {
+  my ( $title, $media ) = @_;
+  return <<EOT
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>$title</title>
+  </head>
+  <body>
+    <video controls="controls" >
+      <source src="$media" type="application/x-mpegURL" />
+    </video>
+  </body>
+</html>
+EOT
 }
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl
