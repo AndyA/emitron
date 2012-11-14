@@ -19,6 +19,8 @@ if [ -z "$OUTPUTDIR" ]; then
   exit 1
 fi
 
+rm -rf "$OUTPUTDIR"
+mkdir -p "$OUTPUTDIR"
 OUTPUTFILE="$OUTPUTDIR/$( basename "$OUTPUTDIR" )"
 
 WORK="/tmp/hlslive.$$.work"
@@ -66,11 +68,14 @@ case $INPUTFILE in
     FIFO="$WORK/input.fifo"
     FIFOS="$FIFOS $FIFO"
     LOG="$LOGS/gst.log"
-    gst-launch \
-      mpegtsmux name=muxer ! filesink location=$FIFO \
-      rtspsrc location=$INPUTFILE name=src \
-      src. ! rtpmp4gdepay ! queue ! muxer. \
-      src. ! rtph264depay ! queue ! muxer. > "$LOG" 2>&1 &
+    mkfifo $FIFO
+    {
+      gst-launch \
+        mpegtsmux name=muxer ! filesink location=$FIFO \
+        rtspsrc location=$INPUTFILE name=src \
+        src. ! rtpmp4gdepay ! queue ! muxer. \
+        src. ! rtph264depay ! queue ! muxer. 
+    } > "$LOG" 2>&1 &
     TOKILL="$! $TOKILL"
     TEES="cat '$FIFO'"
     sleep $[GOP*2]
@@ -113,15 +118,19 @@ for RT in $RATES; do
   FIFOS="$FIFOS $FIFO"
   TEES="$TEES | tee $FIFO"
   mkfifo $FIFO
-  ffmpeg -vsync cfr -f mpegts -i "$FIFO" \
-    -map 0:0 -map 0:1 \
-    $AUDIO_OPTIONS -r:a $AR -b:a ${BA}k \
-    $VIDEO_OPTIONS -profile:v $P $VIDEO_EXTRA \
-    -g $KEYINT -keyint_min $[KEYINT/2] -r:v $R -b:v ${BV}k \
-    -s $S -vf "$PAD,$DT" \
-    -flags -global_header -threads 0 \
-    -f segment -segment_time $GOP -segment_format mpegts \
-    "$FRAG" < /dev/null > "$LOG" 2>&1 &
+  {
+    ffmpeg -vsync cfr -f mpegts -i "$FIFO" \
+      -map 0:0 -map 0:1 \
+      $AUDIO_OPTIONS -r:a $AR -b:a ${BA}k \
+      $VIDEO_OPTIONS -profile:v $P $VIDEO_EXTRA \
+      -g $KEYINT -keyint_min $[KEYINT/2] -r:v $R -b:v ${BV}k \
+      -s $S -vf "$PAD,$DT" \
+      -flags -global_header -threads 0 \
+      -f segment -segment_time $GOP -segment_format mpegts \
+      "$FRAG" < /dev/null 
+    echo
+    echo "Exit code: $?"
+  } > "$LOG" 2>&1 &
   IDX=$[IDX+1]
 done
 
