@@ -89,3 +89,7 @@ direct version:
   ffmpeg -f mpegts -i hlspipe.ts -s 1920x1080 -r:v 25 \
     -acodec libfaac -b:a 128k -vcodec libx264 -b:v 3000k direct.ts
 
+Mono image to alpha (useful for DOG)
+
+  convert xc:white -resize 165x166 \( thespace.png -colorspace gray -alpha off \) \
+    -compose copy-opacity -composite rgba.png
