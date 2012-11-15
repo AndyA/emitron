@@ -107,9 +107,13 @@ if [ "$preprocess" ]; then
   fifo="$work/pre.fifo"
   fifos="$fifos $fifo"
   log="$logs/pre.log"
+  # Make it 16x9
+  pad="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
   mkfifo $fifo
   {
     ffmpeg -vsync cfr  -y -i "$source" -r:v 25 -r:a 48000 \
+      -s 1920x1080 -vf "$pad" \
+      -map 0:0 -map 0:1 \
       -acodec pcm_s16le -vcodec rawvideo \
       -f avi "$fifo"
   } > "$log" 2>&1 &
@@ -143,9 +147,6 @@ for rt in $rates; do
     dt="null"
   fi
 
-  # Make it 16x9
-  pad="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
-
   echo "Encoding bit rate $idx ($S, ${BV}k)"
   mkdir -p "$pfx"
   fifo="$work/br.$idx.fifo"
@@ -159,7 +160,7 @@ for rt in $rates; do
       $audio_options -r:a $AR -b:a ${BA}k \
       $video_options -profile:v $P $video_extra \
       -g $keyint -keyint_min $[keyint/2] -r:v $R -b:v ${BV}k \
-      -s $S -vf "$pad,$dt" \
+      -s $S -vf "$dt" \
       -flags -global_header -threads 0 \
       -f segment -segment_time $gop -segment_format mpegts \
       "$frag" < /dev/null 
