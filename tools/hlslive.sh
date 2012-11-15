@@ -112,7 +112,7 @@ if [ "$preprocess" ]; then
   log="$logs/pre.log"
   extra=""
   if [ "$dog" ]; then
-    extra="-i $dog -filter_complex overlay=64:64"
+    extra="-i $dog -filter_complex overlay=120:40"
   fi
   # Make it 16x9
   pad="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
