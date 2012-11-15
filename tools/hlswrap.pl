@@ -37,7 +37,7 @@ else            { run_vod( $dir, @stm ) }
 
 sub run_live {
   my ( $dir, @stm ) = @_;
-  my @on_ready = ( sub { write_root( $dir, @stm ) } );
+  my @on_ready = ( sub { write_root( $dir, @stm ); state( 'live' ); } );
 
   $SIG{INT} = sub {
     print "Closing stream\n";
@@ -230,6 +230,11 @@ sub get_info {
     }
   }
   return \%r;
+}
+
+sub state {
+  my $st = shift;
+  print "### STATE: $st\n";
 }
 
 sub make_index {

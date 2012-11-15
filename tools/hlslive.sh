@@ -15,16 +15,16 @@ while getopts 'lbp' opt; do
 done
 shift $((OPTIND-1))
 
-inputfile="$1"
-outputdir="$2"
-if [ -z "$outputdir" ]; then
+infile="$1"
+outdir="$2"
+if [ -z "$outdir" ]; then
   echo "Usage: $0 [-l] [-b] <infile> <outdir>" 1>&2
   exit 1
 fi
 
-rm -rf "$outputdir"
-mkdir -p "$outputdir"
-outputfile="$outputdir/$( basename "$outputdir" )"
+rm -rf "$outdir"
+mkdir -p "$outdir"
+outfile="$outdir/$( basename "$outdir" )"
 
 work="/tmp/hlslive.$$.work"
 mkdir -p "$work"
@@ -55,9 +55,19 @@ rates="
 fifos=""
 tees=""
 tokill=""
+state=""
+
+function state {
+  local ns=$1
+  if [ "$ns" != "$state" ]; then
+    state=$ns
+    echo "### STATE: $state"
+  fi
+}
 
 function _cleanup() {
   rm -f $fifos
+  state 'complete'
 }
 
 function _shutdown() {
@@ -67,8 +77,10 @@ function _shutdown() {
 
 trap _shutdown SIGINT
 
-source="$inputfile"
-case $inputfile in
+state 'starting'
+
+source="$infile"
+case $infile in
   rtsp://*)
     fifo="$work/input.fifo"
     fifos="$fifos $fifo"
@@ -77,7 +89,7 @@ case $inputfile in
     {
       gst-launch \
         mpegtsmux name=muxer ! filesink location=$fifo \
-        rtspsrc location=$inputfile name=src \
+        rtspsrc location=$infile name=src \
         src. ! rtpmp4gdepay ! queue ! muxer. \
         src. ! rtph264depay ! queue ! muxer. 
     } > "$log" 2>&1 &
@@ -109,7 +121,7 @@ fi
 tees="cat '$source'"
 idx=1
 for rt in $rates; do
-  pfx="$outputfile-$idx"
+  pfx="$outfile-$idx"
   frag="$pfx/%05d.ts"
 
   W=; H=; R=; BV=; BA=; P=; AR=
@@ -164,14 +176,14 @@ tokill="$! $tokill"
 
 if [ "$live" ]; then
   echo "Starting live HLS packager"
-  perl tools/hlswrap.pl --index --gop $gop --live "$outputdir" &
+  perl tools/hlswrap.pl --index --gop $gop --live "$outdir" &
   tokill="$! $tokill"
   echo "Running"
   wait
 else
   wait
   echo "Packaging HLS on-demand"
-  perl tools/hlswrap.pl --index --gop $gop "$outputdir"
+  perl tools/hlswrap.pl --index --gop $gop "$outdir"
 fi
 
 _cleanup
