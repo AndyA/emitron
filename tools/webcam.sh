@@ -33,7 +33,7 @@ function wc_igloo() {
 }
 
 function wc_orac() {
-  rate=24
+  rate=15
   v4l2-ctl --set-fmt-video=width=1920,height=1080,pixelformat=1
   v4l2-ctl --set-parm=$rate
   ffmpeg -y \
