@@ -1,12 +1,15 @@
 #!/bin/bash
 
-while getopts 'lb' opt; do
+while getopts 'lbp' opt; do
   case $opt in
     b) 
       BURNIN=1 
       ;;
     l) 
       LIVE=1
+      ;;
+    p)
+      PREPROCESS=1
       ;;
   esac
 done
@@ -87,13 +90,14 @@ esac
 
 
 # Preprocess
-if true; then
+if [ "$PREPROCESS" ]; then
+  echo "Starting preprocessor"
   FIFO="$WORK/pre.fifo"
   FIFOS="$FIFOS $FIFO"
   LOG="$LOGS/pre.log"
   mkfifo $FIFO
   {
-    ffmpeg -y -i "$SOURCE" -r:v 25 -r:a 48000 \
+    ffmpeg -vsync cfr  -y -i "$SOURCE" -r:v 25 -r:a 48000 \
       -acodec pcm_s16le -vcodec rawvideo \
       -f avi "$FIFO"
   } > "$LOG" 2>&1 &
@@ -104,7 +108,6 @@ fi
 
 TEES="cat '$SOURCE'"
 IDX=1
-set -x
 for RT in $RATES; do
   PFX="$OUTPUTFILE-$IDX"
   FRAG="$PFX/%05d.ts"
@@ -116,6 +119,7 @@ for RT in $RATES; do
   KEYINT=$( perl -e "print $GOP*$R" )
 
   if [ "$BURNIN" ]; then
+    echo "Burnin enabled"
     # Edit the next line with care - the leading and trailing blanks are \xA0 (non-breaking space)
     CAP=" $S ${BV}k "
     FS=72
@@ -130,6 +134,7 @@ for RT in $RATES; do
   # Make it 16x9
   PAD="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
 
+  echo "Encoding bit rate $IDX ($S, ${BV}k)"
   mkdir -p "$PFX"
   FIFO="$WORK/br.$IDX.fifo"
   LOG="$LOGS/ffmpeg.$IDX.log"
@@ -158,12 +163,14 @@ eval $TEES &
 TOKILL="$! $TOKILL"
 
 if [ "$LIVE" ]; then
+  echo "Starting live HLS packager"
   perl tools/hlswrap.pl --index --gop $GOP --live "$OUTPUTDIR" &
   TOKILL="$! $TOKILL"
+  echo "Running"
   wait
 else
   wait
-  echo "Generating m3u8s"
+  echo "Packaging HLS on-demand"
   perl tools/hlswrap.pl --index --gop $GOP "$OUTPUTDIR"
 fi
 
