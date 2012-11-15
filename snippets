@@ -70,14 +70,13 @@ ffmpeg: the mother of all command-lines
 
 Run the HLS live packager on a stream
 
- rm -rf webroot/live/hls/test && \
   ./tools/hlslive.sh -l -b rtsp://newstream.fenkle:5544/orac webroot/live/hls/test
 
 ffmpeg lossless pipe:
 
   ffmpeg -f mpegts -i hlspipe.ts -s 1920x1080 -r:v 25 \
     -vcodec ffv1 -acodec pcm_s16le -f avi - | \
-    ffmpeg -y -f avi -i - -acodec libfaac -b:a 128k -vcodec libx264 -b:v 3000k foo.ts
+    ffmpeg -y -f avi -i - -acodec libfaac -b:a 128k -vcodec libx264 -b:v 3000k lossless.ts
 
 raw pipe:
 
