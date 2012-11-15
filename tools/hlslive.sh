@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts 'lbp' opt; do
+while getopts ':lbpd:' opt; do
   case $opt in
     b) 
       burnin=1 
@@ -11,6 +11,9 @@ while getopts 'lbp' opt; do
     p)
       preprocess=1
       ;;
+    d)
+      dog="$OPTARG"
+      ;;
   esac
 done
 shift $((OPTIND-1))
@@ -18,7 +21,7 @@ shift $((OPTIND-1))
 infile="$1"
 outdir="$2"
 if [ -z "$outdir" ]; then
-  echo "Usage: $0 [-l] [-b] <infile> <outdir>" 1>&2
+  echo "Usage: $0 [-l] [-b] [-p] [-d dog.png] <infile> <outdir>" 1>&2
   exit 1
 fi
 
@@ -107,12 +110,16 @@ if [ "$preprocess" ]; then
   fifo="$work/pre.fifo"
   fifos="$fifos $fifo"
   log="$logs/pre.log"
+  extra=""
+  if [ "$dog" ]; then
+    extra="-i $dog -filter_complex overlay=64:64"
+  fi
   # Make it 16x9
   pad="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
   mkfifo $fifo
   {
     ffmpeg -vsync cfr  -y -i "$source" -r:v 25 -r:a 48000 \
-      -s 1920x1080 -vf "$pad" \
+      -s 1920x1080 -vf "$pad" $extra \
       -map 0:0 -map 0:1 \
       -acodec pcm_s16le -vcodec rawvideo \
       -f avi "$fifo"
@@ -136,7 +143,8 @@ for rt in $rates; do
 
   if [ "$burnin" ]; then
     echo "Burnin enabled"
-    # Edit the next line with care - the leading and trailing blanks are \xA0 (non-breaking space)
+    # Edit the next line with care - the leading and trailing blanks are
+    # \xA0 (non-breaking space)
     cap=" $S ${BV}k "
     fs=72
     sh=2
