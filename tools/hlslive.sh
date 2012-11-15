@@ -33,6 +33,7 @@ PRESET=veryfast
 AUDIO_OPTIONS="-acodec libfaac -ac 2"
 VIDEO_OPTIONS="-vcodec libx264"
 VIDEO_EXTRA="-preset $PRESET -sc_threshold 0"
+PIPEFMT=mpegts
 
 FONT="$HOME/Dropbox/Fonts/Envy Code R.ttf"
 
@@ -63,6 +64,7 @@ function _shutdown() {
 
 trap _shutdown SIGINT
 
+SOURCE="$INPUTFILE"
 case $INPUTFILE in
   rtsp://*)
     FIFO="$WORK/input.fifo"
@@ -77,13 +79,30 @@ case $INPUTFILE in
         src. ! rtph264depay ! queue ! muxer. 
     } > "$LOG" 2>&1 &
     TOKILL="$! $TOKILL"
-    TEES="cat '$FIFO'"
+    SOURCE="$FIFO"
     ;;
   *)
-    TEES="cat '$INPUTFILE'"
     ;;
 esac
 
+
+# Preprocess
+if true; then
+  FIFO="$WORK/pre.fifo"
+  FIFOS="$FIFOS $FIFO"
+  LOG="$LOGS/pre.log"
+  mkfifo $FIFO
+  {
+    ffmpeg -y -i "$SOURCE" -r:v 25 -r:a 48000 \
+      -acodec pcm_s16le -vcodec rawvideo \
+      -f avi "$FIFO"
+  } > "$LOG" 2>&1 &
+  TOKILL="$! $TOKILL"
+  SOURCE="$FIFO"
+  PIPEFMT=avi
+fi
+
+TEES="cat '$SOURCE'"
 IDX=1
 set -x
 for RT in $RATES; do
@@ -118,7 +137,7 @@ for RT in $RATES; do
   TEES="$TEES | tee $FIFO"
   mkfifo $FIFO
   {
-    ffmpeg -vsync cfr -f mpegts -i "$FIFO" \
+    ffmpeg -vsync cfr -f $PIPEFMT -i "$FIFO" \
       -map 0:0 -map 0:1 \
       $AUDIO_OPTIONS -r:a $AR -b:a ${BA}k \
       $VIDEO_OPTIONS -profile:v $P $VIDEO_EXTRA \
