@@ -133,7 +133,7 @@ tees="cat '$source'"
 idx=1
 for rt in $rates; do
   pfx="$outfile-$idx"
-  frag="$pfx/%05d.ts"
+  frag="$pfx/%08d.ts"
 
   W=; H=; R=; BV=; BA=; P=; AR=
   eval $rt
