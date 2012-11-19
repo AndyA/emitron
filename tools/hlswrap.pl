@@ -45,6 +45,7 @@ sub run_live {
       $stm->close;
       $stm->write_list;
     }
+    exit;
   };
 
   while () {
