@@ -16,7 +16,7 @@ use XML::LibXML;
 # the first fragment comes up small.
 
 use constant GOP  => 8;
-use constant FRAG => '%05d.ts';
+use constant FRAG => '%08d.ts';
 
 my %O = ( live => 0, index => 0, gop => GOP );
 
