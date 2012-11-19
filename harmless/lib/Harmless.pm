@@ -7,7 +7,7 @@ our $VERSION = '0.01';
 
 =head1 NAME
 
-Harmless - Harmless HLS encoder
+Harmless - Mostly Harmless HLS packager
 
 =cut
 

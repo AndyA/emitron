@@ -1,0 +1,13 @@
+Things we might want to do
+
+  Encode live
+  Package live
+  Stream restart
+  Dual redundancy
+  Stream appending
+  Stream aliasing (?)
+  Trick plays, edits, discontinuities. 
+  Encryption
+  Live rolling window
+  Simultaneous live / on demand
+  Publishing?
