@@ -40,5 +40,11 @@ for my $tc ( @case ) {
   eq_or_diff $new, $orig, "$name: round trip";
 }
 
+sub dd {
+  use Data::Dumper;
+  Data::Dumper->new( @_ )->Indent( 2 )->Quotekeys( 0 )->Useqq( 1 )
+   ->Dump;
+}
+
 # vim:ts=2:sw=2:et:ft=perl
 
