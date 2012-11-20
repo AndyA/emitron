@@ -36,13 +36,65 @@ sub _parse_attr {
 sub make_parser {
   my $self  = shift;
   my $state = 'INIT';
-  my $meta  = {};
-  my $seg   = undef;
 
-  my $cseg = sub { $seg ||= {} };
-  my @segs = ();
+  my $seg = undef;
 
-  my $pmeta = sub { $meta->{ $_[0] } = $_[1] };
+  my $cseg = sub { $state = $_[0]; $seg ||= {} };
+
+  my $rv = {
+    meta => {},
+    vpl  => [],
+    seg  => [ [] ],
+  };
+
+  my $pmeta = sub { $rv->{meta}{ $_[0] } = $_[1] };
+
+  my %de_hls = (
+    'EXT-X-ALLOW-CACHE'        => sub { },
+    'EXT-X-BYTERANGE'          => sub { },
+    'EXT-X-DISCONTINUITY'      => sub { },
+    'EXT-X-ENDLIST'            => sub { },
+    'EXT-X-I-FRAME-STREAM-INF' => sub { },
+    'EXT-X-I-FRAMES-ONLY'      => sub { },
+    'EXT-X-KEY'                => sub { },
+    'EXT-X-MEDIA'              => sub { },
+    'EXT-X-PROGRAM-DATE-TIME'  => sub { },
+
+    'EXT-X-TARGETDURATION' => $pmeta,
+    'EXT-X-VERSION'        => $pmeta,
+    'EXT-X-MEDIA-SEQUENCE' => $pmeta,
+    'EXT-X-PLAYLIST-TYPE'  => $pmeta,
+    'EXT-X-STREAM-INF'     => sub {
+      $cseg->( 'HLSPL' )->{ $_[0] } = { _parse_attr( $_[1] ) };
+    },
+  );
+
+  my %de_hls_seg = (
+    'EXTINF' => sub {
+      my ( $dur, $tit ) = split /,/, $_[1], 2;
+      $cseg->( 'HLSSEG' );
+      $tit = '' unless defined $tit;
+      $tit =~ s/\s+$//;
+      $seg->{title}    = $tit;
+      $seg->{duration} = $dur;
+
+    },
+    -uri => sub {
+      $cseg->( 'HLSSEG' )->{uri} = $_[1];
+      push @{ $rv->{seg}[-1] }, $seg;
+      undef $seg;
+      $state = 'HLS';
+    },
+  );
+
+  my %de_hls_pl = (
+    -uri => sub {
+      $cseg->( 'HLSPL' )->{uri} = $_[1];
+      push @{ $rv->{vpl} }, $seg;
+      undef $seg;
+      $state = 'HLS';
+    },
+  );
 
   my %decode = (
     INIT => {
@@ -50,27 +102,9 @@ sub make_parser {
         $state = 'HLS';
       },
     },
-    HLS => {
-      'EXT-X-TARGETDURATION' => $pmeta,
-      'EXT-X-VERSION'        => $pmeta,
-      'EXT-X-MEDIA-SEQUENCE' => $pmeta,
-      'EXT-X-PLAYLIST-TYPE'  => $pmeta,
-      'EXTINF'               => sub {
-        my ( $dur, $tit ) = split /,/, $_[1], 2;
-        $cseg->()->{duration} = $dur;
-        $tit = '' unless defined $tit;
-        $tit =~ s/\s+$//;
-        $cseg->()->{title} = $tit;
-      },
-      'EXT-X-STREAM-INF' => sub {
-        $cseg->()->{ $_[0] } = { _parse_attr( $_[1] ) };
-      },
-      -uri => sub {
-        $cseg->()->{uri} = $_[1];
-        push @segs, $seg;
-        undef $seg;
-      },
-    },
+    HLS    => { %de_hls, %de_hls_seg, },
+    HLSSEG => { %de_hls_seg, },
+    HLSPL  => { %de_hls_pl, },
   );
 
   my $despatch = sub {
@@ -80,7 +114,7 @@ sub make_parser {
   };
 
   return sub {
-    return { meta => $meta, segments => \@segs } unless @_;
+    return $rv unless @_;
     my $ln = shift;
     return if $ln =~ /^\s*$/;
     if ( $ln =~ /^#(EXT.*)/ ) {

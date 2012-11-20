@@ -15,7 +15,7 @@ my @case = (
   {
     source => 'bipbop_4x3_variant/bipbop_4x3_variant.m3u8',
     want   => {
-      segments => [
+      vpl => [
         {
           "EXT-X-STREAM-INF" => {
             CODECS       => "mp4a.40.2, avc1.4d4015",
@@ -57,926 +57,930 @@ my @case = (
           uri => "gear0/prog_index.m3u8"
         }
       ],
+      seg => [ [] ],
       meta => {}
     },
   },
   {
     source => 'bipbop_4x3_variant/gear1/prog_index.m3u8',
     want   => {
-          segments => [
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence0.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence1.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence2.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence3.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence4.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence5.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence6.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence7.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence8.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence9.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence10.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence11.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence12.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence13.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence14.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence15.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence16.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence17.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence18.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence19.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence20.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence21.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence22.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence23.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence24.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence25.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence26.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence27.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence28.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence29.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence30.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence31.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence32.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence33.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence34.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence35.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence36.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence37.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence38.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence39.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence40.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence41.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence42.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence43.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence44.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence45.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence46.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence47.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence48.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence49.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence50.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence51.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence52.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence53.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence54.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence55.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.012",
-                          uri => "fileSequence56.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9417",
-                          uri => "fileSequence57.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence58.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence59.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence60.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence61.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence62.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence63.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence64.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence65.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence66.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence67.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence68.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence69.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence70.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence71.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence72.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence73.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence74.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence75.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence76.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence77.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence78.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence79.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence80.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence81.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence82.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence83.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence84.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence85.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence86.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence87.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence88.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence89.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence90.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence91.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence92.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence93.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence94.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence95.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence96.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence97.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence98.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence99.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence100.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence101.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence102.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence103.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence104.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence105.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence106.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence107.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence108.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence109.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence110.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence111.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence112.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence113.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence114.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence115.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence116.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence117.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence118.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence119.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence120.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence121.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence122.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence123.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence124.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence125.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence126.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence127.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence128.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9417",
-                          uri => "fileSequence129.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence130.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence131.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence132.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence133.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence134.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence135.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence136.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence137.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence138.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence139.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence140.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence141.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence142.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence143.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence144.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence145.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence146.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence147.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence148.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence149.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence150.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence151.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence152.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence153.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence154.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence155.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence156.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence157.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence158.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence159.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence160.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence161.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence162.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence163.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence164.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence165.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence166.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence167.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9767",
-                          uri => "fileSequence168.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence169.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence170.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence171.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence172.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence173.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence174.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence175.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence176.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence177.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "10.01",
-                          uri => "fileSequence178.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "9.9433",
-                          uri => "fileSequence179.ts"
-                        },
-                        {
-                          title => "",
-                          duration => "4.2476",
-                          uri => "fileSequence180.ts"
-                        }
-                      ],
-          meta => {
-                    "EXT-X-MEDIA-SEQUENCE" => 0,
-                    "EXT-X-TARGETDURATION" => 11,
-                    "EXT-X-VERSION" => 3,
-                    "EXT-X-PLAYLIST-TYPE" => "VOD"
-                  }
-        },
+      vpl => [],
+      seg => [
+        [
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence0.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence1.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence2.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence3.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence4.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence5.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence6.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence7.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence8.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence9.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence10.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence11.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence12.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence13.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence14.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence15.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence16.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence17.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence18.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence19.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence20.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence21.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence22.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence23.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence24.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence25.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence26.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence27.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence28.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence29.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence30.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence31.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence32.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence33.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence34.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence35.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence36.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence37.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence38.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence39.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence40.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence41.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence42.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence43.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence44.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence45.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence46.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence47.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence48.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence49.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence50.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence51.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence52.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence53.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence54.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence55.ts"
+          },
+          {
+            duration => "10.012",
+            title    => "",
+            uri      => "fileSequence56.ts"
+          },
+          {
+            duration => "9.9417",
+            title    => "",
+            uri      => "fileSequence57.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence58.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence59.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence60.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence61.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence62.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence63.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence64.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence65.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence66.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence67.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence68.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence69.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence70.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence71.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence72.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence73.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence74.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence75.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence76.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence77.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence78.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence79.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence80.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence81.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence82.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence83.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence84.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence85.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence86.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence87.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence88.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence89.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence90.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence91.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence92.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence93.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence94.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence95.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence96.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence97.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence98.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence99.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence100.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence101.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence102.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence103.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence104.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence105.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence106.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence107.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence108.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence109.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence110.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence111.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence112.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence113.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence114.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence115.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence116.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence117.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence118.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence119.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence120.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence121.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence122.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence123.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence124.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence125.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence126.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence127.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence128.ts"
+          },
+          {
+            duration => "9.9417",
+            title    => "",
+            uri      => "fileSequence129.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence130.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence131.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence132.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence133.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence134.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence135.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence136.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence137.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence138.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence139.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence140.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence141.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence142.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence143.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence144.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence145.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence146.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence147.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence148.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence149.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence150.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence151.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence152.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence153.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence154.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence155.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence156.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence157.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence158.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence159.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence160.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence161.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence162.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence163.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence164.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence165.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence166.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence167.ts"
+          },
+          {
+            duration => "9.9767",
+            title    => "",
+            uri      => "fileSequence168.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence169.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence170.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence171.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence172.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence173.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence174.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence175.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence176.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence177.ts"
+          },
+          {
+            duration => "10.01",
+            title    => "",
+            uri      => "fileSequence178.ts"
+          },
+          {
+            duration => "9.9433",
+            title    => "",
+            uri      => "fileSequence179.ts"
+          },
+          {
+            duration => "4.2476",
+            title    => "",
+            uri      => "fileSequence180.ts"
+          }
+        ]
+      ],
+      meta => {
+        "EXT-X-MEDIA-SEQUENCE" => 0,
+        "EXT-X-TARGETDURATION" => 11,
+        "EXT-X-VERSION"        => 3,
+        "EXT-X-PLAYLIST-TYPE"  => "VOD"
+      }
+    },
   }
 );
 
