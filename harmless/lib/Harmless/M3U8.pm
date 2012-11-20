@@ -1,17 +1,17 @@
-package Harmless::Stream;
+package Harmless::M3U8;
 
 use strict;
 use warnings;
+
+use Harmless::M3U8::Parser;
 
 use Carp qw( croak );
 
 =head1 NAME
 
-Harmless::Stream - A single bit rate HLS stream
+Harmless::M3U8 - An M3U8 file
 
 =cut
-
-use accessors::ro qw( filename );
 
 sub new {
   my $class = shift;
@@ -19,36 +19,12 @@ sub new {
 }
 
 sub read {
-  my $self = shift;
-
-  open my $fh, '<', $self->filename
-   or croak "Can't read ", $self->filename, ": $!";
-
-  while ( defined( my $ln = <$fh> ) ) {
-    chomp $ln;
-    next if $ln =~ /^\s*$/;
-    if ( $ln =~ /^#EXT(.*)/ ) {
-      # Directive
-      my $ext = $1;
-      next;
-    }
-    next if $ln =~ /^#/;
-    # Segment URL
-  }
+  my ( $self, $file ) = @_;
+  $self->{_pl} = Harmless::M3U8::Parser->new->parse_file( $file );
 }
 
 sub write {
   my $self = shift;
-}
-
-sub push_discontinuity {
-  my $self = shift;
-  push @{ $self->{_runs} }, [];
-}
-
-sub push_segment {
-  my ( $self, $seg ) = @_;
-  push @{ $self->{_runs}[-1] }, $seg;
 }
 
 1;
