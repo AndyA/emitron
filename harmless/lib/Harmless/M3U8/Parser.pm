@@ -36,10 +36,13 @@ sub _parse_attr {
 sub make_parser {
   my $self  = shift;
   my $state = 'INIT';
+  my $meta  = {};
   my $seg   = undef;
 
   my $cseg = sub { $seg ||= {} };
   my @segs = ();
+
+  my $pmeta = sub { $meta->{ $_[0] } = $_[1] };
 
   my %decode = (
     INIT => {
@@ -48,13 +51,22 @@ sub make_parser {
       },
     },
     HLS => {
-      'EXTINF' => sub {
+      'EXT-X-TARGETDURATION' => $pmeta,
+      'EXT-X-VERSION'        => $pmeta,
+      'EXT-X-MEDIA-SEQUENCE' => $pmeta,
+      'EXT-X-PLAYLIST-TYPE'  => $pmeta,
+      'EXTINF'               => sub {
+        my ( $dur, $tit ) = split /,/, $_[1], 2;
+        $cseg->()->{duration} = $dur;
+        $tit = '' unless defined $tit;
+        $tit =~ s/\s+$//;
+        $cseg->()->{title} = $tit;
       },
       'EXT-X-STREAM-INF' => sub {
-        $cseg->()->{stream_inf} = { _parse_attr( $_[0] ) };
+        $cseg->()->{ $_[0] } = { _parse_attr( $_[1] ) };
       },
       -uri => sub {
-        $cseg->()->{uri} = $_[0];
+        $cseg->()->{uri} = $_[1];
         push @segs, $seg;
         undef $seg;
       },
@@ -63,12 +75,14 @@ sub make_parser {
 
   my $despatch = sub {
     my ( $dir, @a ) = @_;
+    ( my $nm = lc $dir ) =~ s/^ext-x-//;
+    $nm =~ s/-/_/g;
     my $hd = $decode{$state}{$dir};
-    $hd->( @a ) if $hd;
+    $hd->( $nm, @a ) if $hd;
   };
 
   return sub {
-    return \@segs unless @_;
+    return { meta => $meta, segments => \@segs } unless @_;
     my $ln = shift;
     return if $ln =~ /^\s*$/;
     if ( $ln =~ /^#(EXT.*)/ ) {
