@@ -75,10 +75,8 @@ sub make_parser {
 
   my $despatch = sub {
     my ( $dir, @a ) = @_;
-    ( my $nm = lc $dir ) =~ s/^ext-x-//;
-    $nm =~ s/-/_/g;
     my $hd = $decode{$state}{$dir};
-    $hd->( $nm, @a ) if $hd;
+    $hd->( $dir, @a ) if $hd;
   };
 
   return sub {
