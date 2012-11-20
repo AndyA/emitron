@@ -4,8 +4,8 @@ use strict;
 use warnings;
 
 use Carp qw( croak );
-use DateTime::Format::ISO8601;
 use DateTime;
+use DateTime::Format::ISO8601;
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ Harmless::M3U8::Parser - Parse M3U8 file
 
 sub new {
   my $class = shift;
-  return bless { @_, _runs => [ [] ] }, $class;
+  return bless {@_}, $class;
 }
 
 sub _str {
@@ -44,9 +44,10 @@ sub make_parser {
   my %global = ();
 
   my $rv = {
-    meta => {},
-    vpl  => [],
-    seg  => [ [] ],
+    meta   => {},
+    vpl    => [],
+    seg    => [ [] ],
+    closed => 0,
   };
 
   my $cseg = sub { $state = $_[0]; $seg ||= {%global} };
@@ -75,7 +76,7 @@ sub make_parser {
 
     'EXT-X-I-FRAMES-ONLY' => sub { $rv->{meta}{ $_[0] } = 1 },
     'EXT-X-ENDLIST' => sub {
-      $rv->{meta}{closed} = 1;
+      $rv->{closed} = 1;
       $state = 'IGNORE';
     },
     'EXT-X-STREAM-INF' => sub {
@@ -97,8 +98,9 @@ sub make_parser {
 
     },
     'EXT-X-PROGRAM-DATE-TIME' => sub {
+      my $dt = DateTime::Format::ISO8601->parse_datetime( $_[1] );
       $cseg->( 'HLSSEG' )->{ $_[0] }
-       = DateTime::Format::ISO8601->parse_datetime( $_[1] )->epoch;
+       = $dt->epoch + $dt->microsecond / 1_000_000;
     },
     'EXT-X-BYTERANGE' => sub {
       my ( $tag, $arg ) = @_;
@@ -109,8 +111,8 @@ sub make_parser {
         $ofs = $pbr->{offset} + $pbr->{length};
       }
       $cseg->( 'HLSSEG' )->{$tag} = {
-        length => $len,
-        offset => $ofs
+        length => 1 * $len,
+        offset => 1 * $ofs
       };
     },
     -uri => sub {

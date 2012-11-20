@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-use Data::Dumper;
-use File::Spec;
+use Path::Class;
+use Test::Differences;
 use Test::More;
 
 use Harmless::M3U8::Parser;
@@ -58,7 +58,8 @@ my @case = (
         }
       ],
       seg => [ [] ],
-      meta => {}
+      closed => 0,
+      meta   => {}
     },
   },
   {
@@ -89,13 +90,13 @@ my @case = (
           },
         ]
       ],
-      meta => {
+      closed => 1,
+      meta   => {
         "EXT-X-MEDIA-SEQUENCE" => 0,
         "EXT-X-TARGETDURATION" => 11,
         "EXT-X-VERSION"        => 3,
         "EXT-X-PLAYLIST-TYPE"  => "VOD",
-        closed                 => 1,
-      }
+      },
     },
   },
   {
@@ -128,12 +129,12 @@ my @case = (
           },
         ]
       ],
-      meta => {
+      closed => 1,
+      meta   => {
         "EXT-X-MEDIA-SEQUENCE" => 0,
         "EXT-X-TARGETDURATION" => 11,
         "EXT-X-VERSION"        => 3,
         "EXT-X-PLAYLIST-TYPE"  => "VOD",
-        closed                 => 1,
       }
     },
   },
@@ -181,7 +182,8 @@ my @case = (
           },
         ]
       ],
-      meta => { closed => 1 }
+      closed => 1,
+      meta   => {}
     },
   },
   {
@@ -191,7 +193,7 @@ my @case = (
       seg => [
         [
           {
-            'EXT-X-PROGRAM-DATE-TIME' => 1266562463,
+            'EXT-X-PROGRAM-DATE-TIME' => 1266562463.031,
             duration                  => "9.9767",
             title                     => "",
             uri                       => "fileSequence0.ts"
@@ -213,7 +215,8 @@ my @case = (
           },
         ]
       ],
-      meta => {}
+      closed => 0,
+      meta   => {}
     },
   },
   {
@@ -234,7 +237,8 @@ my @case = (
           },
         ]
       ],
-      meta => { closed => 1 }
+      closed => 1,
+      meta   => {}
     },
   },
   {
@@ -308,7 +312,8 @@ my @case = (
         }
       ],
       seg => [ [] ],
-      meta => {
+      closed => 0,
+      meta   => {
         "EXT-X-I-FRAME-STREAM-INF" => [
           {
             URI          => "gear1/iframe_index.m3u8",
@@ -451,23 +456,18 @@ for my $tc ( @case ) {
   my $name = $tc->{source};
   ok my $p = Harmless::M3U8::Parser->new, "$name: new";
   isa_ok $p, 'Harmless::M3U8::Parser';
-  my $src = File::Spec->catfile( REF, $tc->{source} );
+  my $src = file( REF, $tc->{source} );
   my $got = eval { $p->parse_file( $src ) };
   my $err = $@;
   if ( $tc->{want} ) {
     ok !$err, "$name: no error";
-    is_deeply $got, $tc->{want}, "$name: parsed"
-     or diag dd( [ $got, $tc->{want} ], [ 'got', 'want' ] );
+    is_deeply $got, $tc->{want}, "$name: parsed";
+
   }
   else {
     ok $err, "$name: error reported";
     like $err, $tc->{want_error}, "$name: error matches";
   }
-}
-
-sub dd {
-  Data::Dumper->new( @_ )->Indent( 2 )->Quotekeys( 0 )->Useqq( 1 )
-   ->Dump;
 }
 
 # vim:ts=2:sw=2:et:ft=perl
