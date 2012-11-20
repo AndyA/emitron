@@ -9,11 +9,11 @@ use Test::More;
 
 use Harmless::M3U8::Parser;
 
-use constant REF => 't/ref';
+use constant REF => 't/data';
 
 my @case = (
   {
-    source => 'bipbop_4x3_variant/bipbop_4x3_variant.m3u8',
+    source => 'simple_root.m3u8',
     want   => {
       vpl => [
         {
@@ -62,7 +62,7 @@ my @case = (
     },
   },
   {
-    source => 'bipbop_4x3_variant/gear1/prog_index.m3u8',
+    source => 'simple_var.m3u8',
     want   => {
       vpl => [],
       seg => [
