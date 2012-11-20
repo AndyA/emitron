@@ -16,7 +16,6 @@ sub test_cleanup {
     $want++;
     $pl->push_discontinuity if rand() < 0.2;
     $pl->cleanup( 11 );
-    diag dd( [ $pl->{_pl} ], ['pl'] );
     $want = 11 if $want > 11;
   }
 }
