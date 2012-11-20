@@ -93,6 +93,7 @@ sub _make_tag_formatter {
       $tz =~ s/^(...)(..)$/$1:$2/;
       return "$tm$tz";
     },
+    'EXT-X-I-FRAMES-ONLY' => [],
   );
 
   my $fmt = sub {
@@ -128,7 +129,9 @@ sub _make_tag_formatter {
         push @out, ':', $sp->( $val );
       }
       elsif ( 'ARRAY' eq ref $sp ) {
-        push @out, ':', $fmtv->( $sp, $val );
+        # Empty array: no value, tag is flag
+        # Non-empty array: enum
+        push @out, ':', $fmtv->( $sp, $val ) if @$sp;
       }
       else {
         die;

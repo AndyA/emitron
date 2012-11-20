@@ -15,13 +15,14 @@ use Harmless::M3U8::Parser;
 use constant REF => 't/data';
 
 my @case = (
-  { source => 'simple_root.m3u8', },
-  { source => 'simple_var.m3u8', },
-  { source => 'discontinuity.m3u8', },
-  { source => 'byterange.m3u8', },
-  { source => 'datetime.m3u8', },
-  { source => 'endlist.m3u8', },
-  { source => 'complex.m3u8', },
+  { source => 'simple_root.m3u8' },
+  { source => 'simple_var.m3u8' },
+  { source => 'discontinuity.m3u8' },
+  { source => 'byterange.m3u8' },
+  { source => 'datetime.m3u8' },
+  { source => 'endlist.m3u8' },
+  { source => 'complex.m3u8' },
+  { source => 'iframe_index.m3u8' },
 );
 
 plan tests => 2 * @case;

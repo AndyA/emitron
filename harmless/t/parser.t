@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 
+use Data::Dumper;
 use Path::Class;
 use Test::Differences;
 use Test::More;
@@ -448,6 +449,60 @@ my @case = (
       }
     },
   },
+  {
+    source => 'iframe_index.m3u8',
+    want   => {
+      closed => 1,
+      vpl    => [],
+      seg    => [
+        [
+          {
+            "EXT-X-BYTERANGE" => {
+              length => 53016,
+              offset => 564
+            },
+            duration => "3.003",
+            title    => "",
+            uri      => "main.ts"
+          },
+          {
+            "EXT-X-BYTERANGE" => {
+              length => 37788,
+              offset => 322608
+            },
+            duration => "3.003",
+            title    => "",
+            uri      => "main.ts"
+          },
+          {
+            "EXT-X-BYTERANGE" => {
+              length => 53016,
+              offset => 631304
+            },
+            duration => "3.003",
+            title    => "",
+            uri      => "main.ts"
+          },
+          {
+            "EXT-X-BYTERANGE" => {
+              length => 37788,
+              offset => 954476
+            },
+            duration => "3.003",
+            title    => "",
+            uri      => "main.ts"
+          }
+        ]
+      ],
+      meta => {
+        "EXT-X-I-FRAMES-ONLY"  => 1,
+        "EXT-X-MEDIA-SEQUENCE" => 0,
+        "EXT-X-TARGETDURATION" => 10,
+        "EXT-X-VERSION"        => 4,
+        "EXT-X-PLAYLIST-TYPE"  => "VOD"
+      }
+    },
+  },
 );
 
 plan tests => 4 * @case;
@@ -461,13 +516,18 @@ for my $tc ( @case ) {
   my $err = $@;
   if ( $tc->{want} ) {
     ok !$err, "$name: no error";
-    is_deeply $got, $tc->{want}, "$name: parsed";
-
+    is_deeply $got, $tc->{want}, "$name: parsed"
+     or diag dd( [ $got, $tc->{want} ], [ 'got', 'want' ] );
   }
   else {
     ok $err, "$name: error reported";
     like $err, $tc->{want_error}, "$name: error matches";
   }
+}
+
+sub dd {
+  Data::Dumper->new( @_ )->Indent( 2 )->Quotekeys( 0 )->Useqq( 1 )
+   ->Dump;
 }
 
 # vim:ts=2:sw=2:et:ft=perl

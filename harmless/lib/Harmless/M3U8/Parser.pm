@@ -179,6 +179,18 @@ sub parse_file {
   return $p->();
 }
 
+sub parse {
+  my ( $self, $m3u8 ) = @_;
+
+  my $p = $self->make_parser;
+
+  for my $ln ( split /\n/, $m3u8 ) {
+    $p->( $ln );
+  }
+
+  return $p->();
+}
+
 1;
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl
