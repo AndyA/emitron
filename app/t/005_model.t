@@ -2,12 +2,14 @@
 
 use strict;
 use warnings;
+
 use Test::More tests => 23;
 
-use Emitron::Model;
 use Data::Dumper;
 use File::Temp;
 use Scalar::Util qw( refaddr );
+
+use Emitron::Model;
 
 {
   my $dir = File::Temp->newdir;

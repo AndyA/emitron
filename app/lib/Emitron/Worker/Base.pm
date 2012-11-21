@@ -26,11 +26,12 @@ sub start {
 }
 
 sub get_message {
-  my $self = shift;
+  my ( $self, @args ) = @_;
+
   $self->post_message( signal => 'READY' );
   while () {
     return Emitron::Message->recv( $self->{rdr} )
-     if $self->{sel}->can_read;
+     if $self->{sel}->can_read( @args );
   }
 }
 
