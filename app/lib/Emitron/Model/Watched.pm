@@ -92,7 +92,6 @@ sub _read_ev {
 
 sub _drain {
   my $self = shift;
-  $self->_install_watch;
   my $in = $self->_inotify;
   $in->blocking( 0 );
   $in->poll;
