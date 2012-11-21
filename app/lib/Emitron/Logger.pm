@@ -14,15 +14,18 @@ use POSIX qw( strftime );
 use Term::ANSIColor;
 use Time::HiRes;
 
+my ( %level, %lname );
+
 BEGIN {
   our @EXPORT = ();
-  my %level = (
+  %level = (
     FATAL   => 1,
     ERROR   => 2,
     WARNING => 3,
     INFO    => 4,
     DEBUG   => 5,
   );
+  %lname = reverse %level;
   while ( my ( $lvl, $code ) = each %level ) {
     no strict 'refs';
     *$lvl = sub { return $code };
@@ -34,7 +37,7 @@ BEGIN {
 }
 
 my @LOGCOLOUR
- = ( undef, 'red on_white', 'red on_white', 'yellow', 'cyan',
+ = ( undef, 'white on_red', 'white on_red', 'yellow', 'cyan',
   'green', );
 
 my $LOGLEVEL = INFO;
@@ -64,7 +67,11 @@ sub _mention {
   my $ts   = _ts;
   my $attr = $LOGCOLOUR[$level] || 'white';
 
-  print colored( "$ts [$$] $_", $attr ), "\n" for split /\n/, $msg;
+  print colored(
+    sprintf( '%s %-7s [%5d] %s', $ts, $lname{$level}, $$, $_ ), $attr
+   ),
+   "\n"
+   for split /\n/, $msg;
 }
 
 1;
