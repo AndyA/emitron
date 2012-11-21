@@ -45,13 +45,14 @@ sub _make_watch {
   my $evf  = $self->_evfile;
   my $dir  = file( $evf )->parent;
 
+  $self->{_watch}->cancel if $self->{_watch};
+
   if ( -f $evf ) {
     $self->{_watch} = $self->_inotify->watch(
       $evf,
       IN_MODIFY | IN_DELETE_SELF,
       sub {
         my $ev = shift;
-        $ev->w->cancel;
         $self->_make_watch;
       }
     );
@@ -64,7 +65,6 @@ sub _make_watch {
     sub {
       my $ev = shift;
       if ( $ev->fullname eq $self->_evfile ) {
-        $ev->w->cancel;
         $self->_make_watch;
       }
     }
@@ -92,7 +92,7 @@ sub _read_ev {
 
 sub _drain {
   my $self = shift;
-  my $in = $self->_inotify;
+  my $in   = $self->_inotify;
   $in->blocking( 0 );
   $in->poll;
   $in->blocking( 1 );
