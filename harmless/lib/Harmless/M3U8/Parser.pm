@@ -26,12 +26,19 @@ sub _str {
   return $sv;
 }
 
+sub _to_name {
+  my $s = shift;
+  $s =~ s/-/_/g;
+  return $s;
+}
+
 sub _parse_attr {
   my $attr  = shift;
   my @at    = ();
   my $id    = qr{[A-Z]+(?:-[A-Z]+)*};
   my $value = qr{"(?:\\.|[^"])*"|[^,]*};
-  push @at, $1, _str( $2 ) while $attr =~ m{($id)=($value),?}g;
+  push @at, _to_name( $1 ), _str( $2 )
+   while $attr =~ m{($id)=($value),?}g;
   return @at;
 }
 
@@ -59,36 +66,36 @@ sub make_parser {
   };
 
   my %de_hls = (
-    'EXT-X-I-FRAME-STREAM-INF' => sub {
+    EXT_X_I_FRAME_STREAM_INF => sub {
       $rv->{meta}{ $_[0] } = { _parse_attr( $_[1] ) };
     },
-    'EXT-X-MAP' => $pglob,    # TODO clear map after discontinuity
-    'EXT-X-KEY' => $pglob,
+    EXT_X_MAP => $pglob,    # TODO clear map after discontinuity
+    EXT_X_KEY => $pglob,
 
-    'EXT-X-ALLOW-CACHE'    => $pmeta,
-    'EXT-X-MEDIA-SEQUENCE' => $pmeta,
-    'EXT-X-PLAYLIST-TYPE'  => $pmeta,
-    'EXT-X-TARGETDURATION' => $pmeta,
-    'EXT-X-VERSION'        => $pmeta,
+    EXT_X_ALLOW_CACHE    => $pmeta,
+    EXT_X_MEDIA_SEQUENCE => $pmeta,
+    EXT_X_PLAYLIST_TYPE  => $pmeta,
+    EXT_X_TARGETDURATION => $pmeta,
+    EXT_X_VERSION        => $pmeta,
 
-    'EXT-X-MEDIA'              => $pmetaa,
-    'EXT-X-I-FRAME-STREAM-INF' => $pmetaa,
+    EXT_X_MEDIA              => $pmetaa,
+    EXT_X_I_FRAME_STREAM_INF => $pmetaa,
 
-    'EXT-X-I-FRAMES-ONLY' => sub { $rv->{meta}{ $_[0] } = 1 },
-    'EXT-X-ENDLIST' => sub {
+    EXT_X_I_FRAMES_ONLY => sub { $rv->{meta}{ $_[0] } = 1 },
+    EXT_X_ENDLIST => sub {
       $rv->{closed} = 1;
       $state = 'IGNORE';
     },
-    'EXT-X-STREAM-INF' => sub {
+    EXT_X_STREAM_INF => sub {
       $cseg->( 'HLSPL' )->{ $_[0] } = { _parse_attr( $_[1] ) };
     },
-    'EXT-X-DISCONTINUITY' => sub {
+    EXT_X_DISCONTINUITY => sub {
       push @{ $rv->{seg} }, [] if @{ $rv->{seg}[-1] };
     },
   );
 
   my %de_hls_seg = (
-    'EXTINF' => sub {
+    EXTINF => sub {
       my ( $dur, $tit ) = split /,/, $_[1], 2;
       $cseg->( 'HLSSEG' );
       $tit = '' unless defined $tit;
@@ -97,12 +104,12 @@ sub make_parser {
       $seg->{duration} = $dur;
 
     },
-    'EXT-X-PROGRAM-DATE-TIME' => sub {
+    EXT_X_PROGRAM_DATE_TIME => sub {
       my $dt = DateTime::Format::ISO8601->parse_datetime( $_[1] );
       $cseg->( 'HLSSEG' )->{ $_[0] }
        = $dt->epoch + $dt->microsecond / 1_000_000;
     },
-    'EXT-X-BYTERANGE' => sub {
+    EXT_X_BYTERANGE => sub {
       my ( $tag, $arg ) = @_;
       my ( $len, $ofs ) = split /\@/, $arg, 2;
       unless ( defined $ofs ) {
@@ -115,7 +122,7 @@ sub make_parser {
         offset => 1 * $ofs
       };
     },
-    -uri => sub {
+    uri => sub {
       $cseg->( 'HLSSEG' )->{uri} = $_[1];
       push @{ $rv->{seg}[-1] }, $seg;
       undef $seg;
@@ -124,7 +131,7 @@ sub make_parser {
   );
 
   my %de_hls_pl = (
-    -uri => sub {
+    uri => sub {
       $cseg->( 'HLSPL' )->{uri} = $_[1];
       push @{ $rv->{vpl} }, $seg;
       undef $seg;
@@ -134,7 +141,7 @@ sub make_parser {
 
   my %decode = (
     INIT => {
-      'EXTM3U' => sub {
+      EXTM3U => sub {
         $state = 'HLS';
       },
     },
@@ -145,8 +152,9 @@ sub make_parser {
 
   my $despatch = sub {
     my ( $dir, @a ) = @_;
-    my $hd = $decode{$state}{$dir};
-    $hd->( $dir, @a ) if $hd;
+    my $tag = _to_name( $dir );
+    my $hd  = $decode{$state}{$tag};
+    $hd->( $tag, @a ) if $hd;
   };
 
   return sub {
@@ -159,7 +167,7 @@ sub make_parser {
       return;
     }
     return if $ln =~ /^#/;
-    $despatch->( -uri => $ln );
+    $despatch->( uri => $ln );
   };
 }
 

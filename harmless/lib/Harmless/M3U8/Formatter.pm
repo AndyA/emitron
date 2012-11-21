@@ -16,6 +16,12 @@ sub new {
   return bless {@_}, $class;
 }
 
+sub _from_name {
+  my $s = shift;
+  $s =~ s/_/-/g;
+  return $s;
+}
+
 sub _make_tag_formatter {
   my $self = shift;
 
@@ -39,61 +45,61 @@ sub _make_tag_formatter {
   };
 
   my $stminf = {
-    'PROGRAM-ID' => 'i',
-    AUDIO        => 'zqs',
-    VIDEO        => 'zqs',
-    SUBTITLES    => 'zqs',
-    CODECS       => 'zqs',
-    RESOLUTION   => 'res',
+    PROGRAM_ID => 'i',
+    AUDIO      => 'zqs',
+    VIDEO      => 'zqs',
+    SUBTITLES  => 'zqs',
+    CODECS     => 'zqs',
+    RESOLUTION => 'res',
   };
 
   my %spec = (
-    'EXT-X-MEDIA-SEQUENCE' => 'i',
-    'EXT-X-TARGETDURATION' => 'i',
-    'EXT-X-VERSION'        => 'i',
-    'EXT-X-PLAYLIST-TYPE'  => [ 'EVENT', 'VOD' ],
-    'EXT-X-MEDIA'          => {
+    EXT_X_MEDIA_SEQUENCE => 'i',
+    EXT_X_TARGETDURATION => 'i',
+    EXT_X_VERSION        => 'i',
+    EXT_X_PLAYLIST_TYPE  => [ 'EVENT', 'VOD' ],
+    EXT_X_MEDIA          => {
       require => {},
       allow   => {
-        URI        => 'zqs',
-        TYPE       => [ 'AUDIO', 'VIDEO', 'SUBTITLES' ],
-        'GROUP-ID' => 'zqs',
-        LANGUAGE   => 'zqs',
-        NAME       => 'zqs',
+        URI      => 'zqs',
+        TYPE     => [ 'AUDIO', 'VIDEO', 'SUBTITLES' ],
+        GROUP_ID => 'zqs',
+        LANGUAGE => 'zqs',
+        NAME     => 'zqs',
         DEFAULT         => [ 'YES', 'NO' ],
         AUTOSELECT      => [ 'YES', 'NO' ],
         FORCED          => [ 'YES', 'NO' ],
         CHARACTERISTICS => 'zqs',
       },
     },
-    'EXT-X-I-FRAME-STREAM-INF' => {
+    EXT_X_I_FRAME_STREAM_INF => {
       require => {
         BANDWIDTH => 'i',
         URI       => 'zqs',
       },
       allow => $stminf,
     },
-    'EXT-X-STREAM-INF' => {
+    EXT_X_STREAM_INF => {
       require => { BANDWIDTH => 'i', },
       allow   => $stminf,
     },
-    'EXT-X-BYTERANGE' => sub {
+    EXT_X_BYTERANGE => sub {
       my $v = shift;
       return join '@', $fmtv->( i => $v->{length} ),
        $fmtv->( i => $v->{offset} );
     },
-    'EXTINF' => sub {
+    EXTINF => sub {
       my $v = shift;
       return join ',', $fmtv->( f => $v->{duration} ),
        $fmtv->( bs => $v->{title} );
     },
-    'EXT-X-PROGRAM-DATE-TIME' => sub {
+    EXT_X_PROGRAM_DATE_TIME => sub {
       my $dt = DateTime->from_epoch( epoch => shift );
       my ( $tm, $tz ) = $dt->strftime( '%FT%T.%3N', '%z' );
       $tz =~ s/^(...)(..)$/$1:$2/;
       return "$tm$tz";
     },
-    'EXT-X-I-FRAMES-ONLY' => [],
+    EXT_X_I_FRAMES_ONLY => [],
   );
 
   my $fmt = sub {
@@ -110,7 +116,8 @@ sub _make_tag_formatter {
     my @out = ();
     for my $k ( @ko ) {
       my $vv = delete $v{$k};
-      push @out, join '=', $k, $fmtv->( $all{$k}, $vv ) if defined $vv;
+      push @out, join '=', _from_name( $k ), $fmtv->( $all{$k}, $vv )
+       if defined $vv;
     }
     my @extra = sort keys %v;
     die "Unknown attributes on $tag: ", join( ', ', @extra ) if @extra;
@@ -119,7 +126,7 @@ sub _make_tag_formatter {
 
   my $fmt1 = sub {
     my ( $tag, $val ) = @_;
-    my @out = ( '#', $tag );
+    my @out = ( '#', _from_name( $tag ) );
     my $sp = $spec{$tag} || die "Unknown tag: $tag";
     if ( ref $sp ) {
       if ( 'HASH' eq ref $sp ) {

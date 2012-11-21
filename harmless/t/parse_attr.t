@@ -9,13 +9,13 @@ use Harmless::M3U8::Parser;
 my @case = (
   {
     source => 'PROGRAM-ID=1',
-    want   => [ 'PROGRAM-ID', 1 ]
+    want   => [ 'PROGRAM_ID', 1 ]
   },
   {
     source =>
      'PROGRAM-ID=1,BANDWIDTH=232370,CODECS="mp4a.40.2, avc1.4d4015"',
     want => [
-      'PROGRAM-ID', 1,
+      'PROGRAM_ID', 1,
       BANDWIDTH => 232370,
       CODECS    => "mp4a.40.2, avc1.4d4015",
     ]
