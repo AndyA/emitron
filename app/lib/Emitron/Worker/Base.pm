@@ -31,20 +31,6 @@ sub start {
   $self->run;
 }
 
-sub post_event {
-  my ( $self, $name, $ev ) = @_;
-  return $self->event->commit(
-    {
-      type   => 'event',
-      name   => $name,
-      msg    => $ev,
-      source => 'internal',
-      worker => $$,
-      ts     => time
-    }
-  );
-}
-
 sub _despatch {
   my ( $self, $ev ) = @_;
   debug 'Despatching event', $ev;
@@ -95,6 +81,20 @@ sub get_message {
 sub post_message {
   my ( $self, @msg ) = @_;
   Emitron::Message->new( @msg )->send( $self->{wtr} );
+}
+
+sub post_event {
+  my ( $self, $name, $ev ) = @_;
+  return $self->event->commit(
+    {
+      type   => 'event',
+      name   => $name,
+      msg    => $ev,
+      source => 'internal',
+      worker => $$,
+      ts     => time
+    }
+  );
 }
 
 1;
