@@ -36,7 +36,7 @@ sub run {
       }
     }
     $rev = $nrev;
-    $ser = $queue->wait( $ser, 10 );
+    $ser = $queue->wait( $ser, 10000 );
   }
 }
 

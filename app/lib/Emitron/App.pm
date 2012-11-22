@@ -20,6 +20,7 @@ use Time::HiRes qw( sleep );
 
 use constant QUEUE => '/tmp/emitron.queue';
 use constant MODEL => '/tmp/emitron.model';
+use constant EVENT => '/tmp/emitron.event';
 
 =head1 NAME
 
@@ -49,10 +50,15 @@ sub make_workers {
   my ( $self, @handlers ) = @_;
   my @w = ();
 
-  push @w, Emitron::Worker::EventWatcher->new( queue => $self->queue );
+  push @w,
+   Emitron::Worker::EventWatcher->new(
+    event => $self->event,
+    queue => $self->queue
+   );
 
   push @w,
    Emitron::Worker::CRTMPServerWatcher->new(
+    event   => $self->event,
     uri     => 'http://localhost:6502',
     verb    => 'listStreams',
     backoff => Emitron::BackOff->new( base => 1, max => 10 )
@@ -62,7 +68,11 @@ sub make_workers {
   $_->subscribe( $desp ) for @handlers;
 
   for ( 1 .. 5 ) {
-    push @w, Emitron::Worker::Drone->new( despatcher => $desp );
+    push @w,
+     Emitron::Worker::Drone->new(
+      event      => $self->event,
+      despatcher => $desp
+     );
   }
   return \@w;
 }
@@ -77,6 +87,12 @@ sub queue {
   my $self = shift;
   return $self->{queue}
    ||= Emitron::Model::Watched->new( root => QUEUE )->init;
+}
+
+sub event {
+  my $self = shift;
+  return $self->{event}
+   ||= Emitron::Model::Watched->new( root => EVENT, prune => 50 )->init;
 }
 
 # TODO this shouldn't be here.
