@@ -56,8 +56,6 @@ sub msg::type { shift->{type} }
   $md->despatch( msg->new( type => 'foo.0.bar.0' ) );
   $md->despatch( msg->new( type => 'foo.0.0.bar.0' ) );
 
-  #  diag Dumper( $md );
-
   eq_or_diff $rec1->log,
    [
     [ bless { type => 'foo' }, 'msg' ],
@@ -102,9 +100,12 @@ sub msg::type { shift->{type} }
 
   $md->despatch( msg->new( type => 'foo' ) );
   $md->despatch( msg->new( type => 'bar' ) );
+  $md->despatch( msg->new( type => 'bar' ) );
 
   eq_or_diff $rec1->log,
    [
+    [ bless { type => 'bar' }, 'msg' ],
+    [ bless { type => 'bar' }, 'msg' ],
     [ bless { type => 'bar' }, 'msg' ],
     [ bless { type => 'bar' }, 'msg' ],
    ],
@@ -123,7 +124,6 @@ sub msg::type { shift->{type} }
     [ bless { type => 'baz' }, 'msg' ],
    ],
    "messages to rec1 after off backup bar";
-
 }
 
 # vim:ts=2:sw=2:et:ft=perl

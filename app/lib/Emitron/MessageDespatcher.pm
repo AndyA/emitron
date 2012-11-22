@@ -46,12 +46,15 @@ sub _match {
 
 sub off {
   my ( $self, %like ) = @_;
-  @{ $self->{h} }
-   = grep { !$self->_match( $_, \%like ) } @{ $self->{h} };
+  my @nh = grep { !$self->_match( $_, \%like ) } @{ $self->{h} };
+  if ( scalar @nh != scalar @{ $self->{h} } ) {
+    @{ $self->{h} } = @nh;
+    delete $self->{c};
+  }
   return $self;
 }
 
-sub _bind_message {
+sub _map_message {
   my ( $self, $name ) = @_;
   my @hh = ();
   for my $h ( @{ $self->{h} } ) {
@@ -61,7 +64,12 @@ sub _bind_message {
      if ( 'Regexp' eq ref $ma && ( @cap = $name =~ $ma ) )
      || $ma eq $name;
   }
-  return @hh;
+  return \@hh;
+}
+
+sub _bind_message {
+  my ( $self, $name ) = @_;
+  return @{ $self->{c}{$name} ||= $self->_map_message( $name ) };
 }
 
 sub despatch {
@@ -69,8 +77,8 @@ sub despatch {
 
   my @hh = $self->_bind_message( $msg->type );
   for my $hh ( @hh ) {
-    my $h = shift @$hh;
-    $h->{handler}( $msg, @$hh );
+    my ( $h, @a ) = @$hh;
+    $h->{handler}( $msg, @a );
   }
 }
 
