@@ -54,7 +54,7 @@ sub _get {
   my ( $obj, $k ) = @_;
   return $obj->[$k] if 'ARRAY' eq ref $obj;
   return $obj->{$k} if 'HASH'  eq ref $obj;
-  die;
+  return;
 }
 
 sub iter {
