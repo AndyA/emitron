@@ -6,6 +6,8 @@ use warnings;
 use Carp qw( confess croak );
 use Storable qw( dclone );
 
+use Data::JSONVisitor;
+
 use base qw( Exporter );
 
 our @EXPORT = qw( json_patch json_patched );
@@ -33,18 +35,6 @@ our $VERSION = '0.01';
 
 =head1 INTERFACE 
 
-=cut
-
-sub _at_path {
-  my ( $data, $cb, $k, @path ) = @_;
-  return $cb->( $data, $k ) unless @path;
-  croak "JSONPath refers to a non-existant path"
-   unless defined $data && ref $data;
-  return _at_path( $data->{$k}, $cb, @path ) if 'HASH'  eq ref $data;
-  return _at_path( $data->[$k], $cb, @path ) if 'ARRAY' eq ref $data;
-  confess( "I don't know how to handle a " . ref $data );
-}
-
 =head2 C<< json_patch >>
 
   json_patch($data_a, $diff);
@@ -53,42 +43,9 @@ sub _at_path {
 
 sub json_patch {
   my ( $orig, $patch ) = @_;
-  my $data = { '$' => $orig };
-  for my $p ( @$patch ) {
-    my @path = map { split /\./ } (
-      ( exists $p->{path}    ? ( $p->{path} )    : () ),
-      ( exists $p->{element} ? ( $p->{element} ) : () )
-    );
-    if ( $p->{op} eq 'add' ) {
-      my $v = $p->{value};
-      _at_path(
-        $data,
-        sub {
-          my ( $data, $k ) = @_;
-          if ( 'HASH' eq ref $data ) { $data->{$k} = $v }
-          elsif ( 'ARRAY' eq ref $data ) { splice $data, $k, 0, $v }
-          else                           { confess }
-        },
-        @path
-      );
-    }
-    elsif ( $p->{op} eq 'remove' ) {
-      _at_path(
-        $data,
-        sub {
-          my ( $data, $k ) = @_;
-          if    ( 'HASH'  eq ref $data ) { delete $data->{$k} }
-          elsif ( 'ARRAY' eq ref $data ) { splice $data, $k, 1 }
-          else                           { confess }
-        },
-        @path
-      );
-    }
-    else {
-      croak "Bad op: $p->{op}";
-    }
-  }
-  return $data->{'$'};
+  my $jp = Data::JSONPatch->new( $orig );
+  $jp->patch( $patch );
+  return $jp->data;
 }
 
 =head2 C<< json_patched >>
@@ -105,6 +62,57 @@ sub _clone {
 sub json_patched {
   my ( $orig, $patch ) = @_;
   return json_patch( _clone( $orig ), $patch );
+}
+
+sub new {
+  my $self = bless {}, shift;
+  $self->data( @_ ) if @_;
+  $self;
+}
+
+sub data {
+  my $self = shift;
+  return $self->{p}->data unless @_;
+  $self->{p} = Data::JSONVisitor->new( @_ );
+  $self;
+}
+
+sub patch_path {
+  my ( $self, $p ) = @_;
+  join '.',
+   ( exists $p->{path}    ? ( $p->{path} )    : () ),
+   ( exists $p->{element} ? ( $p->{element} ) : () );
+}
+
+sub patch {
+  my ( $self, $jp ) = @_;
+  for my $pp ( @$jp ) {
+    my $path = $self->patch_path( $pp );
+    if ( $pp->{op} eq 'add' ) {
+      my $v = $pp->{value};
+      $self->{p}->each(
+        $path,
+        sub {
+          my ( undef, undef, $elt, $key ) = @_;
+          if ( 'ARRAY' eq ref $elt ) { splice @$elt, $key, 0, $v }
+          elsif ( 'HASH' eq ref $elt ) { $elt->{$key} = $v }
+          else                         { die }
+        }
+      );
+    }
+    elsif ( $pp->{op} eq 'remove' ) {
+      $self->{p}->each(
+        $path,
+        sub {
+          my ( undef, undef, $elt, $key ) = @_;
+          if ( 'ARRAY' eq ref $elt ) { splice @$elt, $key, 1 }
+          elsif ( 'HASH' eq ref $elt ) { delete $elt->{$key} }
+          else                         { die }
+        }
+      );
+    }
+    else { die "Bad op: ", $pp->{op} }
+  }
 }
 
 1;
