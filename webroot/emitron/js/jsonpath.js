@@ -409,7 +409,7 @@ JSONVisitor.prototype = {
   get: function(path) {
     var value = null;
     this.each(path, function(k, v, ctx, key) {
-      value = ctx[key];
+      value = v;
     });
     return value;
   },
