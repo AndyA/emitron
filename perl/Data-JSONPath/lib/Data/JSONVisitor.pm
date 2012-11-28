@@ -66,9 +66,6 @@ sub iter {
   my ( $ipos, $vpos ) = ( 0, 0 );
   my $k;
 
-  #  use Data::Dumper;
-  #  print STDERR Dumper( \@p );
-
   return sub {
     while ( $vpos < @p ) {
       while ( $ipos <= $vpos ) {
