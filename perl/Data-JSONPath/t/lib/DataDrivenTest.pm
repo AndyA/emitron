@@ -31,7 +31,7 @@ sub ddt {
       my $tc  = shift;
       my $cln = dclone( $tc );
       $ocb->( $cln );
-      eq_or_diff $cln, $tc, "data unchaged";
+      eq_or_diff $cln, $tc, "data unchanged";
     };
   }
 
