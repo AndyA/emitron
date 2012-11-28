@@ -114,6 +114,177 @@ sub toker {
   };
 }
 
+sub new {
+  my $class = shift;
+  my $self = bless {}, $class;
+  $self->parse( shift ) if @_;
+  return $self;
+}
+
+sub _mk_list_iter {
+  my @l = @_;
+  sub { return shift @l }
+}
+
+sub _mk_slice_iter {
+  my ( $from, $to, $step ) = @_;
+  $step = 1 unless defined $step;
+  return sub {
+    my $v = $from;
+    return if $v >= $to;
+    $from += $step;
+    return $v;
+  };
+}
+
+sub _mk_slice {
+  my $tok = shift;
+  my ( undef, $from, $to, $step ) = @{ $tok->{m} };
+  $step = 1 unless defined $step;
+  return {
+    match => sub {
+      $_[0] >= $from && $_[0] < $to && ( $_[0] - $from ) % $step == 0;
+    },
+    iter    => sub { _mk_slice_iter( $from, $to, $step ) },
+    capture => 1,
+  };
+}
+
+sub _mk_literal {
+  my $tok = shift;
+  my $vv  = $tok->{m}[1];
+  return {
+    match => sub { return $_[0] eq $vv },
+    iter => _mk_list_iter( $vv ),
+    capture => 0
+  };
+}
+
+sub _mk_any {
+  my $tok = shift;
+  return {
+    match => sub { 1 },
+    iter  => sub {
+      my $obj = shift;
+      return _mk_slice_iter( 0, scalar @$obj ) if 'ARRAY' eq ref $obj;
+      return _mk_list_iter( sort keys %$obj );
+    },
+    capture => 1,
+  };
+}
+
+sub _mk_multi_iter {
+  my ( $obj, @pp ) = @_;
+  my $ipos = 0;
+  my $ii   = $pp[ $ipos++ ]{iter}( $obj );
+  return sub {
+    return unless defined $ii;
+    my $vv = $ii->();
+    return $vv if defined $vv;
+    $ii = $pp[ $ipos++ ]{iter}( $obj );
+  };
+}
+
+sub _mk_multi {
+  my @pp = @{ $_[0] };
+  die "Empty []" unless @pp;
+  return $pp[0] if @pp == 1;
+  return {
+    match => sub {
+      my $key = shift;
+      for my $p ( @pp ) { return 1 if $p->{match}( $key ) }
+      return;
+    },
+    iter    => sub { _mk_multi_iter( $_[0], @pp ) },
+    capture => 1,
+  };
+}
+
+sub _parse_brackets {
+  my ( $class, $tokr ) = @_;
+
+  my @pp = ();
+
+  my %TOKH = (
+    lit   => \&_mk_literal,
+    str   => \&_mk_literal,
+    slice => \&_mk_slice,
+    star  => \&_mk_any,
+  );
+
+  my $tok = $tokr->();
+  while ( $tok ) {
+    my $th = $TOKH{ $tok->{t} } or die "Syntax error: ", $tok->{m}[0];
+    push @pp, $th->( $tok );
+    $tok = $tokr->();
+    die "Missing ]" unless $tok;
+    last if $tok->{t} eq 'rb';
+    die "Syntax error: ", $tok->{m}[0] unless $tok->{t} eq 'comma';
+    $tok = $tokr->();
+  }
+  return \@pp;
+}
+
+sub _parse {
+  my ( $class, $path ) = @_;
+  my $tokr = $class->toker( $path );
+  my @pp   = ();
+
+  my %TOKH = (
+    lit  => \&_mk_literal,
+    star => \&_mk_any,
+    dot  => sub { },
+    lb   => sub { _mk_multi( $class->_parse_brackets( $tokr ) ) },
+  );
+
+  my $tok = $tokr->();
+  die "Empty path" unless defined $tok;
+  while ( $tok ) {
+    my $th = $TOKH{ $tok->{t} } or die "Syntax error: ", $tok->{m}[0];
+    push @pp, $th->( $tok );
+    $tok = $tokr->();
+  }
+  return \@pp;
+}
+
+sub parse {
+  my ( $self, $path ) = @_;
+  my $cl = ref $self;
+  return $self->{path} = $cl->_parse( $path ) if $cl;
+  return $self->_parse( $path );
+}
+
+sub _split_simple {
+  my ( $self, $path ) = @_;
+  return split /\./, $path if $path =~ /^\$(?:\.\w+)*$/;
+  die "Needs a simple path";
+}
+
+sub path { @{ shift->{path} || [] } }
+
+sub match {
+  my ( $self, $path ) = @_;
+  my @mp = $self->_split_simple( $path );
+  my @pp = $self->path;
+  while ( @pp && @mp ) {
+    return unless ( shift @pp )->{match}( shift @mp );
+  }
+  return if @pp;
+  return \@mp;
+}
+
+sub capture {
+  my ( $self, $path ) = @_;
+  my @mp  = $self->_split_simple( $path );
+  my @pp  = $self->path;
+  my @cap = ();
+  while ( @pp && @mp ) {
+    my $mv = shift @mp;
+    push @cap, $mv if ( shift @pp )->{capture};
+  }
+  return \@cap;
+}
+
 1;
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl
