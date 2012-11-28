@@ -1,0 +1,395 @@
+{
+   "changeSet" : [
+      {
+         "data" : {},
+         "list" : {},
+         "name" : "Empty",
+         "patch" : []
+      },
+      {
+         "data" : {},
+         "list" : {
+            "foo" : [
+               2,
+               2
+            ]
+         },
+         "name" : "Add",
+         "patch" : [
+            {
+               "element" : 0,
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "Zero"
+            },
+            {
+               "element" : 1,
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "One"
+            }
+         ]
+      },
+      {
+         "data" : {
+            "foo" : {
+               "one" : "One",
+               "zero" : "Zero"
+            }
+         },
+         "list" : {
+            "foo" : {
+               "one" : 1,
+               "zero" : 1
+            }
+         },
+         "name" : "Remove",
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo.one"
+            },
+            {
+               "op" : "remove",
+               "path" : "$.foo.zero"
+            }
+         ]
+      },
+      {
+         "data" : {
+            "foo" : {
+               "one" : "One",
+               "zero" : "Zero"
+            }
+         },
+         "list" : {
+            "foo" : {
+               "one" : 1,
+               "zero" : 3
+            }
+         },
+         "name" : "Remove/Add",
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo.one"
+            },
+            {
+               "op" : "remove",
+               "path" : "$.foo.zero"
+            },
+            {
+               "element" : "zero",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : 0
+            }
+         ]
+      },
+      {
+         "data" : {},
+         "list" : {
+            "streams" : 2
+         },
+         "name" : "Add empty",
+         "patch" : [
+            {
+               "element" : "streams",
+               "op" : "add",
+               "path" : "$",
+               "value" : {}
+            }
+         ]
+      },
+      {
+         "data" : {
+            "bar" : [
+               1,
+               2,
+               3,
+               4,
+               5
+            ],
+            "foo" : {
+               "desc" : "An object"
+            }
+         },
+         "list" : {
+            "bar" : [
+               2
+            ],
+            "foo" : {
+               "desc" : 3,
+               "state" : 2
+            }
+         },
+         "name" : "multi match",
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo.desc"
+            },
+            {
+               "element" : "desc",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "Or maybe not"
+            },
+            {
+               "element" : "state",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "uncertain"
+            },
+            {
+               "element" : 0,
+               "op" : "add",
+               "path" : "$.bar",
+               "value" : "zero"
+            }
+         ]
+      }
+   ],
+   "model" : [
+      {
+         "data" : {
+            "bar" : "Hello Again!",
+            "foo" : [
+               1,
+               2,
+               3
+            ]
+         },
+         "name" : "Replace data",
+         "newdata" : {
+            "bar" : "Hello!",
+            "foo" : [
+               1,
+               2,
+               3
+            ]
+         },
+         "on" : [
+            "$.foo",
+            "$.bar"
+         ],
+         "want" : [
+            [
+               "$.bar",
+               "Hello Again!",
+               "Hello!"
+            ]
+         ]
+      },
+      {
+         "data" : {
+            "bar" : "Hello Again!",
+            "foo" : {
+               "a" : 1,
+               "b" : 2,
+               "c" : 3
+            }
+         },
+         "name" : "Patch data",
+         "on" : [
+            "$.foo",
+            "$.bar"
+         ],
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo.a"
+            },
+            {
+               "op" : "remove",
+               "path" : "$.foo.b"
+            },
+            {
+               "element" : "d",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : 4
+            }
+         ],
+         "want" : [
+            [
+               "$.foo",
+               {
+                  "a" : 1,
+                  "b" : 2,
+                  "c" : 3
+               },
+               {
+                  "c" : 3,
+                  "d" : 4
+               }
+            ]
+         ]
+      }
+   ],
+   "trigger" : [
+      {
+         "data" : {
+            "foo" : 1
+         },
+         "name" : "simple",
+         "on" : [
+            "$.foo"
+         ],
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo"
+            },
+            {
+               "element" : "foo",
+               "op" : "add",
+               "path" : "$",
+               "value" : 2
+            }
+         ],
+         "want" : [
+            [
+               "$.foo",
+               1,
+               2
+            ]
+         ]
+      },
+      {
+         "data" : {
+            "bar" : [
+               1,
+               2,
+               3,
+               4,
+               5
+            ],
+            "foo" : {
+               "desc" : "An object"
+            }
+         },
+         "name" : "multi match",
+         "on" : [
+            "$.foo",
+            "$.bar"
+         ],
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo.desc"
+            },
+            {
+               "element" : "desc",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "Or maybe not"
+            },
+            {
+               "element" : "state",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : "uncertain"
+            },
+            {
+               "element" : 0,
+               "op" : "add",
+               "path" : "$.bar",
+               "value" : "zero"
+            }
+         ],
+         "want" : [
+            [
+               "$.foo",
+               {
+                  "desc" : "An object"
+               },
+               {
+                  "desc" : "Or maybe not",
+                  "state" : "uncertain"
+               }
+            ],
+            [
+               "$.bar",
+               [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5
+               ],
+               [
+                  "zero",
+                  1,
+                  2,
+                  3,
+                  4,
+                  5
+               ]
+            ]
+         ]
+      },
+      {
+         "data" : {
+            "foo" : {
+               "r1" : {
+                  "a" : 1,
+                  "b" : 2
+               },
+               "r2" : {
+                  "c" : 3,
+                  "d" : 4
+               }
+            }
+         },
+         "name" : "wildcard match",
+         "on" : [
+            "$.foo.*"
+         ],
+         "patch" : [
+            {
+               "op" : "remove",
+               "path" : "$.foo.r1.a"
+            },
+            {
+               "element" : "a",
+               "op" : "add",
+               "path" : "$.foo.r1",
+               "value" : "Or maybe not"
+            },
+            {
+               "element" : "r3",
+               "op" : "add",
+               "path" : "$.foo",
+               "value" : {
+                  "e" : 5,
+                  "f" : 6
+               }
+            }
+         ],
+         "want" : [
+            [
+               "$.foo.r1",
+               {
+                  "a" : 1,
+                  "b" : 2
+               },
+               {
+                  "a" : "Or maybe not",
+                  "b" : 2
+               },
+               "r1"
+            ],
+            [
+               "$.foo.r3",
+               null,
+               {
+                  "e" : 5,
+                  "f" : 6
+               },
+               "r3"
+            ]
+         ]
+      }
+   ]
+}

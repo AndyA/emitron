@@ -1,0 +1,114 @@
+[
+   {
+      "a" : [],
+      "b" : [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8
+      ],
+      "diff" : [
+         {
+            "element" : 0,
+            "op" : "add",
+            "path" : "$",
+            "value" : 8
+         },
+         {
+            "element" : 0,
+            "op" : "add",
+            "path" : "$",
+            "value" : 7
+         },
+         {
+            "element" : 0,
+            "op" : "add",
+            "path" : "$",
+            "value" : 6
+         },
+         {
+            "element" : 0,
+            "op" : "add",
+            "path" : "$",
+            "value" : 5
+         },
+         {
+            "element" : 0,
+            "op" : "add",
+            "path" : "$",
+            "value" : 4
+         },
+         {
+            "element" : 0,
+            "op" : "add",
+            "path" : "$",
+            "value" : 3
+         },
+         {
+            "element" : 0,
+            "op" : "add",
+            "path" : "$",
+            "value" : 2
+         },
+         {
+            "element" : 0,
+            "op" : "add",
+            "path" : "$",
+            "value" : 1
+         }
+      ],
+      "name" : "Populate array (unshift)"
+   },
+   {
+      "a" : [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8
+      ],
+      "b" : [],
+      "diff" : [
+         {
+            "op" : "remove",
+            "path" : "$.7"
+         },
+         {
+            "op" : "remove",
+            "path" : "$.6"
+         },
+         {
+            "op" : "remove",
+            "path" : "$.5"
+         },
+         {
+            "op" : "remove",
+            "path" : "$.4"
+         },
+         {
+            "op" : "remove",
+            "path" : "$.3"
+         },
+         {
+            "op" : "remove",
+            "path" : "$.2"
+         },
+         {
+            "op" : "remove",
+            "path" : "$.1"
+         },
+         {
+            "op" : "remove",
+            "path" : "$.0"
+         }
+      ],
+      "name" : "Empty array (pop)"
+   }
+]
