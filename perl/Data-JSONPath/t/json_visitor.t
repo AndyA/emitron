@@ -6,6 +6,7 @@ use warnings;
 use Test::Differences;
 use Test::More;
 use DataDrivenTest;
+use Recorder;
 
 use Data::JSONVisitor;
 
@@ -49,7 +50,34 @@ ddt(
     my $ii = $p->iter( $tc->{path}, 1 );
     1 while $ii->();
     eq_or_diff $p->data, $tc->{want}, "$tc->{name}: vivified";
-   }
+  }
+);
+
+ddt(
+  'set',
+  't/data/path.json#set',
+  sub {
+    my $tc = shift;
+    my $p  = Data::JSONVisitor->new( $tc->{data} );
+    $p->set( $tc->{path}, $tc->{value} );
+    eq_or_diff $p->data, $tc->{want}, "$tc->{name}: set";
+  }
+);
+
+ddt(
+  'each',
+  't/data/path.json#each',
+  sub {
+    my $tc   = shift;
+    my $rec  = Recorder->new;
+    my $p    = Data::JSONVisitor->new( $tc->{in} );
+    my @want = ();
+    for my $w ( @{ $tc->{want} } ) {
+      push @want, resolve_path( $tc->{in}, $w );
+    }
+    $p->each( $tc->{path}, $rec->callback );
+    eq_or_diff $rec->log, \@want, "$tc->{name}: each";
+  }
 );
 
 done_testing();

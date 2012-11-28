@@ -104,6 +104,26 @@ sub iter {
   };
 }
 
+sub each {
+  my ( $self, $path, $cb, $autoviv ) = @_;
+  my $ii = $self->iter( $path, $autoviv );
+  while ( my $i = $ii->() ) {
+    $cb->( @$i );
+  }
+}
+
+sub set {
+  my ( $self, $path, $value ) = @_;
+  $self->each( $path, sub { _set( $_[2], $_[3], $value ); }, 1 );
+}
+
+sub get {
+  my ( $self, $path ) = @_;
+  my $v;
+  $self->each( $path, sub { $v = $_[1] } );
+  return $v;
+}
+
 1;
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl
