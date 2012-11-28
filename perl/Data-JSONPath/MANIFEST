@@ -1,0 +1,8 @@
+Build.PL
+Changes
+inc/MyBuilder.pm
+lib/Data/JSONPath.pm
+MANIFEST
+README
+t/00.load.t
+t/patch.t
