@@ -161,7 +161,7 @@ sub _mk_literal {
   my $vv  = $tok->{m}[1];
   return {
     match => sub { return $_[0] eq $vv },
-    iter => _mk_list_iter( $vv ),
+    iter => sub { _mk_list_iter( $vv ) },
     capture => 0
   };
 }
@@ -184,10 +184,12 @@ sub _mk_multi_iter {
   my $ipos = 0;
   my $ii   = $pp[ $ipos++ ]{iter}( $obj );
   return sub {
-    return unless defined $ii;
-    my $vv = $ii->();
-    return $vv if defined $vv;
-    $ii = $pp[ $ipos++ ]{iter}( $obj );
+    while () {
+      my $vv = $ii->();
+      return $vv if defined $vv;
+      return if $ipos >= @pp;
+      $ii = $pp[ $ipos++ ]{iter}( $obj );
+    }
   };
 }
 
