@@ -117,8 +117,14 @@ sub toker {
 sub new {
   my $class = shift;
   my $self = bless {}, $class;
-  $self->parse( shift ) if @_;
+  $self->parse( @_ ) if @_;
   return $self;
+}
+
+sub upgrade {
+  my ( $class, $obj ) = @_;
+  return $obj if UNIVERSAL::can( $obj, 'isa' ) && $obj->isa( $class );
+  return $class->new( $obj );
 }
 
 sub _mk_list_iter {

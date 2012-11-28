@@ -9,6 +9,18 @@ use DataDrivenTest;
 
 use Data::JSONPath;
 
+{
+  my $jp1 = Data::JSONPath->new( '$.a.b.c' );
+  isa_ok $jp1, 'Data::JSONPath';
+}
+
+{
+  my $jp1 = Data::JSONPath->upgrade( '$.a.b.c' );
+  isa_ok $jp1, 'Data::JSONPath';
+  my $jp2 = Data::JSONPath->upgrade( $jp1 );
+  isa_ok $jp2, 'Data::JSONPath';
+}
+
 ddt(
   'toker',
   't/data/path.json#toker',
