@@ -6,7 +6,8 @@ use warnings;
 use Data::Dumper;
 use Test::More;
 
-use Data::JSONPath qw( data_diff data_patch data_patched );
+use Data::JSONDiff;
+use Data::JSONPath qw( data_patch data_patched );
 
 my @case = (
   {
@@ -85,7 +86,7 @@ my @case = (
 plan tests => 2 * @case;
 
 for my $tc ( @case ) {
-  my $got = data_diff( $tc->{a}, $tc->{b} );
+  my $got = json_diff( $tc->{a}, $tc->{b} );
   is_deeply $got, $tc->{want}, "$tc->{name}: diff OK"
    or diag Dumper( $got );
   my $patched = data_patched( $tc->{a}, $got );
