@@ -55,8 +55,10 @@ sub json_patch {
   my ( $orig, $patch ) = @_;
   my $data = { '$' => $orig };
   for my $p ( @$patch ) {
-    my @path = map { split /\./ }
-     grep { defined } @{$p}{ 'path', 'element' };
+    my @path = map { split /\./ } (
+      ( exists $p->{path}    ? ( $p->{path} )    : () ),
+      ( exists $p->{element} ? ( $p->{element} ) : () )
+    );
     if ( $p->{op} eq 'add' ) {
       my $v = $p->{value};
       _at_path(
