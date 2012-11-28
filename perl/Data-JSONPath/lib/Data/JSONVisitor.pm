@@ -11,7 +11,7 @@ Data::JSONVisitor - Visit a data structure using a JSONPath
 
 =head1 VERSION
 
-This document describes Data::JSONPath version 0.01
+This document describes Data::JSONVisitor version 0.01
 
 =cut
 
