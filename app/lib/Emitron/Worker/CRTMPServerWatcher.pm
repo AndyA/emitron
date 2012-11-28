@@ -6,6 +6,7 @@ use warnings;
 use Emitron::BackOff;
 use Emitron::Logger;
 use JSON;
+use Time::HiRes qw( sleep );
 
 use base qw( Emitron::Worker::Base );
 
@@ -23,6 +24,8 @@ sub run {
   my $prev = undef;
   my $srv = Emitron::CRTMPServer->new( uri => 'http://localhost:6502' );
 
+  # TODO: have this update the model directly.
+
   while () {
     my $streams = eval { $srv->api( $self->verb ) };
     if ( my $err = $@ ) {
@@ -33,7 +36,7 @@ sub run {
       my $next = encode_json $streams;
       unless ( defined $prev && $prev eq $next ) {
         $self->post_message(
-          crtmpserver => {
+          'svc.crtmpserver' => {
             verb => $self->verb,
             data => $streams,
           }

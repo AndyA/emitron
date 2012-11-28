@@ -10,6 +10,8 @@ use Time::HiRes qw( time );
 
 use accessors::ro qw( event );
 
+use base qw( Emitron::MessageDespatcher );
+
 =head1 NAME
 
 Emitron::Worker::Base - A worker
@@ -29,11 +31,6 @@ sub start {
   $self->{selev}  = IO::Select->new( $self->event->fileno );
   $self->{evn}    = $self->event->revision;
   $self->run;
-}
-
-sub _despatch {
-  my ( $self, $ev ) = @_;
-  debug 'Despatching event', $ev;
 }
 
 sub _select {
@@ -64,7 +61,7 @@ sub poll {
 
   for my $evn ( $self->{evn} + 1 .. $nevn ) {
     my $ev = $self->event->checkout( $evn );
-    $self->_despatch( $ev );
+    $self->despatch( Emitron::Message->from_raw( $ev ) );
   }
 
   $self->{evn} = $nevn;

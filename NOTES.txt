@@ -17,3 +17,9 @@ Webapp:
       How is it represented?
       How do we observe changes?
       How do we represent deltas?
+
+Messaging:
+  Subscribe to model changes.
+  Changes delivered to each group just once.
+    Handle model subscription globally.
+    Split each change into one message per interested group.

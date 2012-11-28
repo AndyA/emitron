@@ -13,7 +13,7 @@ Emitron::MessageDespatcher - Despatch messages
 
 sub new {
   my $class = shift;
-  return bless { @_, h => [] }, $class;
+  return bless { @_, md_h => [] }, $class;
 }
 
 sub _wild_to_re {
@@ -27,7 +27,7 @@ sub _wild_to_re {
 sub on {
   my ( $self, $name, $handler, $group ) = @_;
   defined $group or $group = 'global';
-  push @{ $self->{h} },
+  push @{ $self->{md_h} },
    {
     name    => "$name",
     match   => $self->_wild_to_re( $name ),
@@ -46,10 +46,10 @@ sub _match {
 
 sub off {
   my ( $self, %like ) = @_;
-  my @nh = grep { !$self->_match( $_, \%like ) } @{ $self->{h} };
-  if ( scalar @nh != scalar @{ $self->{h} } ) {
-    @{ $self->{h} } = @nh;
-    delete $self->{c};
+  my @nh = grep { !$self->_match( $_, \%like ) } @{ $self->{md_h} };
+  if ( scalar @nh != scalar @{ $self->{md_h} } ) {
+    @{ $self->{md_h} } = @nh;
+    delete $self->{md_c};
   }
   return $self;
 }
@@ -57,7 +57,7 @@ sub off {
 sub _map_message {
   my ( $self, $name ) = @_;
   my @hh = ();
-  for my $h ( @{ $self->{h} } ) {
+  for my $h ( @{ $self->{md_h} } ) {
     my @cap = ();
     my $ma  = $h->{match};
     push @hh, [ $h, @cap ]
@@ -69,13 +69,14 @@ sub _map_message {
 
 sub _bind_message {
   my ( $self, $name ) = @_;
-  return @{ $self->{c}{$name} ||= $self->_map_message( $name ) };
+  return @{ $self->{md_c}{$name} ||= $self->_map_message( $name ) };
 }
 
 sub despatch {
   my ( $self, $msg ) = @_;
 
   my @hh = $self->_bind_message( $msg->type );
+  info "Unhandled message: ", $msg->type unless @hh;
   for my $hh ( @hh ) {
     my ( $h, @a ) = @$hh;
     $h->{handler}( $msg, @a );

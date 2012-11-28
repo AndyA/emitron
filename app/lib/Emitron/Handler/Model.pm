@@ -19,7 +19,7 @@ sub subscribe {
   my ( $self, $desp ) = @_;
 
   $desp->on(
-    crtmpserver => sub {
+    'svc.crtmpserver' => sub {
       my $ev = shift;
       debug "Media server update: ", $ev;
       $self->despatch( $ev->msg );

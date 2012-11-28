@@ -24,6 +24,12 @@ sub new {
   }, $class;
 }
 
+sub from_raw {
+  my ( $class, $raw ) = @_;
+  return $raw if UNIVERSAL::can( $raw, 'isa' ) && $raw->isa( $class );
+  return bless {%$raw}, $class;
+}
+
 sub raw_read {
   my ( $fd, $len ) = @_;
   my $buf = '';
