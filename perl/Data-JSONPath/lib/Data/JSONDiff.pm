@@ -3,6 +3,7 @@ package Data::JSONDiff;
 use strict;
 use warnings;
 
+use Carp qw( confess croak );
 use List::Util qw( min );
 
 use base qw( Exporter );

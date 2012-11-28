@@ -7,7 +7,7 @@ use Data::Dumper;
 use Test::More;
 
 use Data::JSONDiff;
-use Data::JSONPath qw( data_patch data_patched );
+use Data::JSONPatch;
 
 my @case = (
   {
@@ -89,7 +89,7 @@ for my $tc ( @case ) {
   my $got = json_diff( $tc->{a}, $tc->{b} );
   is_deeply $got, $tc->{want}, "$tc->{name}: diff OK"
    or diag Dumper( $got );
-  my $patched = data_patched( $tc->{a}, $got );
+  my $patched = json_patched( $tc->{a}, $got );
   is_deeply $patched, $tc->{b}, "$tc->{name}: patch OK";
 }
 
