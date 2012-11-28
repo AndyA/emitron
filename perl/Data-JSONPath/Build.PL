@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use lib 'inc';
+use lib 'inc', 't/lib';
 
 use Module::Build;
 use MyBuilder;
