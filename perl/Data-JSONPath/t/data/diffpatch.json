@@ -102,6 +102,7 @@
             "value" : 2
          }
       ],
+      "disabled" : true,
       "name" : "Root scalar"
    },
    {
