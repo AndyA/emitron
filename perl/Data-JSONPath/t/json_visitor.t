@@ -40,6 +40,18 @@ ddt(
   readOnly => 1
 );
 
+ddt(
+  'vivify',
+  't/data/path.json#vivify',
+  sub {
+    my $tc = shift;
+    my $p  = Data::JSONVisitor->new( $tc->{data} );
+    my $ii = $p->iter( $tc->{path}, 1 );
+    1 while $ii->();
+    eq_or_diff $p->data, $tc->{want}, "$tc->{name}: vivified";
+   }
+);
+
 done_testing();
 
 # vim:ts=2:sw=2:et:ft=perl

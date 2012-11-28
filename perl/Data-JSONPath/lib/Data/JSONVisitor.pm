@@ -35,6 +35,8 @@ sub new {
   return bless { data => { '$' => $data } }, $class;
 }
 
+sub data { shift->{data}{'$'} }
+
 sub upgrade {
   my ( $class, $obj ) = @_;
   return $obj if UNIVERSAL::can( $obj, 'isa' ) && $obj->isa( $class );
@@ -88,7 +90,7 @@ sub iter {
               $pd[ $vpos - 1 ] = []
             );
           }
-          _set( $pd[ $vpos - 1 ], $k, $pd[$vpos] = {} );
+          _set( $pd[ $vpos - 1 ], $k, $pd[$vpos] = {} ) if $vpos < @p;
         }
       }
       else {
