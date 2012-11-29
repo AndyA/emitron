@@ -8,7 +8,7 @@ use Emitron::Message;
 use IO::Select;
 use Time::HiRes qw( time );
 
-use accessors::ro qw( event );
+use accessors::ro qw( event core );
 
 use base qw( Emitron::MessageDespatcher );
 

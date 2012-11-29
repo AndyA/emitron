@@ -6,6 +6,7 @@ use warnings;
 use Data::Dumper;
 use Emitron::CRTMPServer;
 use Emitron::Config;
+use Emitron::Core;
 use Emitron::Logger;
 use Emitron::Message;
 use Emitron::MessageDespatcher;
@@ -51,7 +52,10 @@ sub make_workers {
   my ( $self, @handlers ) = @_;
   my @w = ();
 
-  my @default = ( event => $self->event, );
+  my @default = (
+    event => $self->event,
+    core  => $self->core,
+  );
 
   push @w,
    Emitron::Worker::EventWatcher->new( @default,
@@ -95,6 +99,11 @@ sub event {
   my $self = shift;
   return $self->{event}
    ||= Emitron::Model::Watched->new( root => EVENT, prune => 50 )->init;
+}
+
+sub core {
+  my $self = shift;
+  return $self->{core} ||= Emitron::Core->new;
 }
 
 # TODO this shouldn't be here.
