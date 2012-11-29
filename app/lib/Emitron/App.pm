@@ -51,34 +51,29 @@ sub make_workers {
   my ( $self, @handlers ) = @_;
   my @w = ();
 
+  my @default = ( event => $self->event, );
+
   push @w,
-   Emitron::Worker::EventWatcher->new(
-    event => $self->event,
-    queue => $self->queue
-   );
+   Emitron::Worker::EventWatcher->new( @default,
+    queue => $self->queue );
 
   push @w,
    Emitron::Worker::CRTMPServerWatcher->new(
-    event => $self->event,
+    @default,
     model => $self->model,
     uri   => 'http://localhost:6502'
    );
 
   push @w,
-   Emitron::Worker::ModelWatcher->new(
-    event => $self->event,
-    model => $self->model
-   );
+   Emitron::Worker::ModelWatcher->new( @default,
+    model => $self->model );
 
   my $desp = Emitron::MessageDespatcher->new;
   $_->subscribe( $desp ) for @handlers;
 
   for ( 1 .. 5 ) {
     push @w,
-     Emitron::Worker::Drone->new(
-      event      => $self->event,
-      despatcher => $desp
-     );
+     Emitron::Worker::Drone->new( @default, despatcher => $desp );
   }
   return \@w;
 }
