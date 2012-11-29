@@ -63,8 +63,9 @@ sub _dd {
 sub _mention {
   my $level = shift;
   return if $level > $LOGLEVEL;
-  my $msg  = join '', map { ref $_ ? _dd( $_ ) : $_ } @_;
-  my $ts   = _ts;
+  my $msg = join '',
+   map { ref $_ ? _dd( $_ ) : defined $_ ? $_ : '(undefined)' } @_;
+  my $ts = _ts;
   my $attr = $LOGCOLOUR[$level] || 'white';
 
   print colored(
