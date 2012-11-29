@@ -44,7 +44,7 @@ sub install_hooks {
     '$.streams.*.INR.*',
     sub {
       my ( $path, $before, $after, $name, $app ) = @_;
-      debug "$path changed ($name, $app): ", $before, $after;
+      debug "$path changed ($name, $app), before: ", $before, ", after: ", $after;
     }
   );
 }
