@@ -5,6 +5,7 @@ use warnings;
 
 use Data::Dumper;
 use Emitron::CRTMPServer;
+use Emitron::Config;
 use Emitron::Logger;
 use Emitron::Message;
 use Emitron::MessageDespatcher;
@@ -85,7 +86,8 @@ sub make_workers {
 sub model {
   my $self = shift;
   return $self->{model}
-   ||= Emitron::Model::Watched->new( root => MODEL, prune => 50 )->init;
+   ||= Emitron::Model::Watched->new( root => MODEL, prune => 50 )
+   ->init( Emitron::Config->config );
 }
 
 sub queue {

@@ -3,23 +3,139 @@ package Emitron::Config;
 use strict;
 use warnings;
 
-use YAML qw( LoadFile );
-
 =head1 NAME
 
-Emitron::Config - The dreaded config system. Gotta have one.
+Emitron::Config - Default config data
+
+=head1 INTERFACE 
+
+=head2 C<< config >>
+
+Returns the default config. Actually it returns a complete
+default model.
 
 =cut
 
-sub new {
+sub config {
   my $class = shift;
-  return bless {@_}, $class;
-}
-
-sub load {
-  my ( $self, $file ) = @_;
-  die if $self->{C};
-  $self->{C} = LoadFile( $file );
+  return {
+    config => {
+      profile => {
+        P10 => {
+          v => {
+            bitrate => 32_000,
+            rate    => 5,
+            profile => 'Baseline',
+            width   => 224,
+            height  => 126
+          },
+          a => {
+            rate    => 24_000,
+            profile => 'AAC_HE',
+            rate    => 22_050,
+          }
+        },
+        P20 => {
+          v => {
+            bitrate => 128_000,
+            rate    => 12.5,
+            profile => 'Baseline L3',
+            width   => 400,
+            height  => 224
+          },
+          a => {
+            rate    => 48_000,
+            profile => 'AAC-LC',
+            rate    => 44_100,
+          }
+        },
+        P30 => {
+          v => {
+            bitrate => 304_000,
+            rate    => 25,
+            profile => 'Baseline L3',
+            width   => 400,
+            height  => 224
+          },
+          a => {
+            rate    => 64_000,
+            profile => 'AAC-LC',
+            rate    => 44_100,
+          }
+        },
+        P40 => {
+          v => {
+            bitrate => 400_000,
+            rate    => 25,
+            profile => 'Main L3',
+            width   => 512,
+            height  => 288
+          },
+          a => {
+            rate    => 96_000,
+            profile => 'AAC-LC',
+            rate    => 44_100,
+          }
+        },
+        P50 => {
+          v => {
+            bitrate => 700_000,
+            rate    => 25,
+            profile => 'Main L3',
+            width   => 640,
+            height  => 360
+          },
+          a => {
+            rate    => 96_000,
+            profile => 'AAC-LC',
+            rate    => 44_100,
+          }
+        },
+        P60 => {
+          v => {
+            bitrate => 1200_000,
+            rate    => 25,
+            profile => 'Main L3',
+            width   => 704,
+            height  => 396
+          },
+          a => {
+            rate    => 96_000,
+            profile => 'AAC-LC',
+            rate    => 44_100,
+          }
+        },
+        P70 => {
+          v => {
+            bitrate => 2016_000,
+            rate    => 25,
+            profile => 'Main L3.1',
+            width   => 1024,
+            height  => 576
+          },
+          a => {
+            rate    => 96_000,
+            profile => 'AAC-LC',
+            rate    => 44_100,
+          }
+        },
+        P80 => {
+          v => {
+            bitrate => 3372_000,
+            rate    => 25,
+            profile => 'High L4',
+            width   => 1280,
+            height  => 720
+          },
+          a => {
+            rate    => 128_000,
+            profile => 'AAC-LC',
+            rate    => 44_100,
+          }
+        },
+      },
+    },
+  };
 }
 
 1;
