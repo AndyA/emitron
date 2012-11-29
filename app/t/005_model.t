@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 23;
+use Test::More;
 
 use Data::Dumper;
 use File::Temp;
@@ -82,12 +82,27 @@ with_model(
   }
 );
 
+with_model(
+  sub {
+    my ( $model, $dir ) = @_;
+    my $got = $model->checkout( $model->revision );
+    is_deeply $got, { foo => 1, bar => 2 }, "init with data";
+  },
+  {
+    foo => 1,
+    bar => 2,
+  }
+);
+
 sub with_model {
   my $cb    = shift;
+  my $data  = shift;
   my $dir   = File::Temp->newdir;
   my $model = Emitron::Model->new( root => $dir, prune => 50 );
-  $model->init;
+  $model->init( $data );
   $cb->( $model, $dir );
 }
+
+done_testing();
 
 # vim:ts=2:sw=2:et:ft=perl

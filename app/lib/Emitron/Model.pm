@@ -31,11 +31,12 @@ sub _stash { shift->_obj_name( "r$_[0].json" ) }
 
 sub init {
   my $self = shift;
+  my $data = shift || {};
   my $idx  = $self->_index;
   return $self if -f $idx;
   dir( $self->root )->mkpath;
   print { $idx->openw } "0\n";
-  $self->commit( {} );
+  $self->commit( $data );
   return $self;
 }
 
