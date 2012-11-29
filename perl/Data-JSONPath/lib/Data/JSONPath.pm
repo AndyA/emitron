@@ -173,7 +173,8 @@ sub _mk_any {
     iter  => sub {
       my $obj = shift;
       return _mk_slice_iter( 0, scalar @$obj ) if 'ARRAY' eq ref $obj;
-      return _mk_list_iter( sort keys %$obj );
+      return _mk_list_iter( sort keys %$obj ) if 'HASH' eq ref $obj;
+      return sub { };
     },
     capture => 1,
   };
