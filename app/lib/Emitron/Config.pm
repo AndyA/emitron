@@ -21,7 +21,21 @@ sub config {
   return {
     config => {
       profile => {
-        P10 => {
+        t10 => {
+          v => {
+            bitrate => 200_000,
+            rate    => 25,
+            profile => 'Main L3',
+            width   => 224,
+            height  => 126
+          },
+          a => {
+            bitrate => 96_000,
+            profile => 'AAC_HE',
+            rate    => 22_050,
+          }
+        },
+        p10 => {
           v => {
             bitrate => 32_000,
             rate    => 5,
@@ -30,12 +44,12 @@ sub config {
             height  => 126
           },
           a => {
-            rate    => 24_000,
+            bitrate => 24_000,
             profile => 'AAC_HE',
             rate    => 22_050,
           }
         },
-        P20 => {
+        p20 => {
           v => {
             bitrate => 128_000,
             rate    => 12.5,
@@ -44,12 +58,12 @@ sub config {
             height  => 224
           },
           a => {
-            rate    => 48_000,
+            bitrate => 48_000,
             profile => 'AAC-LC',
             rate    => 44_100,
           }
         },
-        P30 => {
+        p30 => {
           v => {
             bitrate => 304_000,
             rate    => 25,
@@ -58,12 +72,12 @@ sub config {
             height  => 224
           },
           a => {
-            rate    => 64_000,
+            bitrate => 64_000,
             profile => 'AAC-LC',
             rate    => 44_100,
           }
         },
-        P40 => {
+        p40 => {
           v => {
             bitrate => 400_000,
             rate    => 25,
@@ -72,12 +86,12 @@ sub config {
             height  => 288
           },
           a => {
-            rate    => 96_000,
+            bitrate => 96_000,
             profile => 'AAC-LC',
             rate    => 44_100,
           }
         },
-        P50 => {
+        p50 => {
           v => {
             bitrate => 700_000,
             rate    => 25,
@@ -86,12 +100,12 @@ sub config {
             height  => 360
           },
           a => {
-            rate    => 96_000,
+            bitrate => 96_000,
             profile => 'AAC-LC',
             rate    => 44_100,
           }
         },
-        P60 => {
+        p60 => {
           v => {
             bitrate => 1200_000,
             rate    => 25,
@@ -100,12 +114,12 @@ sub config {
             height  => 396
           },
           a => {
-            rate    => 96_000,
+            bitrate => 96_000,
             profile => 'AAC-LC',
             rate    => 44_100,
           }
         },
-        P70 => {
+        p70 => {
           v => {
             bitrate => 2016_000,
             rate    => 25,
@@ -114,12 +128,12 @@ sub config {
             height  => 576
           },
           a => {
-            rate    => 96_000,
+            bitrate => 96_000,
             profile => 'AAC-LC',
             rate    => 44_100,
           }
         },
-        P80 => {
+        p80 => {
           v => {
             bitrate => 3372_000,
             rate    => 25,
@@ -128,7 +142,7 @@ sub config {
             height  => 720
           },
           a => {
-            rate    => 128_000,
+            bitrate => 128_000,
             profile => 'AAC-LC',
             rate    => 44_100,
           }
