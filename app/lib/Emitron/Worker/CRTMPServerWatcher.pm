@@ -10,7 +10,7 @@ use Time::HiRes qw( sleep );
 
 use base qw( Emitron::Worker::Base );
 
-use accessors::ro qw( event model uri backoff );
+use accessors::ro qw( model uri );
 
 =head1 NAME
 
