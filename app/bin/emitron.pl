@@ -5,6 +5,7 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
+use lib "$FindBin::Bin/../../perl/Data-JSONPath/lib";
 
 use Emitron::App;
 use Emitron::Logger;
