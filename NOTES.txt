@@ -42,3 +42,10 @@ TODO:
 
   Authentication / authorisation
     How do we handle that for incoming RTMP?
+
+Notes:
+
+  Any config that we push to crtmpserver should be idempotent so we can
+  always push config at startup / as often as we like.
+
+
