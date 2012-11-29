@@ -3,7 +3,7 @@ package Emitron::Model::Diff;
 use strict;
 use warnings;
 
-use Data::Patch qw( data_diff );
+use Data::JSONDiff qw( json_diff );
 
 use base qw( Emitron::Model );
 
@@ -19,7 +19,7 @@ sub diff {
   return unless defined $da;
   my $db = $self->checkout( $rb );
   return unless defined $db;
-  return data_diff( $da, $db );
+  return json_diff( $da, $db );
 }
 
 1;

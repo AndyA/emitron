@@ -6,7 +6,7 @@ use warnings;
 use Test::More tests => 6;
 
 use Data::Dumper;
-use Data::Patch qw( data_patch );
+use Data::JSONPatch qw( json_patch );
 use File::Temp;
 use POSIX qw( _exit );
 use Scalar::Util qw( refaddr );
@@ -86,7 +86,7 @@ sub forked_test {
     my $nrev = $cb->( $model, $rev, 10000 );
     if ( defined $nrev && $nrev ne $rev ) {
       my $patch = $model->diff( $rev, $nrev );
-      data_patch( $data, $patch );
+      json_patch( $data, $patch );
       $rev = $nrev;
     }
   }

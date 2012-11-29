@@ -17,7 +17,7 @@ WriteMakefile(
     'Dancer'                    => '1.31',
     'Dancer::Test'              => 0,
     'Data::Dumper'              => 0,
-    'Data::Patch'               => 0,
+    'Data::JSONPath'            => 0,
     'ExtUtils::MakeMaker'       => 0,
     'File::Basename'            => 0,
     'File::Find'                => 0,
