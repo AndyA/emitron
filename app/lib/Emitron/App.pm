@@ -14,6 +14,7 @@ use Emitron::Worker::Base;
 use Emitron::Worker::CRTMPServerWatcher;
 use Emitron::Worker::Drone;
 use Emitron::Worker::EventWatcher;
+use Emitron::Worker::ModelWatcher;
 use Emitron::Worker;
 use Time::HiRes qw( sleep );
 
@@ -60,6 +61,12 @@ sub make_workers {
     event => $self->event,
     model => $self->model,
     uri   => 'http://localhost:6502'
+   );
+
+  push @w,
+   Emitron::Worker::ModelWatcher->new(
+    event => $self->event,
+    model => $self->model
    );
 
   my $desp = Emitron::MessageDespatcher->new;
