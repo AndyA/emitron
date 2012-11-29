@@ -5,7 +5,6 @@ use warnings;
 
 use Data::Dumper;
 use Emitron::CRTMPServer;
-use Emitron::Handler::Model;
 use Emitron::Logger;
 use Emitron::Message;
 use Emitron::MessageDespatcher;
@@ -43,7 +42,7 @@ sub run {
 
 sub make_handlers {
   my $self = shift;
-  return ( Emitron::Handler::Model->new( model => $self->model ) );
+  return ();
 }
 
 sub make_workers {
@@ -58,10 +57,9 @@ sub make_workers {
 
   push @w,
    Emitron::Worker::CRTMPServerWatcher->new(
-    event   => $self->event,
-    uri     => 'http://localhost:6502',
-    verb    => 'listStreams',
-    backoff => Emitron::BackOff->new( base => 1, max => 10 )
+    event => $self->event,
+    model => $self->model,
+    uri   => 'http://localhost:6502'
    );
 
   my $desp = Emitron::MessageDespatcher->new;
