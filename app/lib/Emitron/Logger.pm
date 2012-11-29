@@ -56,8 +56,10 @@ sub _ts {
 
 sub _dd {
   my $obj = shift;
-  return Data::Dumper->new( [$obj] )->Indent( 2 )->Quotekeys( 0 )
-   ->Useqq( 1 )->Terse( 1 )->Dump;
+  chomp( my $dd
+     = Data::Dumper->new( [$obj] )->Indent( 2 )->Quotekeys( 0 )
+     ->Useqq( 1 )->Terse( 1 )->Dump );
+  return $dd;
 }
 
 sub _mention {
