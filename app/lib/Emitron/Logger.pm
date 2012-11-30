@@ -1,7 +1,6 @@
 package Emitron::Logger;
 
-use strict;
-use warnings;
+use Moose;
 
 =head1 NAME
 
