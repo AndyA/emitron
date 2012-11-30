@@ -1,7 +1,6 @@
 package Emitron::Handler::Base;
 
-use strict;
-use warnings;
+use Moose;
 
 use Emitron::Logger;
 
@@ -10,11 +9,6 @@ use Emitron::Logger;
 Emitron::Handler::Base - A message handler
 
 =cut
-
-sub new {
-  my $class = shift;
-  return bless {@_}, $class;
-}
 
 sub subscribe {
   my ( $self, $desp ) = @_;
