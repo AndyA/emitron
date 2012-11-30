@@ -1,11 +1,13 @@
 package Emitron::Message;
 
-use strict;
-use warnings;
+use Moose;
 
 use Storable qw( store_fd fd_retrieve freeze thaw );
 
-use accessors::ro qw( msg type source );
+has msg    => ( is  => 'ro' );
+has type   => ( isa => 'Str', is => 'ro' );
+has source => ( isa => 'Str', is => 'ro', default => 'internal' );
+has worker => ( isa => 'Num', is => 'ro', default => sub { $$ } );
 
 =head1 NAME
 
@@ -13,21 +15,10 @@ Emitron::Message - A message
 
 =cut
 
-sub new {
-  my ( $class, $type, $msg, %opts ) = @_;
-  return bless {
-    type   => $type,
-    msg    => $msg,
-    source => 'internal',
-    worker => $$,
-    %opts
-  }, $class;
-}
-
 sub from_raw {
   my ( $class, $raw ) = @_;
   return $raw if UNIVERSAL::can( $raw, 'isa' ) && $raw->isa( $class );
-  return bless {%$raw}, $class;
+  return $class->new( %$raw );
 }
 
 sub raw_read {

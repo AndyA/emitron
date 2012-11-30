@@ -29,7 +29,8 @@ sub run {
       for my $r ( $rev + 1 .. $nrev ) {
         my $msg = $queue->checkout( $r );
         $self->post_message(
-          message => $msg,
+          type    => 'message',
+          msg     => $msg,
           source  => 'api',
           cleanup => $r
         ) if defined $msg;
