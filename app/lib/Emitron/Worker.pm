@@ -1,14 +1,19 @@
 package Emitron::Worker;
 
-use strict;
-use warnings;
+use Moose;
 
 use Carp qw( croak );
 use Emitron::Message;
 use IO::Handle;
 use IO::Select;
 
-use accessors::ro qw( pid reader writer );
+has pid => ( isa => 'Num', is => 'ro', required => 1 );
+
+has [ 'reader', 'writer' ] => (
+  isa      => 'IO::Handle',
+  is       => 'ro',
+  required => 1
+);
 
 =head1 NAME
 
