@@ -43,20 +43,6 @@ has [ '_workers', '_mq' ] => (
   init_arg => 'workers'
 );
 
-#use accessors::ro qw( post_event );
-
-#sub new {
-#  my $class = shift;
-#  return bless {
-#    rds        => IO::Select->new,
-#    active     => {},
-#    workers    => [],
-#    mq         => [],
-#    post_event => sub { },
-#    @_
-#  }, $class;
-#}
-
 sub enqueue {
   my ( $self, $msg ) = @_;
   push @{ $self->_mq }, $msg;
