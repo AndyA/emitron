@@ -1,7 +1,6 @@
 package Emitron::BackOff;
 
-use strict;
-use warnings;
+use Moose;
 
 =head1 NAME
 
@@ -9,23 +8,19 @@ Emitron::BackOff - Exponential backoff
 
 =cut
 
-use accessors::ro qw( base rise max current );
+has base => ( isa => 'Num', is => 'ro', default => 1 );
+has rise => ( isa => 'Num', is => 'ro', default => 2**0.5 );
+has max  => ( isa => 'Num', is => 'ro', default => 60 );
+has current => ( isa => 'Num', is => 'rw' );
 
-sub new {
-  my $class = shift;
-  my $self  = bless {
-    @_,
-    base => 1,
-    rise => 2**0.5,
-    max  => 60,
-  }, $class;
-  $self->{current} = $self->{base};
-  return $self;
+sub BUILD {
+  my $self = shift;
+  $self->current( $self->base );
 }
 
 sub good {
   my $self = shift;
-  return $self->{current} = $self->base;
+  return $self->current( $self->base );
 }
 
 sub bad {
@@ -33,7 +28,7 @@ sub bad {
   my $next = $self->current * $self->rise;
   my $max  = $self->max;
   $next = $max if defined $max && $next > $max;
-  return $self->{current} = $next;
+  return $self->current( $next );
 }
 
 1;
