@@ -1,7 +1,6 @@
 package Emitron::Runner;
 
-use strict;
-use warnings;
+use Moose;
 
 use Carp qw( croak );
 use Emitron::Logger;
@@ -18,31 +17,57 @@ Emitron::Runner - App core
 
 =cut
 
-use accessors::ro qw( post_event );
+has post_event => (
+  is      => 'ro',
+  default => sub {
+    sub { }
+  }
+);
 
-sub new {
-  my $class = shift;
-  return bless {
-    rds        => IO::Select->new,
-    active     => {},
-    workers    => [],
-    mq         => [],
-    post_event => sub { },
-    @_
-  }, $class;
-}
+has _rds => (
+  isa     => 'IO::Select',
+  is      => 'ro',
+  default => sub { IO::Select->new }
+);
+
+has _active => (
+  isa     => 'HashRef',
+  is      => 'ro',
+  default => sub { {} }
+);
+
+has [ '_workers', '_mq' ] => (
+  isa      => 'ArrayRef',
+  is       => 'ro',
+  default  => sub { [] },
+  init_arg => 'workers'
+);
+
+#use accessors::ro qw( post_event );
+
+#sub new {
+#  my $class = shift;
+#  return bless {
+#    rds        => IO::Select->new,
+#    active     => {},
+#    workers    => [],
+#    mq         => [],
+#    post_event => sub { },
+#    @_
+#  }, $class;
+#}
 
 sub enqueue {
   my ( $self, $msg ) = @_;
-  push @{ $self->{mq} }, $msg;
+  push @{ $self->_mq }, $msg;
 }
 
 sub run {
   my $self    = shift;
-  my $active  = $self->{active};
-  my $mq      = $self->{mq};
-  my $rds     = $self->{rds};
-  my $workers = $self->{workers};
+  my $active  = $self->_active;
+  my $mq      = $self->_mq;
+  my $rds     = $self->_rds;
+  my $workers = $self->_workers;
 
   while () {
     while ( @$workers ) {
@@ -70,7 +95,7 @@ sub run {
       if ( $msg->type eq 'signal' ) {
         $wrk->signal( $msg );
         if ( $wrk->is_ready && defined( my $m = delete $ar->{msg} ) ) {
-          $self->{post_event}( $m );
+          $self->post_event->( $m );
         }
       }
       else {
@@ -101,11 +126,11 @@ sub run {
 
 sub recycle {
   my ( $self, $pid ) = @_;
-  if ( my $ar = delete $self->{active}{$pid} ) {
-    $self->{rds}->remove( $ar->{wrk}->reader );
-    push @{ $self->{workers} }, $ar->{handler};
+  if ( my $ar = delete $self->_active->{$pid} ) {
+    $self->_rds->remove( $ar->{wrk}->reader );
+    push @{ $self->_workers }, $ar->{handler};
     if ( my $msg = delete $ar->{msg} ) {
-      unshift @{ $self->{mq} }, $msg;
+      unshift @{ $self->_mq }, $msg;
     }
   }
 }

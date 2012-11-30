@@ -1,7 +1,6 @@
 package Emitron::App;
 
-use strict;
-use warnings;
+use Moose;
 
 use Data::Dumper;
 use Emitron::CRTMPServer;
@@ -29,11 +28,6 @@ use constant EVENT => '/tmp/emitron.event';
 Emitron::App - The Emitron app.
 
 =cut
-
-sub new {
-  my $class = shift;
-  return bless {@_}, $class;
-}
 
 sub run {
   my $self = shift;
