@@ -1,7 +1,6 @@
 package Emitron::HTTPClient;
 
-use strict;
-use warnings;
+use Moose::Role;
 
 use LWP::UserAgent;
 

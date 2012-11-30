@@ -1,26 +1,20 @@
 package Emitron::CRTMPServer;
 
-use strict;
-use warnings;
+use Moose;
 
 use JSON;
 use MIME::Base64;
 use URI::Escape;
 
-use base qw( Emitron::HTTPClient );
+with qw( Emitron::HTTPClient );
 
-use accessors::ro qw( uri );
+has uri => ( isa => 'Str', is => 'ro' );
 
 =head1 NAME
 
 Emitron::CRTMPServer - CRTMPServer API
 
 =cut
-
-sub new {
-  my ( $class, %args ) = @_;
-  return bless {%args}, $class;
-}
 
 sub api {
   my ( $self, $verb, $args ) = @_;
