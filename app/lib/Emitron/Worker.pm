@@ -10,25 +10,11 @@ use IO::Select;
 
 enum 'WorkerState' => [qw( PENDING READY BUSY )];
 
+has pid    => ( isa => 'Num',        is => 'rw', writer => '_pid', );
+has reader => ( isa => 'IO::Handle', is => 'rw', writer => '_reader', );
+has writer => ( isa => 'IO::Handle', is => 'rw', writer => '_writer', );
+
 has state => ( isa => 'WorkerState', is => 'rw' );
-
-has pid => (
-  isa    => 'Num',
-  is     => 'rw',
-  writer => '_pid',
-);
-
-has reader => (
-  isa    => 'IO::Handle',
-  is     => 'rw',
-  writer => '_reader',
-);
-
-has writer => (
-  isa    => 'IO::Handle',
-  is     => 'rw',
-  writer => '_writer',
-);
 
 has worker => (
   isa      => 'Emitron::Worker::Base',
@@ -38,7 +24,7 @@ has worker => (
 
 =head1 NAME
 
-Emitron::Worker - A worker process
+Emitron::Worker - Represents a worker within the master process
 
 =cut
 
