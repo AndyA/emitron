@@ -8,7 +8,7 @@ use URI::Escape;
 
 with qw( Emitron::HTTPClient );
 
-has uri => ( isa => 'Str', is => 'ro' );
+has uri => ( isa => 'Str', is => 'ro', required => 1 );
 
 =head1 NAME
 

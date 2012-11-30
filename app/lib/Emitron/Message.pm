@@ -4,10 +4,10 @@ use Moose;
 
 use Storable qw( store_fd fd_retrieve freeze thaw );
 
-has msg    => ( is  => 'ro' );
-has type   => ( isa => 'Str', is => 'ro' );
-has source => ( isa => 'Str', is => 'ro', default => 'internal' );
-has worker => ( isa => 'Num', is => 'ro', default => sub { $$ } );
+has msg    => ( is  => 'ro',  required => 1 );
+has type   => ( isa => 'Str', is       => 'ro', required => 1 );
+has source => ( isa => 'Str', is       => 'ro', default => 'internal' );
+has worker => ( isa => 'Num', is       => 'ro', default => sub { $$ } );
 
 =head1 NAME
 
