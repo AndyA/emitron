@@ -1,7 +1,6 @@
 package Emitron::MessageDespatcher;
 
-use strict;
-use warnings;
+use Moose;
 
 use Emitron::Logger;
 
@@ -11,9 +10,9 @@ Emitron::MessageDespatcher - Despatch messages
 
 =cut
 
-sub new {
-  my $class = shift;
-  return bless { @_, md_h => [] }, $class;
+sub BUILD {
+  my $self = shift;
+  $self->{md_h} = [];
 }
 
 sub _wild_to_re {
