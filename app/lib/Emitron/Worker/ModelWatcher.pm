@@ -1,15 +1,14 @@
 package Emitron::Worker::ModelWatcher;
 
-use strict;
-use warnings;
+use Moose;
 
 use Data::JSONTrigger;
 use Emitron::Logger;
 use Emitron::Model::Watched;
 
-use base qw( Emitron::Worker::Base );
+extends qw( Emitron::Worker::Base );
 
-use accessors::ro qw( event model );
+has model => ( isa => 'Emitron::Model', is => 'ro', required => 1 );
 
 =head1 NAME
 
@@ -44,7 +43,8 @@ sub install_hooks {
     '$.streams.*.INR.*',
     sub {
       my ( $path, $before, $after, $name, $app ) = @_;
-      debug "$path changed ($name, $app), before: ", $before, ", after: ", $after;
+      debug "$path changed ($name, $app), before: ", $before,
+       ", after: ", $after;
     }
   );
 }

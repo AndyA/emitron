@@ -1,13 +1,12 @@
 package Emitron::Worker::EventWatcher;
 
-use strict;
-use warnings;
+use Moose;
 
 use Emitron::Logger;
 
-use base qw( Emitron::Worker::Base );
+extends qw( Emitron::Worker::Base );
 
-use accessors::ro qw( queue );
+has queue => ( isa => 'Emitron::Model', is => 'ro', required => 1 );
 
 =head1 NAME
 

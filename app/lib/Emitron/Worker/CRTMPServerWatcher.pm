@@ -1,16 +1,16 @@
 package Emitron::Worker::CRTMPServerWatcher;
 
-use strict;
-use warnings;
+use Moose;
 
 use Emitron::BackOff;
 use Emitron::Logger;
 use JSON;
 use Time::HiRes qw( sleep );
 
-use base qw( Emitron::Worker::Base );
+extends qw( Emitron::Worker::Base );
 
-use accessors::ro qw( model uri );
+has model => ( isa => 'Emitron::Model', is => 'ro', required => 1 );
+has uri   => ( isa => 'Str',            is => 'ro', required => 1 );
 
 =head1 NAME
 

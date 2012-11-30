@@ -1,14 +1,14 @@
 package Emitron::Worker::Base;
 
-use strict;
-use warnings;
+use Moose;
 
 use Emitron::Logger;
 use Emitron::Message;
 use IO::Select;
 use Time::HiRes qw( time );
 
-use accessors::ro qw( event core );
+has event => ( isa => 'Emitron::Model', is => 'ro', required => 1 );
+has core  => ( isa => 'Emitron::Core',  is => 'ro', required => 1 );
 
 use base qw( Emitron::MessageDespatcher );
 
@@ -17,11 +17,6 @@ use base qw( Emitron::MessageDespatcher );
 Emitron::Worker::Base - A worker
 
 =cut
-
-sub new {
-  my $class = shift;
-  return bless {@_}, $class;
-}
 
 sub start {
   my ( $self, $rdr, $wtr ) = @_;

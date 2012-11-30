@@ -1,13 +1,16 @@
 package Emitron::Worker::Drone;
 
-use strict;
-use warnings;
+use Moose;
 
 use Emitron::Logger;
 
-use base qw( Emitron::Worker::Base );
+extends qw( Emitron::Worker::Base );
 
-use accessors::ro qw( despatcher );
+has despatcher => (
+  isa      => 'Emitron::MessageDespatcher',
+  is       => 'ro',
+  required => 1
+);
 
 =head1 NAME
 
@@ -18,7 +21,7 @@ Emitron::Worker::Drone - Process messages
 sub run {
   my $self = shift;
   while ( my $msg = $self->get_message ) {
-    $self->despatcher->despatch($msg);
+    $self->despatcher->despatch( $msg );
   }
 }
 
