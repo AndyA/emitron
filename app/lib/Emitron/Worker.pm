@@ -1,18 +1,39 @@
 package Emitron::Worker;
 
 use Moose;
+use Moose::Util::TypeConstraints;
 
 use Carp qw( croak );
 use Emitron::Message;
 use IO::Handle;
 use IO::Select;
 
-has pid => ( isa => 'Num', is => 'ro', required => 1 );
+enum 'WorkerState' => [qw( PENDING READY BUSY )];
 
-has [ 'reader', 'writer' ] => (
-  isa      => 'IO::Handle',
+has state => ( isa => 'WorkerState', is => 'rw' );
+
+has pid => (
+  isa    => 'Num',
+  is     => 'rw',
+  writer => '_pid',
+);
+
+has reader => (
+  isa    => 'IO::Handle',
+  is     => 'rw',
+  writer => '_reader',
+);
+
+has writer => (
+  isa    => 'IO::Handle',
+  is     => 'rw',
+  writer => '_writer',
+);
+
+has worker => (
+  isa      => 'Emitron::Worker::Base',
   is       => 'ro',
-  required => 1
+  required => 1,
 );
 
 =head1 NAME
@@ -21,8 +42,8 @@ Emitron::Worker - A worker process
 
 =cut
 
-sub new {
-  my ( $class, $worker ) = @_;
+sub BUILD {
+  my $self = shift;
 
   my ( $my_rdr, $my_wtr, $child_rdr, $child_wtr )
    = map { IO::Handle->new } 1 .. 4;
@@ -35,6 +56,7 @@ sub new {
 
   my $pid = fork;
   croak "Fork failed: $!" unless defined $pid;
+
   if ( !$pid ) {
     close $_ for $my_rdr, $my_wtr;
 
@@ -42,7 +64,7 @@ sub new {
     use POSIX '_exit';
     eval q{END { _exit 0 }};
 
-    $worker->start( $child_rdr, $child_wtr );
+    $self->worker->start( $child_rdr, $child_wtr );
 
     close $_ for $child_rdr, $child_wtr;
     exit;
@@ -50,19 +72,11 @@ sub new {
 
   # Parent
   close $_ for $child_rdr, $child_wtr;
-  return bless {
-    pid    => $pid,
-    reader => $my_rdr,
-    writer => $my_wtr,
-    state  => 'PENDING',
-   },
-   $class;
-}
 
-sub state {
-  my $self = shift;
-  return $self->{state} unless @_;
-  return $self->{state} = shift;
+  $self->_pid( $pid );
+  $self->_reader( $my_rdr );
+  $self->_writer( $my_wtr );
+  $self->state( 'PENDING' );
 }
 
 sub is_ready { 'READY' eq shift->state }

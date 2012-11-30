@@ -72,7 +72,7 @@ sub run {
   while () {
     while ( @$workers ) {
       my $handler = shift @$workers;
-      my $wrk     = Emitron::Worker->new( $handler );
+      my $wrk = Emitron::Worker->new( worker => $handler );
       $active->{ $wrk->pid } = {
         handler => $handler,
         wrk     => $wrk,
