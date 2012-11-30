@@ -1,7 +1,6 @@
 package Emitron::Core;
 
-use strict;
-use warnings;
+use Moose;
 
 =head1 NAME
 
@@ -10,8 +9,6 @@ Emitron::Core - Core command set
 =cut
 
 # TODO this needs to have access to the message and event queues.
-
-sub new { bless {}, shift }
 
 sub encode_start {
   my $self = shift;
