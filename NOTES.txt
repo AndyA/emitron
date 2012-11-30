@@ -1,4 +1,45 @@
+Config
+======
+
+The only bootstrap config we should need should be the name of a
+directory to contain the various databases. That plus the built-in
+config defaults should be enough to get us running.
+
+Perhaps we should just have an env variable called EMITRON_HOME and have
+it default to /tmp/emitron.
+
 Any config that we push to crtmpserver should be idempotent so we can
 always push config at startup / as often as we like.
 
+Roles
+=====
 
+  Message sink
+    Receives messages
+    Only available in worker context
+    Where does polling happen?
+
+  Event sink
+    Receives events
+    Anything can be an event sink.
+
+  Message source
+    Sends messages
+    Anything should be able to send messages
+    But the implementation will depend on whether we're running in a
+    worker (in which case we have to use IPC) or the master (in
+    which case we can post messages directly into the queue).
+
+  Event source
+    Sends events
+    Anything can send events
+
+To determine at runtime whether we're running in the master or a worker
+we can just set a global in the forked workers.
+
+Make the master queue runner a singleton - so we can find it to send
+messages when we're running in the master.
+
+  Emitron Core
+    Is an event and message source that wraps messages in various domain
+    specific verbs (encode_start, encode_stop etc).
