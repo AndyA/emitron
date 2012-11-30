@@ -1,14 +1,13 @@
 package Emitron::Model::Watched;
 
-use strict;
-use warnings;
+use Moose;
 
 use Linux::Inotify2;
 use Path::Class;
 use IO::Select;
 use Time::HiRes qw( time );
 
-use base qw( Emitron::Model::Diff );
+extends qw( Emitron::Model::Diff );
 
 =head1 NAME
 

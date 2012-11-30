@@ -1,11 +1,10 @@
 package Emitron::Model::Diff;
 
-use strict;
-use warnings;
+use Moose;
 
 use Data::JSONDiff qw( json_diff );
 
-use base qw( Emitron::Model );
+extends qw( Emitron::Model );
 
 =head1 NAME
 

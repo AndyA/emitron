@@ -1,7 +1,6 @@
 package Emitron::Model;
 
-use strict;
-use warnings;
+use Moose;
 
 use Carp qw( croak );
 use Emitron::Logger;
@@ -10,18 +9,14 @@ use JSON;
 use List::Util qw( min );
 use Path::Class;
 
-use accessors::ro qw( root prune );
+has root  => ( is  => 'ro',  required => 1 );
+has prune => ( isa => 'Num', is       => 'ro' );
 
 =head1 NAME
 
 Emitron::Model - versioned model
 
 =cut
-
-sub new {
-  my $class = shift;
-  return bless {@_}, $class;
-}
 
 sub _obj_name { file( shift->root, @_ ) }
 
