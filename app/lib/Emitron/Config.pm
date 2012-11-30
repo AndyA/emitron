@@ -1,7 +1,6 @@
 package Emitron::Config;
 
-use strict;
-use warnings;
+use Moose;
 
 =head1 NAME
 
