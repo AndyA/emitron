@@ -1,3 +1,58 @@
+Architecture
+============
+
+The Emitron application looks like this:
+
+  #!/usr/bin/env perl
+
+  use strict;
+  use warnings;
+
+  use FindBin;
+  use lib "$FindBin::Bin/../lib";
+  use lib "$FindBin::Bin/../../perl/Data-JSONPath/lib";
+
+  use Emitron::Core root => '/tmp/emitron';
+
+  em->model->inject(
+    {
+      events => {
+        roh => {
+          name  => 'Royal Opera House',
+          input => {
+            roh1 => {},
+            roh2 => {},
+          },
+        }
+      }
+    }
+  );
+
+  em->on(
+    '$.streams.*.INR.*',
+    sub {
+      my ( $path, $before, $after, $name, $app ) = @_;
+      # Do something...
+    }
+  );
+
+  em->run;
+
+'em' returns a single Emitron object with this interface
+
+  em->on( event, handler [, group ])
+
+  em->off( args )
+
+  em->model
+
+  em->run
+
+What's the best way to unregister a bunch of handlers? Put them in a
+containing object that hangs off Emitron?
+
+Are one shot triggers useful? I guess so.
+
 Config
 ======
 
