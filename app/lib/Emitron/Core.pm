@@ -13,7 +13,7 @@ our @EXPORT = qw( em );
 
 has root => ( isa => 'Str', is => 'ro', default => '/tmp/emitron' );
 
-has [ '_d_msg', '_d_event' ] => (
+has _despatcher => (
   isa     => 'Emitron::MessageDespatcher',
   is      => 'ro',
   default => sub { Emitron::MessageDespatcher->new }
@@ -38,18 +38,23 @@ Emitron::Logger->level( Emitron::Logger->DEBUG );
   sub em { $EMITRON }
 }
 
-sub _d_ns {
-  my ( $self, $ns ) = @_;
-  return $self->_d_msg   if $ns eq 'm';
-  return $self->_d_event if $ns eq 'e';
-  croak "Namespace must be 'e' or 'm'";
+sub _wrap_handler {
+  my ( $self, $handler ) = @_;
+  return $handler;
 }
 
 sub _on {
   my ( $self, $name, $handler, $group ) = @_;
-  croak "Missing namespace: $name" unless $name =~ /^(\w+):(.*)$/;
-  my ( $ns, $key ) = ( $1, $2 );
-  $self->_d_ns( $ns )->on( $key, $handler, $group );
+  if ( UNIVERSAL::can( $name, 'isa' ) && $name->isa( 'IO::Handle' ) ) {
+    # Register handle to select on
+    return;
+  }
+  if ( $name =~ /^\$/ ) {
+    # JSONPath to trigger on
+    return;
+  }
+  $self->_despatcher->on( $name, $self->_wrap_handler( $handler ),
+    $group );
 }
 
 sub on {
@@ -67,7 +72,7 @@ sub off {
 
 sub run {
   my $self = shift;
-  print "That's all folks\n";
+
 }
 
 1;
