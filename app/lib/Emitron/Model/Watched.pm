@@ -75,12 +75,12 @@ sub _install_watch {
   $self->_make_watch unless exists $self->{_watch};
 }
 
-sub commit {
-  my ( $self, @args ) = @_;
-  my $rev = $self->SUPER::commit( @args );
+override commit => sub {
+  my $self = shift;
+  my $rev = super();
   $self->_signal( $rev ) if defined $rev;
   return $rev;
-}
+};
 
 sub _read_ev {
   my $self = shift;
