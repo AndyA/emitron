@@ -40,16 +40,24 @@ The Emitron application looks like this:
 
 'em' returns a single Emitron object with this interface
 
-  em->on( event, handler [, group ])
+em->on( event | message | jsonpath | handle, handler [, group ])
 
-  em->off( args )
+  Register a handler to be called when an event or message is received,
+  when the model changes or when a filehandle becomes readable.
 
-  em->model
+em->off( args )
 
-  em->run
+em->model
+
+em->run
 
 What's the best way to unregister a bunch of handlers? Put them in a
 containing object that hangs off Emitron?
+
+Is it possible to have a dynamically scoped trigger group that
+propagates into registered handlers? That'd allow all the handlers for a
+particular event to be killed. How does that help with handlers that are
+killed before event handling is done?
 
 Are one shot triggers useful? I guess so.
 
