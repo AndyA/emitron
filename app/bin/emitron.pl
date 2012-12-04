@@ -13,10 +13,17 @@ use Emitron::Logger;
 Emitron::Logger->level( Emitron::Logger->DEBUG );
 
 em->on(
-  '$.streams.*.INR.*',
+  '+$.streams.*.INR.*',
   sub {
     my ( $path, $before, $after, $name, $app ) = @_;
-    info "$path ($name, $app): ", $before, $after;
+    info "Created stream ($name, $app): ", $after;
+    em->on(
+      "-$path",
+      sub {
+        my ( $path, $before, $after, $name, $app ) = @_;
+        info "Destroyed stream ($name, $app): ", $before;
+      }
+    );
   }
 );
 
