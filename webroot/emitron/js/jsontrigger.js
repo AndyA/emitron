@@ -59,6 +59,18 @@ JSONTrigger.prototype = (function() {
     || (like.hasOwnProperty('group') && h.group === like.group);
   }
 
+  function cook_handler(h) {
+    if (h.hasOwnProperty('limit')) return h;
+    var hh = clone(h);
+    hh.limit = '*';
+    var m = /^([-\+\*])(.*)/.exec(hh.path);
+    if (m) {
+      hh.limit = m[1];
+      hh.path = m[2];
+    }
+    return hh;
+  }
+
   var $super = JSONPatch.prototype;
 
   return $.extend(({}), $super, {
@@ -99,27 +111,31 @@ JSONTrigger.prototype = (function() {
       };
     },
     on: function(path, cb, group) {
-      var pp = JSONPath.bless(path);
-      this.handler.push({
+      var h = cook_handler({
         path: path,
-        pp: pp,
         cb: cb,
         group: group || 'global'
       });
+      h.pp = JSONPath.bless(h.path);
+      this.handler.push(h);
       return this;
     },
     off: function(like) {
+      var lk = cook_handler(like);
       var hh = this.handler;
       for (var i = 0; i < hh.length; i++) {
-        if (is_like(hh[i], like)) hh.splice(i--, 1);
+        if (is_like(hh[i], lk)) hh.splice(i--, 1);
       }
       return this;
     },
     fire: function(path) {
+      var like = cook_handler({
+        path: path
+      });
       var hh = this.handler;
       for (var i = 0; i < hh.length; i++) {
         var h = hh[i];
-        if (h.pp.match(path)) h.cb.apply(this, arguments);
+        if (h.pp.match(like.path)) h.cb.apply(this, arguments);
       }
       return this;
     },
@@ -138,7 +154,9 @@ JSONTrigger.prototype = (function() {
           if (flags) {
             var before = cs.orig.get(p);
             var after = $this.p.get(p);
-            if (before != null || after != null) {
+            if ((h.limit == '+' && before == null && after != null) //
+            || (h.limit == '-' && before != null && after == null) //
+            || (h.limit == '*' && (before != null || after != null))) {
               var args = [p, before, after];
               h.cb.apply($this, args.concat(h.pp.capture(p)));
             }

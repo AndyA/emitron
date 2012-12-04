@@ -6,7 +6,7 @@ test("fire", function() {
   var rec = new Recorder();
 
   jt.on('$.foo', rec.callback());
-  jt.on('$.bar.*', rec.callback()).on('$.*.bink', rec.callback(), 'aGroup');
+  jt.on('$.bar.*', rec.callback()).on('*$.*.bink', rec.callback(), 'aGroup');
 
   function fire() {
     jt.fire('$.foo.0', "Hello, World").fire('$.bar.boffle', 1, 2, 3);
@@ -65,7 +65,9 @@ dataDrivenTest("trigger", 'data/trigger.json#trigger', function(tc, tn) {
 dataDrivenTest("model", 'data/trigger.json#model', function(tc, tn) {
   var m = new JSONTrigger(tc.data);
   var rec = new Recorder();
-  for (var i = 0; i < tc.on.length; i++) m.on(tc.on[i], rec.callback());
+  for (var i = 0; i < tc.on.length; i++) {
+    m.on(tc.on[i], rec.callback());
+  }
   if (tc.patch) m.patch(tc.patch);
   else if (tc.newdata) m.setData(tc.newdata);
   deepEqual(rec.getLog(), tc.want, tc.name + ": model");
