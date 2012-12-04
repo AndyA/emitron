@@ -54,6 +54,11 @@ JSONTrigger.prototype = (function() {
     return $.extend(true, (obj instanceof Array ? [] : {}), obj);
   }
 
+  function is_like(h, like) {
+    return (like.hasOwnProperty('path') && h.path === like.path) //
+    || (like.hasOwnProperty('group') && h.group === like.group);
+  }
+
   var $super = JSONPatch.prototype;
 
   return $.extend(({}), $super, {
@@ -93,13 +98,22 @@ JSONTrigger.prototype = (function() {
         orig: orig
       };
     },
-    on: function(path, cb) {
+    on: function(path, cb, group) {
       var pp = JSONPath.bless(path);
       this.handler.push({
         path: path,
         pp: pp,
-        cb: cb
+        cb: cb,
+        group: group || 'global'
       });
+      return this;
+    },
+    off: function(like) {
+      var hh = this.handler;
+      for (var i = 0; i < hh.length; i++) {
+        if (is_like(hh[i], like)) hh.splice(i--, 1);
+      }
+      return this;
     },
     fire: function(path) {
       var hh = this.handler;
@@ -107,6 +121,7 @@ JSONTrigger.prototype = (function() {
         var h = hh[i];
         if (h.pp.match(path)) h.cb.apply(this, arguments);
       }
+      return this;
     },
     triggerSet: function(cs) {
       var hh = this.handler;

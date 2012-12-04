@@ -6,17 +6,44 @@ test("fire", function() {
   var rec = new Recorder();
 
   jt.on('$.foo', rec.callback());
-  jt.on('$.bar.*', rec.callback());
+  jt.on('$.bar.*', rec.callback()).on('$.*.bink', rec.callback(), 'aGroup');
 
-  jt.fire('$.foo.0', "Hello, World");
-  jt.fire('$.bar.boffle', 1, 2, 3);
-  jt.fire('$.baz.nomatch');
+  function fire() {
+    jt.fire('$.foo.0', "Hello, World").fire('$.bar.boffle', 1, 2, 3);
+    jt.fire('$.baz.bink');
+    jt.fire('$.baz.nomatch');
+    jt.fire('$.bar.bink');
+  }
 
-  var want = [
-    ['$.foo.0', "Hello, World"],
-    ['$.bar.boffle', 1, 2, 3], ];
+  fire();
 
-  deepEqual(rec.getLog(), want, "fire");
+  (function() {
+    var want = [
+      ['$.foo.0', "Hello, World"],
+      ['$.bar.boffle', 1, 2, 3],
+      ['$.baz.bink'],
+      ['$.bar.bink'],
+      ['$.bar.bink']];
+
+    deepEqual(rec.getLog(), want, "fire");
+  })();
+
+  jt.off({
+    path: '$.foo'
+  }).off({
+    group: 'aGroup'
+  });
+
+  fire();
+
+  (function() {
+    var want = [
+      ['$.bar.boffle', 1, 2, 3],
+      ['$.bar.bink']];
+
+    deepEqual(rec.getLog(), want, "fire after off()");
+  })();
+
 });
 
 dataDrivenTest("changeSet", 'data/trigger.json#changeSet', function(tc) {
