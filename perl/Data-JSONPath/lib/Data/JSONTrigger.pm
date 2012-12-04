@@ -163,9 +163,10 @@ sub trigger_set {
         if ( $flags ) {
           my $b = $cs->{orig}->get( $p );
           my $a = $self->{p}->get( $p );
+          use Data::Dumper;
           $h->{cb}->( $p, $b, $a, @{ $h->{pp}->capture( $p ) } )
-           if ( $h->{limit} eq '+' && !defined $b && defined $a )
-           || ( $h->{limit} eq '-' && defined $b && !defined $a )
+           if ( $h->{limit} eq '+' && ( !defined $b && defined $a ) )
+           || ( $h->{limit} eq '-' && ( defined $b && !defined $a ) )
            || ( $h->{limit} eq '*' && ( defined $b || defined $a ) );
         }
       }
