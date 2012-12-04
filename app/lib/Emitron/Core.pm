@@ -7,11 +7,12 @@ use Carp qw( croak );
 use Emitron::Logger;
 use Emitron::MessageDespatcher;
 
-extends 'Exporter';
-
-our @EXPORT = qw( em );
-
 has root => ( isa => 'Str', is => 'ro', default => '/tmp/emitron' );
+has in_child => (
+  isa     => 'Bool',
+  is      => 'rw',
+  default => 0,
+);
 
 has _despatcher => (
   isa     => 'Emitron::MessageDespatcher',
@@ -33,9 +34,12 @@ Emitron::Logger->level( Emitron::Logger->DEBUG );
   sub import {
     my $class = shift;
     $EMITRON ||= $class->new( @_ );
+    {
+      my $pkg = caller;
+      no strict 'refs';
+      *{"${pkg}::em"} = sub { $EMITRON };
+    }
   }
-
-  sub em { $EMITRON }
 }
 
 sub _wrap_handler {
