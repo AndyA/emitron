@@ -15,17 +15,43 @@ use Data::JSONTrigger;
   my $rec = Recorder->new;
 
   $jt->on( '$.foo',   $rec->callback );
-  $jt->on( '$.bar.*', $rec->callback );
+  $jt->on( '$.bar.*', $rec->callback )
+   ->on( '$.*.bink', $rec->callback, 'aGroup' );
 
-  $jt->fire( '$.foo.0', "Hello, World" );
-  $jt->fire( '$.bar.boffle', 1, 2, 3 );
-  $jt->fire( '$.baz.nomatch' );
-  my $want = [
-    # Comment to foil perltidy
-    [ '$.foo.0', "Hello, World" ],
-    [ '$.bar.boffle', 1, 2, 3 ],
-  ];
-  eq_or_diff $rec->log, $want, "fire";
+  my $fire = sub {
+    $jt->fire( '$.foo.0', "Hello, World" )
+     ->fire( '$.bar.boffle', 1, 2, 3 );
+    $jt->fire( '$.baz.bink' );
+    $jt->fire( '$.baz.nomatch' );
+    $jt->fire( '$.bar.bink' );
+  };
+
+  $fire->();
+
+  {
+    my $want = [
+      # Comment to foil perltidy
+      [ '$.foo.0', "Hello, World" ],
+      [ '$.bar.boffle', 1, 2, 3 ],
+      ['$.baz.bink'],
+      ['$.bar.bink'],
+      ['$.bar.bink'],
+    ];
+    eq_or_diff $rec->log, $want, "fire";
+  }
+
+  $jt->off( path => '$.foo' )->off( group => 'aGroup' );
+
+  $fire->();
+
+  {
+    my $want = [
+      # Comment to foil perltidy
+      [ '$.bar.boffle', 1, 2, 3 ],
+      ['$.bar.bink'],
+    ];
+    eq_or_diff $rec->log, $want, "fire";
+  }
 }
 
 ddt(

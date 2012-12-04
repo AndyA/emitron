@@ -102,13 +102,29 @@ sub change_set {
 }
 
 sub on {
-  my ( $self, $path, $cb ) = @_;
+  my ( $self, $path, $cb, $group ) = @_;
   push @{ $self->{handler} },
    {
-    path => $path,
-    pp   => Data::JSONPath->upgrade( $path ),
-    cb   => $cb
+    path  => $path,
+    pp    => Data::JSONPath->upgrade( $path ),
+    cb    => $cb,
+    group => $group || 'global',
    };
+  $self;
+}
+
+sub _is_like {
+  my ( $h, $like ) = @_;
+  for my $prop ( qw( path group ) ) {
+    return 1 if exists $like->{$prop} && $like->{$prop} eq $h->{$prop};
+  }
+  return;
+}
+
+sub off {
+  my ( $self, %like ) = @_;
+  my $hh = [ grep { !_is_like( $_, \%like ) } @{ $self->{handler} } ];
+  $self->{handler} = $hh;
   $self;
 }
 
