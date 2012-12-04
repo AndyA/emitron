@@ -120,25 +120,17 @@ sub make_workers {
   my ( $self ) = @_;
   my @w = ();
 
-  my @default = ( event => $self->event, );
-
-  push @w,
-   Emitron::Worker::EventWatcher->new( @default,
-    queue => $self->queue );
+  push @w, Emitron::Worker::EventWatcher->new();
 
   push @w,
    Emitron::Worker::CRTMPServerWatcher->new(
-    @default,
-    model => $self->model,
-    uri   => 'http://localhost:6502'
-   );
+    uri => 'http://localhost:6502' );
 
   push @w, $self->_watcher;
 
   for ( 1 .. 5 ) {
     push @w,
-     Emitron::Worker::Script->new( @default,
-      despatcher => $self->_despatcher );
+     Emitron::Worker::Script->new( despatcher => $self->_despatcher );
   }
 
   return \@w;

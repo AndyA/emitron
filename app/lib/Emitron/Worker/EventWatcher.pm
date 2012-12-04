@@ -6,8 +6,6 @@ use Emitron::Logger;
 
 extends qw( Emitron::Worker::Base );
 
-has queue => ( isa => 'Emitron::Model', is => 'ro', required => 1 );
-
 =head1 NAME
 
 Emitron::Worker::EventWatcher - Listen for events from web app
@@ -17,7 +15,7 @@ Emitron::Worker::EventWatcher - Listen for events from web app
 sub run {
   my $self = shift;
 
-  my $queue = $self->queue;
+  my $queue = $self->em->queue;
   my $first = $queue->earliest;
   my $rev   = defined $first ? $first - 1 : undef;
   my $ser   = 0;

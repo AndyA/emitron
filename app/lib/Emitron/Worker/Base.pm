@@ -2,12 +2,20 @@ package Emitron::Worker::Base;
 
 use Moose;
 
+use Emitron::App;
 use Emitron::Logger;
 use Emitron::Message;
 use IO::Select;
 use Time::HiRes qw( time );
 
-has event => ( isa => 'Emitron::Model', is => 'ro', required => 1 );
+has em => (
+  isa     => 'Emitron::App',
+  is      => 'ro',
+  lazy    => 1,
+  default => sub {
+    Emitron::App->em;
+  }
+);
 
 =head1 NAME
 
@@ -19,9 +27,9 @@ sub start {
   my ( $self, $rdr, $wtr ) = @_;
   $self->{rdr}    = $rdr;
   $self->{wtr}    = $wtr;
-  $self->{selmsg} = IO::Select->new( $self->event->fileno, $rdr );
-  $self->{selev}  = IO::Select->new( $self->event->fileno );
-  $self->{evn}    = $self->event->revision;
+  $self->{selmsg} = IO::Select->new( $self->em->event->fileno, $rdr );
+  $self->{selev}  = IO::Select->new( $self->em->event->fileno );
+  $self->{evn}    = $self->em->event->revision;
   $self->run;
 }
 
@@ -40,7 +48,7 @@ sub _select {
       return Emitron::Message->recv( $self->{rdr} )
        if $fd == $self->{rdr};
       $self->poll
-       if $fd == $self->event->fileno;
+       if $fd == $self->em->event->fileno;
     }
   }
   return;
@@ -48,11 +56,11 @@ sub _select {
 
 sub poll {
   my $self = shift;
-  my $nevn = $self->event->poll;
+  my $nevn = $self->em->event->poll;
   return unless defined $nevn;
 
   for my $evn ( $self->{evn} + 1 .. $nevn ) {
-    my $ev = $self->event->checkout( $evn );
+    my $ev = $self->em->event->checkout( $evn );
     $self->despatch( Emitron::Message->from_raw( $ev ) );
   }
 
@@ -74,7 +82,7 @@ sub post_message {
 
 sub post_event {
   my ( $self, $name, $ev ) = @_;
-  return $self->event->commit(
+  return $self->em->event->commit(
     {
       type   => 'event',
       name   => $name,

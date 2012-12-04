@@ -9,8 +9,7 @@ use Time::HiRes qw( sleep );
 
 extends qw( Emitron::Worker::Base );
 
-has model => ( isa => 'Emitron::Model', is => 'ro', required => 1 );
-has uri   => ( isa => 'Str',            is => 'ro', required => 1 );
+has uri => ( isa => 'Str', is => 'ro', required => 1 );
 
 =head1 NAME
 
@@ -46,7 +45,7 @@ sub _handle_listStreams {
   my ( $self, $data ) = @_;
 
   # Quick and a little dirty
-  $self->model->transaction(
+  $self->em->model->transaction(
     sub {
       my ( $model, $rev ) = @_;
       $model->{streams} = $self->_munge_streams( $data );

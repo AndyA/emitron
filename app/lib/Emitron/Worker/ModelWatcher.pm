@@ -8,8 +8,6 @@ use Emitron::Model::Watched;
 
 extends qw( Emitron::Worker::Base );
 
-has model => ( isa => 'Emitron::Model', is => 'ro', required => 1 );
-
 has _trigger => (
   isa     => 'Data::JSONTrigger',
   is      => 'ro',
@@ -28,13 +26,13 @@ sub run {
 
   info "Model watcher starting";
 
-  my $model = $self->model;
+  my $model = $self->em->model;
 
   my $rev = $model->revision;
   $self->_trigger->data( $model->checkout( $rev ) );
 
   while () {
-    my $nrev = $self->model->wait( $rev, 10000 );
+    my $nrev = $model->wait( $rev, 10000 );
     if ( $nrev ne $rev ) {
       debug "Model updated to $nrev";
       $self->_trigger->data( $model->checkout( $rev = $nrev ) );
