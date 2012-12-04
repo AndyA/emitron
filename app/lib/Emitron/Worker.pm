@@ -5,6 +5,7 @@ use Moose::Util::TypeConstraints;
 
 use Carp qw( croak );
 use Emitron::Message;
+use Emitron::Core;
 use IO::Handle;
 use IO::Select;
 
@@ -49,6 +50,8 @@ sub BUILD {
     # Don't execute any END blocks
     use POSIX '_exit';
     eval q{END { _exit 0 }};
+
+    em->in_child( 1 );
 
     $self->worker->start( $child_rdr, $child_wtr );
 
