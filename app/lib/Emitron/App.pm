@@ -30,6 +30,34 @@ has in_child => (
   default => 0,
 );
 
+has model => (
+  isa     => 'Emitron::Model::Watched',
+  is      => 'ro',
+  lazy    => 1,
+  default => sub {
+    Emitron::Model::Watched->new( root => MODEL, prune => 50 )
+     ->init( Emitron::Config->config );
+  }
+);
+
+has queue => (
+  isa     => 'Emitron::Model::Watched',
+  is      => 'ro',
+  lazy    => 1,
+  default => sub {
+    Emitron::Model::Watched->new( root => QUEUE )->init;
+  }
+);
+
+has event => (
+  isa     => 'Emitron::Model::Watched',
+  is      => 'ro',
+  lazy    => 1,
+  default => sub {
+    Emitron::Model::Watched->new( root => EVENT, prune => 50 )->init;
+  }
+);
+
 has _despatcher => (
   isa     => 'Emitron::MessageDespatcher',
   is      => 'ro',
@@ -114,25 +142,6 @@ sub make_workers {
      Emitron::Worker::Drone->new( @default, despatcher => $desp );
   }
   return \@w;
-}
-
-sub model {
-  my $self = shift;
-  return $self->{model}
-   ||= Emitron::Model::Watched->new( root => MODEL, prune => 50 )
-   ->init( Emitron::Config->config );
-}
-
-sub queue {
-  my $self = shift;
-  return $self->{queue}
-   ||= Emitron::Model::Watched->new( root => QUEUE )->init;
-}
-
-sub event {
-  my $self = shift;
-  return $self->{event}
-   ||= Emitron::Model::Watched->new( root => EVENT, prune => 50 )->init;
 }
 
 # TODO this shouldn't be here.
