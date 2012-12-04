@@ -101,18 +101,6 @@ sub change_set {
   return { orig => $orig, list => $list };
 }
 
-sub on {
-  my ( $self, $path, $cb, $group ) = @_;
-  push @{ $self->{handler} },
-   {
-    path  => $path,
-    pp    => Data::JSONPath->upgrade( $path ),
-    cb    => $cb,
-    group => $group || 'global',
-   };
-  $self;
-}
-
 sub _is_like {
   my ( $h, $like ) = @_;
   for my $prop ( qw( path group ) ) {
@@ -121,17 +109,44 @@ sub _is_like {
   return;
 }
 
+sub _cook_handler {
+  my $h = shift;
+  return $h if exists $h->{limit};
+  return $h unless exists $h->{path};
+  my $hh = {%$h};
+  $hh->{limit} = '*';
+  @{$hh}{ 'limit', 'path' } = ( $1, $2 )
+   if $hh->{path} =~ /^([-\+\*])(.*)/;
+  return $hh;
+}
+
+sub on {
+  my ( $self, $path, $cb, $group ) = @_;
+  my $h = _cook_handler(
+    {
+      path  => $path,
+      cb    => $cb,
+      group => $group || 'global',
+    }
+  );
+  $h->{pp} = Data::JSONPath->upgrade( $h->{path} );
+  push @{ $self->{handler} }, $h;
+  $self;
+}
+
 sub off {
   my ( $self, %like ) = @_;
-  my $hh = [ grep { !_is_like( $_, \%like ) } @{ $self->{handler} } ];
+  my $lk = _cook_handler( \%like );
+  my $hh = [ grep { !_is_like( $_, $lk ) } @{ $self->{handler} } ];
   $self->{handler} = $hh;
   $self;
 }
 
 sub fire {
-  my $self = shift;
+  my ( $self, $path, @args ) = @_;
+  my $lk = _cook_handler( { path => $path } );
   for my $h ( @{ $self->{handler} } ) {
-    $h->{cb}( @_ ) if $h->{pp}->match( $_[0] );
+    $h->{cb}( $lk->{path}, @args ) if $h->{pp}->match( $lk->{path} );
   }
   $self;
 }
@@ -146,11 +161,12 @@ sub trigger_set {
         my $flags = 0;
         _visit( $v, sub { $flags |= $_[1] } );
         if ( $flags ) {
-          my $before = $cs->{orig}->get( $p );
-          my $after  = $self->{p}->get( $p );
-          $h->{cb}
-           ->( $p, $before, $after, @{ $h->{pp}->capture( $p ) } )
-           if defined $before || defined $after;
+          my $b = $cs->{orig}->get( $p );
+          my $a = $self->{p}->get( $p );
+          $h->{cb}->( $p, $b, $a, @{ $h->{pp}->capture( $p ) } )
+           if ( $h->{limit} eq '+' && !defined $b && defined $a )
+           || ( $h->{limit} eq '-' && defined $b && !defined $a )
+           || ( $h->{limit} eq '*' && ( defined $b || defined $a ) );
         }
       }
     );

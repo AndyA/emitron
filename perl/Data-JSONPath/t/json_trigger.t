@@ -23,7 +23,7 @@ use Data::JSONTrigger;
      ->fire( '$.bar.boffle', 1, 2, 3 );
     $jt->fire( '$.baz.bink' );
     $jt->fire( '$.baz.nomatch' );
-    $jt->fire( '$.bar.bink' );
+    $jt->fire( '*$.bar.bink' );
   };
 
   $fire->();
