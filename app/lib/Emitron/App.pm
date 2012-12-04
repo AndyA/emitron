@@ -160,7 +160,7 @@ sub _on {
     # Register handle to select on
     return;
   }
-  if ( $name =~ /^\$/ ) {
+  if ( $name =~ /^[-\*\+\$]/ ) {
     # JSONPath to trigger on
     if ( $self->in_child ) {
       $self->_trigger->on( $name, $self->_wrap_handler( $handler ) );
