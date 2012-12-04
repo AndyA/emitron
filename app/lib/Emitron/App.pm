@@ -32,8 +32,8 @@ Emitron::App - The Emitron app.
 sub run {
   my $self = shift;
   Emitron::Runner->new(
-    workers    => $self->make_workers( $self->make_handlers ),
-    post_event => $self->make_event_cleanup
+    workers => $self->make_workers( $self->make_handlers ),
+    cleanup => $self->make_event_cleanup
   )->run;
 }
 

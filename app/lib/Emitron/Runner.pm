@@ -17,7 +17,7 @@ Emitron::Runner - App core
 
 =cut
 
-has post_event => (
+has cleanup => (
   is      => 'ro',
   default => sub {
     sub { }
@@ -81,7 +81,7 @@ sub run {
       if ( $msg->type eq 'signal' ) {
         $wrk->signal( $msg );
         if ( $wrk->is_ready && defined( my $m = delete $ar->{msg} ) ) {
-          $self->post_event->( $m );
+          $self->cleanup->( $m );
         }
       }
       else {
