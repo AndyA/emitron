@@ -32,18 +32,13 @@ Emitron::App - The Emitron app.
 sub run {
   my $self = shift;
   Emitron::Runner->new(
-    workers => $self->make_workers( $self->make_handlers ),
+    workers => $self->make_workers,
     cleanup => $self->make_event_cleanup
   )->run;
 }
 
-sub make_handlers {
-  my $self = shift;
-  return ();
-}
-
 sub make_workers {
-  my ( $self, @handlers ) = @_;
+  my ( $self ) = @_;
   my @w = ();
 
   my @default = (
@@ -67,7 +62,6 @@ sub make_workers {
     model => $self->model );
 
   my $desp = Emitron::MessageDespatcher->new;
-  $_->subscribe( $desp ) for @handlers;
 
   for ( 1 .. 5 ) {
     push @w,
