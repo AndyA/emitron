@@ -3,8 +3,6 @@ package Emitron::Worker::Script;
 use strict;
 use warnings;
 
-use Emitron::Core;
-
 =head1 NAME
 
 Emitron::Worker::Script - The worker wrapper for a script.

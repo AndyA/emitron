@@ -5,7 +5,6 @@ use Moose;
 use Data::Dumper;
 use Emitron::CRTMPServer;
 use Emitron::Config;
-use Emitron::Core;
 use Emitron::Logger;
 use Emitron::Message;
 use Emitron::MessageDespatcher;
@@ -23,11 +22,41 @@ use constant QUEUE => '/tmp/emitron.queue';
 use constant MODEL => '/tmp/emitron.model';
 use constant EVENT => '/tmp/emitron.event';
 
+has root => ( isa => 'Str', is => 'ro', default => '/tmp/emitron' );
+has in_child => (
+  isa     => 'Bool',
+  is      => 'rw',
+  default => 0,
+);
+
+has _despatcher => (
+  isa     => 'Emitron::MessageDespatcher',
+  is      => 'ro',
+  default => sub { Emitron::MessageDespatcher->new }
+);
+
 =head1 NAME
 
 Emitron::App - The Emitron app.
 
 =cut
+
+{
+  my ( $EMITRON );
+
+  sub import {
+    my $class = shift;
+    $EMITRON ||= $class->new( @_ );
+    {
+      my $pkg = caller;
+      no strict 'refs';
+      *{"${pkg}::em"} = sub { $EMITRON };
+    }
+  }
+
+  # Also available as a class method
+  sub em { $EMITRON }
+}
 
 sub run {
   my $self = shift;
@@ -41,10 +70,7 @@ sub make_workers {
   my ( $self ) = @_;
   my @w = ();
 
-  my @default = (
-    event => $self->event,
-    core  => $self->core,
-  );
+  my @default = ( event => $self->event, );
 
   push @w,
    Emitron::Worker::EventWatcher->new( @default,
@@ -89,11 +115,6 @@ sub event {
    ||= Emitron::Model::Watched->new( root => EVENT, prune => 50 )->init;
 }
 
-sub core {
-  my $self = shift;
-  return $self->{core} ||= Emitron::Core->new;
-}
-
 # TODO this shouldn't be here.
 
 sub make_event_cleanup {
@@ -105,6 +126,38 @@ sub make_event_cleanup {
       $queue->remove( $msg->{cleanup} );
     }
   };
+}
+
+sub _wrap_handler {
+  my ( $self, $handler ) = @_;
+  return $handler;
+}
+
+sub _on {
+  my ( $self, $name, $handler, $group ) = @_;
+  if ( UNIVERSAL::can( $name, 'isa' ) && $name->isa( 'IO::Handle' ) ) {
+    # Register handle to select on
+    return;
+  }
+  if ( $name =~ /^\$/ ) {
+    # JSONPath to trigger on
+    return;
+  }
+  $self->_despatcher->on( $name, $self->_wrap_handler( $handler ),
+    $group );
+}
+
+sub on {
+  my $self = shift;
+  my $name = shift;
+  for my $n ( 'ARRAY' eq ref $name ? @$name : $name ) {
+    $self->_on( $n, @_ );
+  }
+  $self;
+}
+
+sub off {
+  my ( $self, %like ) = @_;
 }
 
 1;

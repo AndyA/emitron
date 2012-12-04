@@ -8,7 +8,6 @@ use IO::Select;
 use Time::HiRes qw( time );
 
 has event => ( isa => 'Emitron::Model', is => 'ro', required => 1 );
-has core  => ( isa => 'Emitron::Core',  is => 'ro', required => 1 );
 
 use base qw( Emitron::MessageDespatcher );
 
