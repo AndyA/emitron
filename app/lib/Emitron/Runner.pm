@@ -66,7 +66,7 @@ sub run {
       $rds->add( [ $wrk->reader, $wrk->pid ] );
     }
 
-    my @rdy = $rds->can_read( 10 );
+    my @rdy = $rds->can_read( 60 );
 
     for my $rd ( @rdy ) {
       my $ar = $active->{ $rd->[1] };

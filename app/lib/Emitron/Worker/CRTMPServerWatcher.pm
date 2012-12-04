@@ -50,7 +50,6 @@ sub _handle_listStreams {
     sub {
       my ( $model, $rev ) = @_;
       $model->{streams} = $self->_munge_streams( $data );
-      debug "Model update: ", $model;
       return $model;
     }
   );
