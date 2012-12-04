@@ -112,7 +112,7 @@ sub run {
   my $self = shift;
   Emitron::Runner->new(
     workers => $self->make_workers,
-    cleanup => $self->make_event_cleanup
+    cleanup => $self->make_cleanup
   )->run;
 }
 
@@ -138,7 +138,7 @@ sub make_workers {
 
 # TODO this shouldn't be here.
 
-sub make_event_cleanup {
+sub make_cleanup {
   my $self  = shift;
   my $queue = $self->queue;
   return sub {
