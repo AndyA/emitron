@@ -16,6 +16,8 @@ Recorder.prototype = {
     }
   },
   getLog: function() {
-    return this.log;
+    var rc = this.log;
+    this.log = [];
+    return rc;
   }
 }
