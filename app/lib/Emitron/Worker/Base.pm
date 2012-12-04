@@ -9,8 +9,6 @@ use Time::HiRes qw( time );
 
 has event => ( isa => 'Emitron::Model', is => 'ro', required => 1 );
 
-use base qw( Emitron::MessageDespatcher );
-
 =head1 NAME
 
 Emitron::Worker::Base - A worker

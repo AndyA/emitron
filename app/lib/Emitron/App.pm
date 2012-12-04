@@ -13,9 +13,9 @@ use Emitron::Model::Watched;
 use Emitron::Runner;
 use Emitron::Worker::Base;
 use Emitron::Worker::CRTMPServerWatcher;
-use Emitron::Worker::Drone;
 use Emitron::Worker::EventWatcher;
 use Emitron::Worker::ModelWatcher;
+use Emitron::Worker::Script;
 use Emitron::Worker;
 use Time::HiRes qw( sleep );
 
@@ -135,12 +135,12 @@ sub make_workers {
 
   push @w, $self->_watcher;
 
-  my $desp = Emitron::MessageDespatcher->new;
-
   for ( 1 .. 5 ) {
     push @w,
-     Emitron::Worker::Drone->new( @default, despatcher => $desp );
+     Emitron::Worker::Script->new( @default,
+      despatcher => $self->_despatcher );
   }
+
   return \@w;
 }
 
@@ -174,8 +174,16 @@ sub _on {
       $self->_trigger->on( $name, $self->_wrap_handler( $handler ) );
     }
     else {
-      $self->_despatcher->on( $self->_watcher->listen( $name ),
-        $self->_wrap_handler( $handler ), $group );
+      $self->_despatcher->on(
+        $self->_watcher->listen( $name ),
+        $self->_wrap_handler(
+          sub {
+            my $msg = shift;
+            $handler->( @{ $msg->msg } );
+          }
+        ),
+        $group
+      );
     }
     return;
   }
