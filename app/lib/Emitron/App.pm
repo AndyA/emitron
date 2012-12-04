@@ -3,6 +3,7 @@ package Emitron::App;
 use Moose;
 
 use Data::Dumper;
+use Data::JSONTrigger;
 use Emitron::CRTMPServer;
 use Emitron::Config;
 use Emitron::Logger;
@@ -32,7 +33,28 @@ has in_child => (
 has _despatcher => (
   isa     => 'Emitron::MessageDespatcher',
   is      => 'ro',
+  lazy    => 1,
   default => sub { Emitron::MessageDespatcher->new }
+);
+
+has _watcher => (
+  isa     => 'Emitron::Worker::ModelWatcher',
+  is      => 'ro',
+  lazy    => 1,
+  default => sub {
+    my $self = shift;
+    Emitron::Worker::ModelWatcher->new(
+      event => $self->event,
+      model => $self->model
+    );
+  }
+);
+
+has _trigger => (
+  isa     => 'Data::JSONTrigger',
+  is      => 'ro',
+  lazy    => 1,
+  default => sub { Data::JSONTrigger->new }
 );
 
 =head1 NAME
@@ -83,9 +105,7 @@ sub make_workers {
     uri   => 'http://localhost:6502'
    );
 
-  push @w,
-   Emitron::Worker::ModelWatcher->new( @default,
-    model => $self->model );
+  push @w, $self->_watcher;
 
   my $desp = Emitron::MessageDespatcher->new;
 
@@ -141,6 +161,13 @@ sub _on {
   }
   if ( $name =~ /^\$/ ) {
     # JSONPath to trigger on
+    if ( $self->in_child ) {
+      $self->_trigger->on( $name, $self->_wrap_handler( $handler ) );
+    }
+    else {
+      $self->_despatcher->on( $self->_watcher->listen( $name ),
+        $self->_wrap_handler( $handler ), $group );
+    }
     return;
   }
   $self->_despatcher->on( $name, $self->_wrap_handler( $handler ),

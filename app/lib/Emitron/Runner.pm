@@ -78,7 +78,7 @@ sub run {
         next;
       }
 
-      if ( $msg->type eq 'signal' ) {
+      if ( $msg->type eq 'signal.state' ) {
         $wrk->signal( $msg );
         if ( $wrk->is_ready && defined( my $m = delete $ar->{msg} ) ) {
           $self->cleanup->( $m );

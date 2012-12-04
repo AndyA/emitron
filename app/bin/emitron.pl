@@ -12,6 +12,14 @@ use Emitron::Logger;
 
 Emitron::Logger->level( Emitron::Logger->DEBUG );
 
+em->on(
+  '$.streams.*.INR.*',
+  sub {
+    my ( $path, $before, $after, $name, $app ) = @_;
+    info "$path ($name, $app): ", $before, $after;
+  }
+);
+
 em->run;
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl

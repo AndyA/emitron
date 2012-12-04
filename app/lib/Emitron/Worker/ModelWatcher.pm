@@ -10,6 +10,13 @@ extends qw( Emitron::Worker::Base );
 
 has model => ( isa => 'Emitron::Model', is => 'ro', required => 1 );
 
+has _trigger => (
+  isa     => 'Data::JSONTrigger',
+  is      => 'ro',
+  lazy    => 1,
+  default => sub { Data::JSONTrigger->new }
+);
+
 =head1 NAME
 
 Emitron::Worker::ModelWatcher - Watch the model, fire messages on interesting changes
@@ -22,36 +29,31 @@ sub run {
   info "Model watcher starting";
 
   my $model = $self->model;
-  $self->install_hooks;
 
   my $rev = $model->revision;
-  $self->trigger->data( $model->checkout( $rev ) );
+  $self->_trigger->data( $model->checkout( $rev ) );
 
   while () {
     my $nrev = $self->model->wait( $rev, 10000 );
     if ( $nrev ne $rev ) {
       debug "Model updated to $nrev";
-      $self->trigger->data( $model->checkout( $rev = $nrev ) );
+      $self->_trigger->data( $model->checkout( $rev = $nrev ) );
     }
   }
 }
 
-sub install_hooks {
+sub _make_signal_name {
   my $self = shift;
-  my $jt   = $self->trigger;
-  $jt->on(
-    '$.streams.*.INR.*',
-    sub {
-      my ( $path, $before, $after, $name, $app ) = @_;
-      debug "$path changed ($name, $app), before: ", $before,
-       ", after: ", $after;
-    }
-  );
+  'signal.model.' . ( ++$self->{_next_signal} );
 }
 
-sub trigger {
-  my $self = shift;
-  return $self->{trigger} ||= Data::JSONTrigger->new;
+sub listen {
+  my ( $self, $path ) = @_;
+  my $sig = $self->_make_signal_name;
+  info "Listen on changes to $path and fire $sig";
+  $self->_trigger->on( $path,
+    sub { $self->post_message( type => $sig, msg => \@_ ) } );
+  return $sig;
 }
 
 1;

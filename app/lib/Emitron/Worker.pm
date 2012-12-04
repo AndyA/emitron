@@ -79,7 +79,7 @@ sub send {
 
 sub signal {
   my ( $self, $msg ) = @_;
-  $self->state( $msg->msg ) if $msg->type eq 'signal';
+  $self->state( $msg->msg ) if $msg->type eq 'signal.state';
 }
 
 1;

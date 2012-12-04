@@ -64,7 +64,7 @@ sub poll {
 sub get_message {
   my ( $self, $timeout ) = @_;
 
-  $self->post_message( type => 'signal', msg => 'READY' );
+  $self->post_message( type => 'signal.state', msg => 'READY' );
 
   return $self->_select( $timeout, $self->{selmsg} );
 }
