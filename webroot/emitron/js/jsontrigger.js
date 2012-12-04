@@ -61,6 +61,7 @@ JSONTrigger.prototype = (function() {
 
   function cook_handler(h) {
     if (h.hasOwnProperty('limit')) return h;
+    if (!h.hasOwnProperty('path')) return h;
     var hh = clone(h);
     hh.limit = '*';
     var m = /^([-\+\*])(.*)/.exec(hh.path);
