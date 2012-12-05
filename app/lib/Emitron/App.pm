@@ -25,7 +25,7 @@ has root => ( isa => 'Str', is => 'ro', default => '/tmp/emitron' );
 has worker => (
   isa     => 'Emitron::Worker::Base',
   is      => 'rw',
-  handles => ['post_message']
+  handles => [ 'post_message', 'handle_messages' ]
 );
 
 has _context => (
