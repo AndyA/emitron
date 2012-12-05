@@ -34,7 +34,7 @@ sub run {
   $self->_trigger->data( $model->checkout( $rev ) );
 
   while () {
-    my $nrev = $model->wait( $rev, 10000 );
+    my $nrev = $model->wait( $rev, 10 );
     if ( $nrev ne $rev ) {
       debug "Model updated to $nrev";
       $self->_revision( $nrev );
