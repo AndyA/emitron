@@ -183,6 +183,11 @@ sub patch {
   $self;
 }
 
+sub sneak {
+  my $self = shift;
+  $self->SUPER::data( @_ );
+}
+
 sub data {
   my $self = shift;
   return $self->SUPER::data unless @_;
