@@ -27,7 +27,7 @@ has in_child => (
   default => 0,
 );
 
-has context => (
+has _context => (
   isa     => 'Emitron::Context',
   is      => 'ro',
   lazy    => 1,
@@ -41,7 +41,7 @@ has _watcher => (
   lazy    => 1,
   default => sub {
     my $self = shift;
-    Emitron::Worker::ModelWatcher->new( context => $self->context );
+    Emitron::Worker::ModelWatcher->new;
   }
 );
 
@@ -51,6 +51,16 @@ has _trigger => (
   lazy    => 1,
   default => sub { Data::JSONTrigger->new }
 );
+
+has _listener => (
+  isa     => 'Emitron::Listener',
+  is      => 'ro',
+  lazy    => 1,
+  default => sub { Emitron::Listener->new },
+  handles => [ 'peek', 'poll' ]
+);
+
+has _revision => ( isa => 'Num', is => 'rw' );
 
 =head1 NAME
 
@@ -79,7 +89,7 @@ sub run {
   my $self = shift;
   Emitron::Runner->new(
     workers => $self->make_workers,
-    cleanup => $self->make_cleanup
+    cleanup => $self->_make_cleanup
   )->run;
 }
 
@@ -87,19 +97,16 @@ sub make_workers {
   my ( $self ) = @_;
   my @w = ();
 
-  push @w,
-   Emitron::Worker::EventWatcher->new( context => $self->context );
+  #  push @w, Emitron::Worker::EventWatcher->new;
 
   push @w,
    Emitron::Worker::CRTMPServerWatcher->new(
-    context => $self->context,
-    uri     => 'http://localhost:6502'
-   );
+    uri => 'http://localhost:6502' );
 
   push @w, $self->_watcher;
 
   for ( 1 .. 5 ) {
-    push @w, Emitron::Worker::Script->new( context => $self->context );
+    push @w, Emitron::Worker::Script->new;
   }
 
   return \@w;
@@ -107,7 +114,7 @@ sub make_workers {
 
 # TODO this shouldn't be here.
 
-sub make_cleanup {
+sub _make_cleanup {
   my $self  = shift;
   my $queue = $self->queue;
   return sub {
@@ -123,33 +130,64 @@ sub _wrap_handler {
   return $handler;
 }
 
+sub _add_model_to_listener {
+  my $self  = shift;
+  my $model = $self->model;
+  $self->_listener->add(
+    $model->fileno,
+    sub {
+      my $fn = shift;
+    }
+  );
+}
+
+sub _remove_model_from_listener {
+  my $self = shift;
+  $self->_listener->remove( $self->model->fileno );
+}
+
+sub _on_path {
+  my $self = shift;
+  my $trig = $self->_trigger;
+  $self->_add_model_to_listener unless $trig->has_trigger;
+  $trig->on( @_ );
+}
+
+sub _off_path {
+  my ( $self, %like ) = @_;
+  my $trig = $self->_trigger;
+  $trig->off( %like );
+  $self->_remove_model_from_listener unless $trig->has_trigger;
+}
+
+sub _on_path_msg {
+  my ( $self, $name, $handler, $group ) = @_;
+  $self->despatcher->on(
+    $self->_watcher->listen( $name ),
+    sub {
+      my $msg = shift;
+      my ( $rev, @args ) = @{ $msg->msg };
+      $self->_revision( $rev );
+      $handler->( @args );
+    },
+    $group
+  );
+}
+
 sub _on {
   my ( $self, $name, $handler, $group ) = @_;
+  my $hh = $self->_wrap_handler( $handler );
   if ( UNIVERSAL::can( $name, 'isa' ) && $name->isa( 'IO::Handle' ) ) {
     # Register handle to select on
     return;
   }
   if ( $name =~ /^[-\*\+\$]/ ) {
     # JSONPath to trigger on
-    if ( $self->in_child ) {
-      $self->_trigger->on( $name, $self->_wrap_handler( $handler ) );
-    }
-    else {
-      $self->despatcher->on(
-        $self->_watcher->listen( $name ),
-        $self->_wrap_handler(
-          sub {
-            my $msg = shift;
-            $handler->( @{ $msg->msg } );
-          }
-        ),
-        $group
-      );
-    }
-    return;
+    return $self->in_child
+     ? $self->_on_path( $name, $hh, $group )
+     : $self->_on_path_msg( $name, $hh, $group );
   }
-  $self->despatcher->on( $name, $self->_wrap_handler( $handler ),
-    $group );
+  $self->despatcher->on( $name, $hh, $group );
 }
 
 sub on {
@@ -163,6 +201,17 @@ sub on {
 
 sub off {
   my ( $self, %like ) = @_;
+
+  if ( exists $like{path} ) {
+    $self->_off_path( %like );
+  }
+  elsif ( exists $like{name} ) {
+    $self->despatcher->off( %like );
+  }
+  else {
+    $self->_off_path( %like );
+    $self->despatcher->off( %like );
+  }
 }
 
 1;

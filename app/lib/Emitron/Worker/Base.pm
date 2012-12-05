@@ -3,6 +3,7 @@ package Emitron::Worker::Base;
 use Moose;
 
 use Emitron::App;
+use Emitron::Listener;
 use Emitron::Logger;
 use Emitron::Message;
 use IO::Select;
@@ -14,14 +15,8 @@ has em => (
   lazy    => 1,
   default => sub {
     Emitron::App->em;
-  }
-);
-
-has context => (
-  isa      => 'Emitron::Context',
-  is       => 'ro',
-  required => 1,
-  handles  => [ 'model', 'queue', 'event', 'despatcher' ]
+  },
+  handles => [ 'model', 'queue', 'event', 'despatcher', 'peek', 'poll' ]
 );
 
 =head1 NAME
@@ -61,7 +56,7 @@ sub _select {
   return;
 }
 
-sub poll {
+sub _poll {
   my $self = shift;
   my $nevn = $self->em->event->poll;
   return unless defined $nevn;

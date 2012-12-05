@@ -15,6 +15,8 @@ has _trigger => (
   default => sub { Data::JSONTrigger->new }
 );
 
+has _revision => ( isa => 'Num', is => 'rw' );
+
 =head1 NAME
 
 Emitron::Worker::ModelWatcher - Watch the model, fire messages on interesting changes
@@ -35,6 +37,7 @@ sub run {
     my $nrev = $model->wait( $rev, 10000 );
     if ( $nrev ne $rev ) {
       debug "Model updated to $nrev";
+      $self->_revision( $nrev );
       $self->_trigger->data( $model->checkout( $rev = $nrev ) );
     }
   }
@@ -49,8 +52,15 @@ sub listen {
   my ( $self, $path ) = @_;
   my $sig = $self->_make_signal_name;
   info "Listen on changes to $path and fire $sig";
-  $self->_trigger->on( $path,
-    sub { $self->post_message( type => $sig, msg => \@_ ) } );
+  $self->_trigger->on(
+    $path,
+    sub {
+      $self->post_message(
+        type => $sig,
+        msg  => [ $self->_revision, @_ ]
+      );
+    }
+  );
   return $sig;
 }
 

@@ -12,6 +12,8 @@ Emitron::Worker::EventWatcher - Listen for events from web app
 
 =cut
 
+# TODO this isn't right any more
+
 sub run {
   my $self = shift;
 
