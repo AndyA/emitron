@@ -13,9 +13,9 @@ use Emitron::Logger;
 Emitron::Logger->level( Emitron::Logger->DEBUG );
 
 em->on(
-  'msg.stream.encode.start' => sub {
-    my $msg = shift;
-    debug $msg->type, ': ', $msg->msg;
+  'msg.stream.encode.*' => sub {
+    my ( $msg, $name ) = @_;
+    debug "encode $name: ", $msg->type, ', ', $msg->msg;
   }
 );
 
@@ -35,25 +35,9 @@ em->on(
 
     # Encode the preview stream
     em->post_message(
-      type => 'msg.stream.encode.start',
+      type => "msg.stream.encode.$name",
       msg  => $stream
     );
-
-    em->post_event(
-      type => 'ev.something',
-      msg  => { name => $name, app => $app }
-    );
-    em->post_message(
-      type => 'msg.something',
-      msg  => { name => $name, app => $app }
-    );
-  }
-);
-
-em->on(
-  [ 'ev.something', 'msg.something' ] => sub {
-    my $msg = shift;
-    debug "Got event/message: ", $msg->type;
   }
 );
 
