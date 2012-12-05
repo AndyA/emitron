@@ -152,7 +152,7 @@ sub handle_events {
     $event->fileno,
     sub {
       my $fn = shift;
-      my $nrev = $event->wait( $rev, 10 );
+      my $nrev = $event->poll;
       for my $r ( $rev + 1 .. $nrev ) {
         my $ev = $event->checkout( $r );
         $self->despatcher->despatch(
@@ -172,8 +172,8 @@ sub _add_model_to_listener {
   $self->add_listener(
     $model->fileno,
     sub {
-      my $fn = shift;
-      my $nrev = $model->wait( $self->_revision, 10000 );
+      my $fn   = shift;
+      my $nrev = $model->poll;
       if ( $nrev ne $self->_revision ) {
         $self->_revision( $nrev );
         $trig->data( $model->checkout( $nrev ) );
