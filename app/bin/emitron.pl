@@ -22,6 +22,7 @@ em->on(
       sub {
         my ( undef, $before, undef ) = @_;
         info "Destroyed stream ($name, $app): ", $before;
+        em->off_all;
       }
     );
   }

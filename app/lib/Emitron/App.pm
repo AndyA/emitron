@@ -130,12 +130,21 @@ sub _make_cleanup {
   };
 }
 
+our $UID;
+
+sub uid { $UID }
+
+sub _make_uid { 'session.' . ++( shift->{_uid} ) }
+
 sub _wrap_handler {
   my ( $self, $handler ) = @_;
-  return $handler;
+  my $uid = $UID;
+  return sub {
+    local $UID = $uid || $self->_make_uid;
+    debug "Running handler in $UID";
+    $handler->( @_ );
+  };
 }
-
-# TODO event polling
 
 sub _add_model_to_listener {
   my $self  = shift;
@@ -158,6 +167,7 @@ sub _add_model_to_listener {
 
 sub _remove_model_from_listener {
   my $self = shift;
+  debug "Stopping model listener for rev ", $self->_revision;
   $self->remove_listener( $self->model->fileno );
 }
 
@@ -190,10 +200,10 @@ sub _on_path_msg {
 }
 
 sub _on {
-  my ( $self, $name, $handler, $group ) = @_;
-  my $hh = $self->_wrap_handler( $handler );
+  my ( $self, $name, $hh, $group ) = @_;
   if ( UNIVERSAL::can( $name, 'isa' ) && $name->isa( 'IO::Handle' ) ) {
     # Register handle to select on
+    die;
     return;
   }
   if ( $name =~ /^[-\*\+\$]/ ) {
@@ -206,10 +216,11 @@ sub _on {
 }
 
 sub on {
-  my $self = shift;
-  my $name = shift;
+  my ( $self, $name, $handler, $group ) = @_;
+  $group = uid unless defined $group;
+  my $hh = $self->_wrap_handler( $handler );
   for my $n ( 'ARRAY' eq ref $name ? @$name : $name ) {
-    $self->_on( $n, @_ );
+    $self->_on( $n, $hh, $group );
   }
   $self;
 }
@@ -226,6 +237,18 @@ sub off {
   else {
     $self->_off_path( %like );
     $self->despatcher->off( %like );
+  }
+}
+
+sub off_all {
+  my $self = shift;
+  if ( $UID ) {
+    debug "Removing handlers for $UID";
+    $self->off( group => $UID );
+    undef $UID;
+  }
+  else {
+    warning "off_all called outside handler context";
   }
 }
 
