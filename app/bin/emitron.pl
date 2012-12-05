@@ -21,6 +21,10 @@ em->on(
       type => 'ev.something',
       msg  => { name => $name, app => $app }
     );
+    em->post_message(
+      type => 'msg.something',
+      msg  => { name => $name, app => $app }
+    );
     em->on(
       "-$path",
       sub {
@@ -33,10 +37,10 @@ em->on(
 );
 
 em->on(
-  'ev.something',
+  [ 'ev.something', 'msg.something' ],
   sub {
     my $msg = shift;
-    debug "Got event: ", $msg->type;
+    debug "Got event/message: ", $msg->type;
   }
 );
 

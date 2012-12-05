@@ -52,7 +52,7 @@ sub BUILD {
     use POSIX '_exit';
     eval q{END { _exit 0 }};
 
-    Emitron::App->em->in_child( 1 );
+    Emitron::App->em->worker( $self->worker );
 
     $self->worker->start( $child_rdr, $child_wtr );
 

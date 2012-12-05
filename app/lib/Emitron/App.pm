@@ -21,10 +21,11 @@ use Emitron::Worker;
 use Time::HiRes qw( sleep );
 
 has root => ( isa => 'Str', is => 'ro', default => '/tmp/emitron' );
-has in_child => (
-  isa     => 'Bool',
+
+has worker => (
+  isa     => 'Emitron::Worker::Base',
   is      => 'rw',
-  default => 0,
+  handles => ['post_message']
 );
 
 has _context => (
@@ -227,7 +228,7 @@ sub _on {
   }
   if ( $name =~ /^[-\*\+\$]/ ) {
     # JSONPath to trigger on
-    return $self->in_child
+    return $self->worker
      ? $self->_on_path( $name, $hh, $group )
      : $self->_on_path_msg( $name, $hh, $group );
   }
