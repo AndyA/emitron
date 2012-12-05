@@ -4,6 +4,7 @@ use Moose;
 
 use Data::Dumper;
 use Data::JSONTrigger;
+use Data::JSONVisitor;
 use Emitron::CRTMPServer;
 use Emitron::Config;
 use Emitron::Context;
@@ -47,7 +48,12 @@ has _trigger => (
   isa     => 'Data::JSONTrigger',
   is      => 'ro',
   lazy    => 1,
-  default => sub { Data::JSONTrigger->new }
+  default => sub {
+    my $self = shift;
+    my $trig = Data::JSONTrigger->new;
+    $trig->sneak( $self->model->checkout( $self->_revision ) );
+    return $trig;
+  }
 );
 
 has _listener => (
@@ -63,7 +69,12 @@ has _listener => (
   }
 );
 
-has _revision => ( isa => 'Num', is => 'rw' );
+has _revision => (
+  isa     => 'Num',
+  is      => 'rw',
+  lazy    => 1,
+  default => sub { shift->model->revision }
+);
 
 =head1 NAME
 
@@ -104,7 +115,7 @@ sub make_workers {
 
   push @w,
    Emitron::Worker::CRTMPServerWatcher->new(
-    uri => 'http://localhost:6502' );
+    uri => $self->uri( 'crtmpserver' ) );
 
   push @w, $self->_watcher;
 
@@ -274,6 +285,25 @@ sub post_event {
       %args
     }
   );
+}
+
+sub cfg {
+  my ( $self, $path, $cb ) = @_;
+  my $v;
+  Data::JSONVisitor->new( $self->_trigger->data->{config} )->each(
+    $path,
+    sub {
+      ( $cb || sub { $v = shift } )->( $_[1] );
+    }
+  );
+  return $v;
+}
+
+sub uri {
+  my ( $self, $base, @args ) = @_;
+  my $uri = $self->cfg( "\$[global,local].uri.$base" );
+  die "No uri defined for $base" unless defined $uri;
+  return sprintf $uri, @args;
 }
 
 1;

@@ -63,21 +63,18 @@ sub _munge_streams {
       my $by_name = $by_type->{$type};
       for my $name ( keys %$by_name ) {
         my $rec = $by_name->{$name};
-        $rec->{preview} = $self->_preview_url( $name );
+        $rec->{uri} = $rec->{preview} = $self->_preview_url( $name );
         $out->{$name}{$type}{$app} = $rec;
       }
     }
   }
-
-  debug "Media server stream update: ", $data;
 
   return $out;
 }
 
 sub _preview_url {
   my ( $self, $name ) = @_;
-  # TODO hardwired for now
-  return 'rtmp://newstream.fenkle/live/' . $name;
+  return $self->em->uri( raw_stream => $name );
 }
 
 1;

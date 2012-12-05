@@ -13,10 +13,32 @@ use Emitron::Logger;
 Emitron::Logger->level( Emitron::Logger->DEBUG );
 
 em->on(
-  '+$.streams.*.INR.*',
-  sub {
-    my ( $path, undef, $after, $name, $app ) = @_;
-    info "Created stream ($name, $app): ", $after;
+  'msg.stream.encode.start' => sub {
+    my $msg = shift;
+    debug $msg->type, ': ', $msg->msg;
+  }
+);
+
+em->on(
+  '+$.streams.*.INR.*' => sub {
+    my ( $path, undef, $stream, $name, $app ) = @_;
+
+    info "Created stream ($name, $app): ", $stream;
+
+    em->on(
+      "-$path" => sub {
+        my ( undef, $before, undef ) = @_;
+        info "Destroyed stream ($name, $app): ", $before;
+        em->off_all;
+      }
+    );
+
+    # Encode the preview stream
+    em->post_message(
+      type => 'msg.stream.encode.start',
+      msg  => $stream
+    );
+
     em->post_event(
       type => 'ev.something',
       msg  => { name => $name, app => $app }
@@ -25,20 +47,11 @@ em->on(
       type => 'msg.something',
       msg  => { name => $name, app => $app }
     );
-    em->on(
-      "-$path",
-      sub {
-        my ( undef, $before, undef ) = @_;
-        info "Destroyed stream ($name, $app): ", $before;
-        em->off_all;
-      }
-    );
   }
 );
 
 em->on(
-  [ 'ev.something', 'msg.something' ],
-  sub {
+  [ 'ev.something', 'msg.something' ] => sub {
     my $msg = shift;
     debug "Got event/message: ", $msg->type;
   }

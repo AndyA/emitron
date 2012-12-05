@@ -2,6 +2,8 @@ package Emitron::Config;
 
 use Moose;
 
+use Net::Domain qw( hostfqdn );
+
 =head1 NAME
 
 Emitron::Config - Default config data
@@ -17,8 +19,16 @@ default model.
 
 sub config {
   my $class = shift;
+  my $fqdn  = hostfqdn;
   return {
     config => {
+      local => {
+        uri => {
+          raw_stream  => "rtmp://$fqdn/live/%s",
+          crtmpserver => 'http://localhost:6502',
+        },
+      },
+      global  => { uri => { home => 'http://thespace.org', }, },
       profile => {
         t10 => {
           v => {
