@@ -10,6 +10,8 @@ use constant QUEUE => '/tmp/emitron.queue';
 use constant MODEL => '/tmp/emitron.model';
 use constant EVENT => '/tmp/emitron.event';
 
+has root => ( isa => 'Str', is => 'ro', default => '/tmp/emitron' );
+
 has model => (
   isa     => 'Emitron::Model::Watched',
   is      => 'ro',

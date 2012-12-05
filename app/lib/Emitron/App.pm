@@ -32,7 +32,7 @@ has _context => (
   isa     => 'Emitron::Context',
   is      => 'ro',
   lazy    => 1,
-  default => sub { Emitron::Context->new },
+  default => sub { Emitron::Context->new( root => shift->root ) },
   handles => [ 'model', 'queue', 'event', 'despatcher' ]
 );
 
@@ -40,10 +40,7 @@ has _watcher => (
   isa     => 'Emitron::Worker::ModelWatcher',
   is      => 'ro',
   lazy    => 1,
-  default => sub {
-    my $self = shift;
-    Emitron::Worker::ModelWatcher->new;
-  }
+  default => sub { Emitron::Worker::ModelWatcher->new }
 );
 
 has _trigger => (
