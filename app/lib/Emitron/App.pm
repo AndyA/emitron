@@ -6,6 +6,7 @@ use Data::Dumper;
 use Data::JSONTrigger;
 use Emitron::CRTMPServer;
 use Emitron::Config;
+use Emitron::Context;
 use Emitron::Logger;
 use Emitron::Message;
 use Emitron::MessageDespatcher;
@@ -19,10 +20,6 @@ use Emitron::Worker::Script;
 use Emitron::Worker;
 use Time::HiRes qw( sleep );
 
-use constant QUEUE => '/tmp/emitron.queue';
-use constant MODEL => '/tmp/emitron.model';
-use constant EVENT => '/tmp/emitron.event';
-
 has root => ( isa => 'Str', is => 'ro', default => '/tmp/emitron' );
 has in_child => (
   isa     => 'Bool',
@@ -30,39 +27,12 @@ has in_child => (
   default => 0,
 );
 
-has model => (
-  isa     => 'Emitron::Model::Watched',
+has context => (
+  isa     => 'Emitron::Context',
   is      => 'ro',
   lazy    => 1,
-  default => sub {
-    Emitron::Model::Watched->new( root => MODEL, prune => 50 )
-     ->init( Emitron::Config->config );
-  }
-);
-
-has queue => (
-  isa     => 'Emitron::Model::Watched',
-  is      => 'ro',
-  lazy    => 1,
-  default => sub {
-    Emitron::Model::Watched->new( root => QUEUE )->init;
-  }
-);
-
-has event => (
-  isa     => 'Emitron::Model::Watched',
-  is      => 'ro',
-  lazy    => 1,
-  default => sub {
-    Emitron::Model::Watched->new( root => EVENT, prune => 50 )->init;
-  }
-);
-
-has _despatcher => (
-  isa     => 'Emitron::MessageDespatcher',
-  is      => 'ro',
-  lazy    => 1,
-  default => sub { Emitron::MessageDespatcher->new }
+  default => sub { Emitron::Context->new },
+  handles => [ 'model', 'queue', 'event', 'despatcher' ]
 );
 
 has _watcher => (
@@ -130,7 +100,7 @@ sub make_workers {
 
   for ( 1 .. 5 ) {
     push @w,
-     Emitron::Worker::Script->new( despatcher => $self->_despatcher );
+     Emitron::Worker::Script->new( despatcher => $self->despatcher );
   }
 
   return \@w;
@@ -166,7 +136,7 @@ sub _on {
       $self->_trigger->on( $name, $self->_wrap_handler( $handler ) );
     }
     else {
-      $self->_despatcher->on(
+      $self->despatcher->on(
         $self->_watcher->listen( $name ),
         $self->_wrap_handler(
           sub {
@@ -179,7 +149,7 @@ sub _on {
     }
     return;
   }
-  $self->_despatcher->on( $name, $self->_wrap_handler( $handler ),
+  $self->despatcher->on( $name, $self->_wrap_handler( $handler ),
     $group );
 }
 
