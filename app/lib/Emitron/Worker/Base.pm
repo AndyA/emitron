@@ -17,6 +17,13 @@ has em => (
   }
 );
 
+has context => (
+  isa      => 'Emitron::Context',
+  is       => 'ro',
+  required => 1,
+  handles  => [ 'model', 'queue', 'event', 'despatcher' ]
+);
+
 =head1 NAME
 
 Emitron::Worker::Base - A worker

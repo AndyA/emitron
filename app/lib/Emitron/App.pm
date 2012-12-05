@@ -41,10 +41,7 @@ has _watcher => (
   lazy    => 1,
   default => sub {
     my $self = shift;
-    Emitron::Worker::ModelWatcher->new(
-      event => $self->event,
-      model => $self->model
-    );
+    Emitron::Worker::ModelWatcher->new( context => $self->context );
   }
 );
 
@@ -90,17 +87,19 @@ sub make_workers {
   my ( $self ) = @_;
   my @w = ();
 
-  push @w, Emitron::Worker::EventWatcher->new();
+  push @w,
+   Emitron::Worker::EventWatcher->new( context => $self->context );
 
   push @w,
    Emitron::Worker::CRTMPServerWatcher->new(
-    uri => 'http://localhost:6502' );
+    context => $self->context,
+    uri     => 'http://localhost:6502'
+   );
 
   push @w, $self->_watcher;
 
   for ( 1 .. 5 ) {
-    push @w,
-     Emitron::Worker::Script->new( despatcher => $self->despatcher );
+    push @w, Emitron::Worker::Script->new( context => $self->context );
   }
 
   return \@w;

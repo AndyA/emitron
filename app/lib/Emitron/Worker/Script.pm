@@ -10,11 +10,6 @@ Emitron::Worker::Script - The worker wrapper for a script.
 
 =cut
 
-has despatcher => (
-  isa => 'Emitron::MessageDespatcher',
-  is  => 'ro',
-);
-
 sub run {
   my $self = shift;
   while ( my $msg = $self->get_message ) {
