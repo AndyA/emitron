@@ -77,7 +77,7 @@ sub _install_watch {
 
 override commit => sub {
   my $self = shift;
-  my $rev = super();
+  my $rev  = super();
   $self->_signal( $rev ) if defined $rev;
   return $rev;
 };
@@ -106,7 +106,7 @@ sub poll {
 sub wait {
   my ( $self, $serial, $timeout ) = @_;
 
-  my $deadline = time + $timeout / 1000;
+  my $deadline = time + $timeout;
 
   $self->_drain;
   my $sel = IO::Select->new( $self->fileno );
@@ -119,7 +119,7 @@ sub wait {
     return $nsn if defined $nsn && $nsn ne $serial;
 
     $self->_inotify->poll
-     if $sel->can_read( ( $deadline - $now ) * 1000 );
+     if $sel->can_read( $deadline - $now );
   }
 
   return $serial;

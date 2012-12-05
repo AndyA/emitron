@@ -57,7 +57,12 @@ has _listener => (
   is      => 'ro',
   lazy    => 1,
   default => sub { Emitron::Listener->new },
-  handles => [ 'peek', 'poll' ]
+  handles => {
+    peek            => 'peek',
+    poll            => 'poll',
+    add_listener    => 'add',
+    remove_listener => 'remove'
+  }
 );
 
 has _revision => ( isa => 'Num', is => 'rw' );
@@ -133,17 +138,25 @@ sub _wrap_handler {
 sub _add_model_to_listener {
   my $self  = shift;
   my $model = $self->model;
-  $self->_listener->add(
+  my $trig  = $self->_trigger;
+  $trig->sneak( $model->checkout( $self->_revision ) );
+  debug "Starting model listener for rev ", $self->_revision;
+  $self->add_listener(
     $model->fileno,
     sub {
       my $fn = shift;
+      my $nrev = $model->wait( $self->_revision, 10000 );
+      if ( $nrev ne $self->_revision ) {
+        $self->_revision( $nrev );
+        $trig->data( $model->checkout( $nrev ) );
+      }
     }
   );
 }
 
 sub _remove_model_from_listener {
   my $self = shift;
-  $self->_listener->remove( $self->model->fileno );
+  $self->remove_listener( $self->model->fileno );
 }
 
 sub _on_path {
