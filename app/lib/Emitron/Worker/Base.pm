@@ -37,8 +37,6 @@ sub start {
   my ( $self, $rdr, $wtr ) = @_;
   $self->_reader( $rdr );
   $self->_writer( $wtr );
-  $self->{selev} = IO::Select->new( $self->event->fileno );
-  $self->{evn}   = $self->event->revision;
   $self->run;
 }
 
