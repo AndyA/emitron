@@ -135,6 +135,8 @@ sub _wrap_handler {
   return $handler;
 }
 
+# TODO event polling
+
 sub _add_model_to_listener {
   my $self  = shift;
   my $model = $self->model;
@@ -225,6 +227,20 @@ sub off {
     $self->_off_path( %like );
     $self->despatcher->off( %like );
   }
+}
+
+sub post_event {
+  my ( $self, $name, $ev ) = @_;
+  return $self->event->commit(
+    {
+      type   => 'event',
+      name   => $name,
+      msg    => $ev,
+      source => 'internal',
+      worker => $$,
+      ts     => time
+    }
+  );
 }
 
 1;

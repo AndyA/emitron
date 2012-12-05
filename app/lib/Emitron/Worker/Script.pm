@@ -12,6 +12,7 @@ Emitron::Worker::Script - The worker wrapper for a script.
 
 sub run {
   my $self = shift;
+  $self->handle_messages;
   $self->em->poll( 10 ) while 1;
 }
 

@@ -16,8 +16,13 @@ has em => (
   default => sub {
     Emitron::App->em;
   },
-  handles => [ 'model', 'queue', 'event', 'despatcher', 'peek', 'poll' ]
+  handles => [
+    'model', 'queue', 'event', 'despatcher',
+    'peek',  'poll',  'post_event'
+  ]
 );
+
+has [ '_reader', '_writer' ] => ( isa => 'IO::Handle', is => 'rw' );
 
 =head1 NAME
 
@@ -27,73 +32,50 @@ Emitron::Worker::Base - A worker
 
 sub start {
   my ( $self, $rdr, $wtr ) = @_;
-  $self->{rdr}    = $rdr;
-  $self->{wtr}    = $wtr;
-  $self->{selmsg} = IO::Select->new( $self->em->event->fileno, $rdr );
-  $self->{selev}  = IO::Select->new( $self->em->event->fileno );
-  $self->{evn}    = $self->em->event->revision;
+  $self->_reader( $rdr );
+  $self->_writer( $wtr );
+  $self->{selev}  = IO::Select->new( $self->event->fileno );
+  $self->{evn}    = $self->event->revision;
   $self->run;
 }
 
-sub _select {
-  my ( $self, $timeout, $sel ) = @_;
-  my $deadline;
-  $deadline = time + $timeout / 1000 if defined $timeout;
-  while () {
-    my @to = ();
-    if ( defined $deadline ) {
-      my $now = time;
-      last if $now >= $deadline;
-      @to = ( ( $deadline - $now ) * 1000 );
-    }
-    for my $fd ( $sel->can_read( @to ) ) {
-      return Emitron::Message->recv( $self->{rdr} )
-       if $fd == $self->{rdr};
-      $self->poll
-       if $fd == $self->em->event->fileno;
-    }
-  }
-  return;
+sub _signal_ready {
+  # TODO how does this signalling method interact with other
+  # inputs we might want to listen for?
+  shift->post_message( type => 'signal.state', msg => 'READY' );
 }
 
-sub _poll {
+sub handle_messages {
   my $self = shift;
-  my $nevn = $self->em->event->poll;
-  return unless defined $nevn;
-
-  for my $evn ( $self->{evn} + 1 .. $nevn ) {
-    my $ev = $self->em->event->checkout( $evn );
-    $self->despatch( Emitron::Message->from_raw( $ev ) );
-  }
-
-  $self->{evn} = $nevn;
+  $self->em->add_listener(
+    $self->_reader,
+    sub {
+      my $fn  = shift;
+      my $msg = Emitron::Message->recv( $fn );
+      debug "Handling msg ", $msg->type;
+      $self->despatcher->despatch( $msg );
+      $self->_signal_ready;
+    }
+  );
+  $self->_signal_ready;
 }
 
-sub get_message {
-  my ( $self, $timeout ) = @_;
+#sub _poll {
+#  my $self = shift;
+#  my $nevn = $self->event->poll;
+#  return unless defined $nevn;
 
-  $self->post_message( type => 'signal.state', msg => 'READY' );
+#  for my $evn ( $self->{evn} + 1 .. $nevn ) {
+#    my $ev = $self->event->checkout( $evn );
+#    $self->despatch( Emitron::Message->from_raw( $ev ) );
+#  }
 
-  return $self->_select( $timeout, $self->{selmsg} );
-}
+#  $self->{evn} = $nevn;
+#}
 
 sub post_message {
   my ( $self, @msg ) = @_;
-  Emitron::Message->new( @msg )->send( $self->{wtr} );
-}
-
-sub post_event {
-  my ( $self, $name, $ev ) = @_;
-  return $self->em->event->commit(
-    {
-      type   => 'event',
-      name   => $name,
-      msg    => $ev,
-      source => 'internal',
-      worker => $$,
-      ts     => time
-    }
-  );
+  Emitron::Message->new( @msg )->send( $self->_writer );
 }
 
 1;

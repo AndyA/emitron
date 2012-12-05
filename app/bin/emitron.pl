@@ -15,12 +15,12 @@ Emitron::Logger->level( Emitron::Logger->DEBUG );
 em->on(
   '+$.streams.*.INR.*',
   sub {
-    my ( $path, $before, $after, $name, $app ) = @_;
+    my ( $path, undef, $after, $name, $app ) = @_;
     info "Created stream ($name, $app): ", $after;
     em->on(
       "-$path",
       sub {
-        my ( $path, $before, $after, $name, $app ) = @_;
+        my ( undef, $before, undef ) = @_;
         info "Destroyed stream ($name, $app): ", $before;
       }
     );
