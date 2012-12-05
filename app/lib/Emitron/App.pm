@@ -218,11 +218,6 @@ sub _on_path_msg {
 
 sub _on {
   my ( $self, $name, $hh, $group ) = @_;
-  if ( UNIVERSAL::can( $name, 'isa' ) && $name->isa( 'IO::Handle' ) ) {
-    # Register handle to select on
-    die;
-    return;
-  }
   if ( $name =~ /^[-\*\+\$]/ ) {
     # JSONPath to trigger on
     return $self->worker
