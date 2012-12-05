@@ -151,7 +151,7 @@ sub handle_events {
   $self->add_listener(
     $event->fileno,
     sub {
-      my $fn = shift;
+      my $fn   = shift;
       my $nrev = $event->poll;
       for my $r ( $rev + 1 .. $nrev ) {
         my $ev = $event->checkout( $r );
@@ -219,11 +219,12 @@ sub _on_path_msg {
 sub _on {
   my ( $self, $name, $hh, $group ) = @_;
   if ( $name =~ /^[-\*\+\$]/ ) {
-    # JSONPath to trigger on
+    # JSONPath
     return $self->worker
      ? $self->_on_path( $name, $hh, $group )
      : $self->_on_path_msg( $name, $hh, $group );
   }
+  # Regular event
   $self->despatcher->on( $name, $hh, $group );
 }
 
