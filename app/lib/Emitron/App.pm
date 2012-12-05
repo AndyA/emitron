@@ -264,7 +264,6 @@ sub off_all {
   if ( $UID ) {
     debug "Removing handlers for $UID";
     $self->off( group => $UID );
-    undef $UID;
   }
   else {
     warning "off_all called outside handler context";
