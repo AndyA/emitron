@@ -200,6 +200,11 @@ sub trigger {
   $self;
 }
 
+sub has_trigger {
+  my $self = shift;
+  return scalar @{ $self->{handler} };
+}
+
 1;
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl

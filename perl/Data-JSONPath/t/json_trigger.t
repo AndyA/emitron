@@ -11,12 +11,17 @@ use Recorder;
 use Data::JSONTrigger;
 
 {
-  my $jt  = Data::JSONTrigger->new;
+  ok my $jt = Data::JSONTrigger->new, 'new';
+  isa_ok $jt, 'Data::JSONTrigger';
   my $rec = Recorder->new;
+
+  is $jt->has_trigger, 0, 'has_trigger == 0';
 
   $jt->on( '$.foo',   $rec->callback );
   $jt->on( '$.bar.*', $rec->callback )
    ->on( '$.*.bink', $rec->callback, 'aGroup' );
+
+  is $jt->has_trigger, 3, 'has_trigger == 3';
 
   my $fire = sub {
     $jt->fire( '$.foo.0', "Hello, World" )
