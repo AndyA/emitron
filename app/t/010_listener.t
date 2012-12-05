@@ -75,6 +75,17 @@ sub test_it(&) {
   $poller->( $li );
 
   eq_or_diff $cl, { r1 => 2, r2 => 1 }, "r1, r2 callback";
+
+  $li->remove( $r1 );
+
+  $w1->syswrite( "Boo!" );
+  $w1->flush;
+  $w2->syswrite( "Boo!" );
+  $w2->flush;
+
+  $poller->( $li );
+
+  eq_or_diff $cl, { r1 => 2, r2 => 2 }, "r2 callback";
 }
 
 test_it {
