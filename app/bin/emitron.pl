@@ -17,6 +17,10 @@ em->on(
   sub {
     my ( $path, undef, $after, $name, $app ) = @_;
     info "Created stream ($name, $app): ", $after;
+    em->post_event(
+      type => 'ev.something',
+      msg  => { name => $name, app => $app }
+    );
     em->on(
       "-$path",
       sub {
@@ -25,6 +29,14 @@ em->on(
         em->off_all;
       }
     );
+  }
+);
+
+em->on(
+  'ev.something',
+  sub {
+    my $msg = shift;
+    debug "Got event: ", $msg->type;
   }
 );
 

@@ -146,6 +146,25 @@ sub _wrap_handler {
   };
 }
 
+sub handle_events {
+  my $self  = shift;
+  my $event = $self->event;
+  my $rev   = $event->revision;
+  $self->add_listener(
+    $event->fileno,
+    sub {
+      my $fn = shift;
+      my $nrev = $event->wait( $rev, 10 );
+      for my $r ( $rev + 1 .. $nrev ) {
+        my $ev = $event->checkout( $r );
+        $self->despatcher->despatch(
+          Emitron::Message->from_raw( $ev ) );
+      }
+      $rev = $nrev;
+    }
+  );
+}
+
 sub _add_model_to_listener {
   my $self  = shift;
   my $model = $self->model;
@@ -253,15 +272,13 @@ sub off_all {
 }
 
 sub post_event {
-  my ( $self, $name, $ev ) = @_;
+  my ( $self, %args ) = @_;
   return $self->event->commit(
     {
-      type   => 'event',
-      name   => $name,
-      msg    => $ev,
-      source => 'internal',
+      source => 'event',
       worker => $$,
-      ts     => time
+      ts     => time,
+      %args
     }
   );
 }

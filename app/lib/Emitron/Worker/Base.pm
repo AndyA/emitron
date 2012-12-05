@@ -17,8 +17,11 @@ has em => (
     Emitron::App->em;
   },
   handles => [
-    'model', 'queue', 'event', 'despatcher',
-    'peek',  'poll',  'post_event'
+    'model',        'queue',
+    'event',        'despatcher',
+    'peek',         'poll',
+    'post_event',   'handle_events',
+    'add_listener', 'remove_listener'
   ]
 );
 
@@ -34,8 +37,8 @@ sub start {
   my ( $self, $rdr, $wtr ) = @_;
   $self->_reader( $rdr );
   $self->_writer( $wtr );
-  $self->{selev}  = IO::Select->new( $self->event->fileno );
-  $self->{evn}    = $self->event->revision;
+  $self->{selev} = IO::Select->new( $self->event->fileno );
+  $self->{evn}   = $self->event->revision;
   $self->run;
 }
 
@@ -47,7 +50,7 @@ sub _signal_ready {
 
 sub handle_messages {
   my $self = shift;
-  $self->em->add_listener(
+  $self->add_listener(
     $self->_reader,
     sub {
       my $fn  = shift;
@@ -59,19 +62,6 @@ sub handle_messages {
   );
   $self->_signal_ready;
 }
-
-#sub _poll {
-#  my $self = shift;
-#  my $nevn = $self->event->poll;
-#  return unless defined $nevn;
-
-#  for my $evn ( $self->{evn} + 1 .. $nevn ) {
-#    my $ev = $self->event->checkout( $evn );
-#    $self->despatch( Emitron::Message->from_raw( $ev ) );
-#  }
-
-#  $self->{evn} = $nevn;
-#}
 
 sub post_message {
   my ( $self, @msg ) = @_;
