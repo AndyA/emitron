@@ -220,8 +220,13 @@ sub _on_path_msg {
     sub {
       my $msg = shift;
       my ( $rev, @args ) = @{ $msg->msg };
-      $self->_revision( $rev );
-      $handler->( @args );
+      if ( defined $rev ) {
+        $self->_revision( $rev );
+        $handler->( @args );
+      }
+      else {
+        error "Received model update message with no revision: ", $msg;
+      }
     },
     $group
   );
