@@ -86,7 +86,7 @@ sub push_segment {
 sub push_discontinuity {
   my $self = shift;
   my $seg  = $self->{_pl}{seg};
-  push @$seg, [] if @$seg;
+  push @$seg, [] if @{ $seg->[-1] };
   $self;
 }
 
