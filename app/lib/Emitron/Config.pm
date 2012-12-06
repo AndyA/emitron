@@ -22,8 +22,10 @@ sub config {
   my $fqdn  = hostfqdn;
   return {
     config => {
-      uri => {
-        raw_stream  => "rtmp://$fqdn/live/%s",
+      paths => { tmp => '/tmp/emitron' },
+      uri   => {
+        rtmp_stream => "rtmp://$fqdn/live/%s",
+        rtsp_stream => "rtsp://$fqdn:5544/%s",
         home        => 'http://thespace.org',
         crtmpserver => 'http://localhost:6502',
       },

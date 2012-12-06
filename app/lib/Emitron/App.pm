@@ -2,24 +2,21 @@ package Emitron::App;
 
 use Moose;
 
-use Data::Dumper;
+use Data::JSONPath;
 use Data::JSONTrigger;
 use Data::JSONVisitor;
-use Emitron::CRTMPServer;
 use Emitron::Config;
 use Emitron::Context;
 use Emitron::Logger;
 use Emitron::Message;
-use Emitron::MessageDespatcher;
-use Emitron::Model::Watched;
 use Emitron::Runner;
 use Emitron::Worker::Base;
 use Emitron::Worker::CRTMPServerWatcher;
 use Emitron::Worker::EventWatcher;
 use Emitron::Worker::ModelWatcher;
 use Emitron::Worker::Script;
-use Emitron::Worker;
-use Time::HiRes qw( sleep );
+use Path::Class;
+use Time::HiRes qw( sleep time );
 
 has root => ( isa => 'Str', is => 'ro', default => '/tmp/emitron' );
 
@@ -295,10 +292,14 @@ sub post_event {
 sub cfg {
   my ( $self, $path, $cb ) = @_;
   my $v;
+  $cb ||= sub { $v = shift };
+  my $jp = Data::JSONPath->upgrade( $path );
   Data::JSONVisitor->new( $self->_trigger->data->{config} )->each(
-    $path,
+    $jp,
     sub {
-      ( $cb || sub { $v = shift } )->( $_[1] );
+      my ( $p, $v ) = @_;
+      my @arg = @{ $jp->capture( $p ) };
+      $cb->( $v, @arg );
     }
   );
   return $v;
@@ -309,6 +310,14 @@ sub uri {
   my $uri = $self->cfg( "\$.uri.$base" );
   die "No uri defined for $base" unless defined $uri;
   return sprintf $uri, @args;
+}
+
+sub work_dir {
+  my ( $self, @args ) = @_;
+  my $nm = join '.', 'job', @args, $$, sprintf '%.3f', time;
+  my $dir = dir( $self->cfg( '$.paths.tmp' ), $nm );
+  $dir->mkpath;
+  return "$dir";
 }
 
 1;

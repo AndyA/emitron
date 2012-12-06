@@ -3,6 +3,7 @@ package Emitron::Worker::CRTMPServerWatcher;
 use Moose;
 
 use Emitron::BackOff;
+use Emitron::CRTMPServer;
 use Emitron::Logger;
 use JSON;
 use Time::HiRes qw( sleep );
@@ -63,7 +64,8 @@ sub _munge_streams {
       my $by_name = $by_type->{$type};
       for my $name ( keys %$by_name ) {
         my $rec = $by_name->{$name};
-        $rec->{uri} = $rec->{preview} = $self->_preview_url( $name );
+        $rec->{rtmp} = $rec->{preview} = $self->_rtmp_url( $name );
+        $rec->{rtsp} = $self->_rtsp_url( $name );
         $out->{$name}{$type}{$app} = $rec;
       }
     }
@@ -72,9 +74,14 @@ sub _munge_streams {
   return $out;
 }
 
-sub _preview_url {
+sub _rtsp_url {
   my ( $self, $name ) = @_;
-  return $self->em->uri( raw_stream => $name );
+  return $self->em->uri( rtsp_stream => $name );
+}
+
+sub _rtmp_url {
+  my ( $self, $name ) = @_;
+  return $self->em->uri( rtmp_stream => $name );
 }
 
 1;
