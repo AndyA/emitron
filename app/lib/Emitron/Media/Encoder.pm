@@ -27,10 +27,18 @@ has globals => (
   default => sub { Emitron::Media::Globals->new }
 );
 
-has tmp_dir => (
+has _tmp_dir => (
   isa     => 'File::Temp::Dir',
   is      => 'ro',
+  lazy    => 1,
   default => sub { File::Temp->newdir( TEMPLATE => 'emXXXXX' ) }
+);
+
+has tmp_dir => (
+  isa     => 'Str',
+  is      => 'ro',
+  lazy    => 1,
+  default => sub { shift->_tmp_dir->dirname }
 );
 
 =head1 NAME
@@ -56,6 +64,7 @@ sub _bash {
   my $pid = fork;
   die "Can't fork: $!" unless defined $pid;
   unless ( $pid ) {
+    setpgrp( 0, 0 );
     exec $self->programs->bash, -c => $cmd or die "Can't run $cmd: $!";
     exit 1;
   }
@@ -70,7 +79,17 @@ Start the encode
 
 sub stop {
   my $self = shift;
-  kill 'KILL', splice @{ $self->{pids} ||= [] };
+
+  my @pids = sort { $a <=> $b } splice @{ $self->{pids} || [] };
+  my $sig = kill -9, @pids;
+  warn "Signalled only $sig of ", scalar( @pids ), "\n"
+   unless @pids == $sig;
+  my @st = ();
+  for my $pid ( @pids ) {
+    my $got = waitpid $pid, 0;
+    push @st, $? if $got >= 0;
+  }
+  return @st;
 }
 
 sub _log {

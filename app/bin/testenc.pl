@@ -6,11 +6,12 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 
 use Emitron::Media::Encoder;
+use Path::Class;
 
 my $CONFIG = [
   {
     name        => 'p30',
-    destination => '/tmp/p30/f%08d.ts',
+    destination => 'testenc/p30/f%08d.ts',
     profile     => {
       v => {
         bitrate => 304_000,
@@ -29,7 +30,7 @@ my $CONFIG = [
   },
   {
     name        => 'p50',
-    destination => '/tmp/p50/f%08d.ts',
+    destination => 'testenc/p50/f%08d.ts',
     profile     => {
       v => {
         bitrate => 700_000,
@@ -48,10 +49,14 @@ my $CONFIG = [
   }
 ];
 
+my $TMP = 'testenc/tmp';
+dir( $TMP )->mkpath;
+
 my $enc = Emitron::Media::Encoder->new(
-  source => 'rtsp://newstream.fenkle:5544/orac',
-  config => $CONFIG,
-  burnin => 1,
+  source  => 'rtsp://newstream.fenkle:5544/orac',
+  config  => $CONFIG,
+  burnin  => 1,
+  tmp_dir => $TMP
 );
 
 $enc->start;
