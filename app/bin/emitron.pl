@@ -12,10 +12,14 @@ use Emitron::Logger;
 
 Emitron::Logger->level( Emitron::Logger->DEBUG );
 
+# TODO figure out a better way to clear handlers; having a single
+# context per top-level activation isn't flexible enough.
+
 em->on(
   'msg.stream.encode.*' => sub {
     my ( $msg, $name ) = @_;
     debug "encode $name: ", $msg->type, ', ', $msg->msg;
+    # Start stream encoding, update model
   }
 );
 
@@ -36,7 +40,10 @@ em->on(
     # Encode the preview stream
     em->post_message(
       type => "msg.stream.encode.$name",
-      msg  => $stream
+      msg  => {
+        stream => $stream,
+        config => '$.profiles.config.thumbnail'
+      }
     );
   }
 );

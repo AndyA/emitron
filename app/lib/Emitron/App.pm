@@ -301,7 +301,7 @@ sub cfg {
 
 sub uri {
   my ( $self, $base, @args ) = @_;
-  my $uri = $self->cfg( "\$[global,local].uri.$base" );
+  my $uri = $self->cfg( "\$.uri.$base" );
   die "No uri defined for $base" unless defined $uri;
   return sprintf $uri, @args;
 }

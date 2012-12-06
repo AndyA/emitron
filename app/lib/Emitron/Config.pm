@@ -22,15 +22,19 @@ sub config {
   my $fqdn  = hostfqdn;
   return {
     config => {
-      local => {
-        uri => {
-          raw_stream  => "rtmp://$fqdn/live/%s",
-          crtmpserver => 'http://localhost:6502',
-        },
+      uri => {
+        raw_stream  => "rtmp://$fqdn/live/%s",
+        home        => 'http://thespace.org',
+        crtmpserver => 'http://localhost:6502',
       },
-      global => {
-        uri     => { home => 'http://thespace.org', },
-        profile => {
+      profiles => {
+        config => {
+          thumbnail => { encodes => ['t10'] },
+          pc => { encodes => [ 'p30', 'p40', 'p50', 'p60', 'p70' ] },
+          pc_hd =>
+           { encodes => [ 'p30', 'p40', 'p50', 'p60', 'p70', 'p80' ] },
+        },
+        encodes => {
           t10 => {
             v => {
               bitrate => 200_000,
