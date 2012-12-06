@@ -11,13 +11,8 @@ Emitron::Tool::Encoder - A multi bit rate encoder
 =cut
 
 has source => ( isa => 'Str', is => 'ro', required => 1 );
-has '+msg_path' => (
-  lazy    => 1,
-  default => sub {
-    my $self = shift;
-    sprintf 'stream.encode.%s', $self->name;
-  }
-);
+
+sub prefix { 'stream.encode' }
 
 1;
 
