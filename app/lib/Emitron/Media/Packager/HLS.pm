@@ -4,8 +4,8 @@ use Moose;
 
 use Emitron::Media::Globals;
 use Emitron::Media::Programs;
-use Harmless::M3U8::Formatter;
-use Harmless::M3U8::Parser;
+use Harmless::M3U8;
+use Harmless::Segment;
 
 extends 'Emitron::Media::Base';
 

@@ -6,7 +6,16 @@ use Test::More;
 
 use Emitron::Media::Packager::HLS;
 
-ok 1, "that's ok";
+my $CONFIG = [];
+
+{
+  ok my $pkg = Emitron::Media::Packager::HLS->new(
+    webroot => 'webroot/live/hls/test',
+    config  => $CONFIG,
+   ),
+   'new';
+  isa_ok $pkg, 'Emitron::Media::Packager::HLS';
+}
 
 done_testing();
 
