@@ -13,3 +13,7 @@ body {
   height: 31px;
   background-color: #ff5500;
 }
+
+.thumb_player {
+  margin: 4px;
+}

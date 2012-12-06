@@ -34,9 +34,9 @@ $(function() {
 
     if (!before && after) {
       var id = name + '_preview';
-      $('#main').append($('<div></div>').attr({
+      $('#main').append($('<div class="thumb_player"></div>').append($('<div></div>').attr({
         id: id
-      }));
+      })));
       var flashvars = {
         src: after.preview,
         autoPlay: true,
