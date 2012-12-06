@@ -37,7 +37,7 @@ get '/api/ping' => sub {
 get '/api/ev/:serial?' => sub {
   my $sn = param( 'serial' ) || 0;
   { my $msg = model_message( $sn ); return $msg if $msg }
-  my $next = $model->wait( $sn, 10000 );
+  my $next = $model->wait( $sn, 10 );
   { my $msg = model_message( $sn ); return $msg if $msg }
   return { name => 'keepalive' };
 };
