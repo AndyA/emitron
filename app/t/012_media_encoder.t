@@ -1,7 +1,7 @@
 #!perl
 
-use strict;
-use warnings;
+use Moose;
+
 use Test::More;
 
 use Emitron::Media::Encoder;

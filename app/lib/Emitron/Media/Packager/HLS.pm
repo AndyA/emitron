@@ -4,12 +4,17 @@ use Moose;
 
 use Emitron::Media::Globals;
 use Emitron::Media::Programs;
+use Harmless::M3U8::Formatter;
+use Harmless::M3U8::Parser;
 
 extends 'Emitron::Media::Base';
 
+has webroot => ( isa => 'Str', is => 'ro', required => 1 );
+has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );
+
 =head1 NAME
 
-Emitron::Media::Packager::HLS - do something
+Emitron::Media::Packager::HLS - HLS packager
 
 =cut
 
