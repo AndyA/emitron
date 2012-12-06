@@ -19,9 +19,21 @@ default model.
 
 =cut
 
+{
+  my %FQDN_MAP = (
+    'igloo.fenkle'     => 'newstream.fenkle',
+    'ernie.hexten.net' => 'newstream.hexten.net',
+  );
+
+  sub _map_fqdn {
+    my ( $class, $fqdn ) = @_;
+    $FQDN_MAP{$fqdn} || $fqdn;
+  }
+}
+
 sub config {
   my $class = shift;
-  my $fqdn  = hostfqdn;
+  my $fqdn  = $class->_map_fqdn( hostfqdn );
   my $home  = dir( $FindBin::Bin )->parent->parent;
   my $dog   = file( $home, 'art', 'thespace-dog.png' );
   die "Can't find/read $dog" unless -r $dog;
