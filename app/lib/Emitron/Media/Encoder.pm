@@ -56,7 +56,14 @@ Start the encode
 sub start {
   my $self = shift;
   my @cmd  = $self->_build_cmds;
+  $self->_stash( 'commands', @cmd );
   $self->{pids} = [ map { $self->_bash( $_ ) } @cmd ];
+}
+
+sub _stash {
+  my ( $self, $name, @lines ) = @_;
+  my $fh = file( $self->tmp_dir, 'commands' )->openw;
+  print $fh "$_\n" for @lines;
 }
 
 sub _bash {
@@ -94,7 +101,7 @@ sub stop {
 
 sub _log {
   my $self = shift;
-  return ' > ' . $self->_mk_log( @_ ) . ' 2>&1';
+  return ' > ' . shell_quote( $self->_mk_log( @_ ) ) . ' 2>&1';
 }
 
 sub _build_cmds {
