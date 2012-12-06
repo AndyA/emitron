@@ -8,6 +8,7 @@ use lib "$FindBin::Bin/../lib";
 use lib "$FindBin::Bin/../../perl/Data-JSONPath/lib";
 
 use Emitron::App root => '/tmp/emitron';
+use Emitron::Tool::Encoder;
 use Emitron::Logger;
 
 Emitron::Logger->level( Emitron::Logger->DEBUG );
@@ -18,8 +19,17 @@ Emitron::Logger->level( Emitron::Logger->DEBUG );
 em->on(
   'msg.stream.encode.*' => sub {
     my ( $msg, $name ) = @_;
-    debug "encode $name: ", $msg->type, ', ', $msg->msg;
+    my $m = $msg->msg;
+    debug "encode $name: ", $msg->type, ', ', $m;
+
     # Start stream encoding, update model
+    my $enc = Emitron::Tool::Encoder->new(
+      name   => $name,
+      source => $m->{stream}{uri},
+      config => $m->{config}
+    );
+
+    debug "Encoder message path is ", $enc->msg_path;
   }
 );
 
