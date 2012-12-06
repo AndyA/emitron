@@ -20,37 +20,30 @@ em->on(
 
     info "Created stream ($name, $app): ", $stream;
 
+    my $enc_t = Emitron::Tool::Encoder->new(
+      name   => "${name}_thumbnail",
+      stream => $stream,
+      config => '$.profiles.config.thumbnail'
+    );
+
+    my $enc_p = Emitron::Tool::Encoder->new(
+      name   => "${name}_pc",
+      stream => $stream,
+      config => '$.profiles.config.pc'
+    );
+
     em->on(
       "-$path" => sub {
         my ( undef, $before, undef ) = @_;
         info "Destroyed stream ($name, $app): ", $before;
-        em->post_event(
-          type => "evt.stream.encode.$name.thumbnail.stop",
-          msg  => {}
-        );
-        em->post_event(
-          type => "evt.stream.encode.$name.pc.stop",
-          msg  => {}
-        );
+        $enc_t->stop;
+        $enc_p->stop;
         em->off_all;
       }
     );
 
-    # Encode the preview stream
-    em->post_message(
-      type => "msg.stream.encode.$name.thumbnail.start",
-      msg  => {
-        stream => $stream,
-        config => '$.profiles.config.thumbnail'
-      }
-    );
-    em->post_message(
-      type => "msg.stream.encode.$name.pc.start",
-      msg  => {
-        stream => $stream,
-        config => '$.profiles.config.pc'
-      }
-    );
+    $enc_t->start;
+    $enc_p->start;
   }
 );
 

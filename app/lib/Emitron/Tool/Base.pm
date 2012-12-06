@@ -9,15 +9,6 @@ Emitron::Tool::Base - An asynchronous tool
 =cut
 
 has name => ( isa => 'Str', is => 'ro', required => 1 );
-has msg_path => (
-  isa     => 'Str',
-  is      => 'ro',
-  lazy    => 1,
-  default => sub {
-    my $self = shift;
-    join '.', $self->prefix, $self->name;
-  }
-);
 
 1;
 
