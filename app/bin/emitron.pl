@@ -7,9 +7,10 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 use lib "$FindBin::Bin/../../perl/Data-JSONPath/lib";
 
+use Carp qw( verbose );
 use Emitron::App root => '/tmp/emitron';
-use Emitron::Tool::Encoder;
 use Emitron::Logger;
+use Emitron::Tool::Encoder;
 
 Emitron::Logger->level( Emitron::Logger->DEBUG );
 
