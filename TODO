@@ -3,10 +3,7 @@ BUGS
   Can't restart with an existing database. Suspect something to do with
   Moose being lazy.
 
-  Lots of model updates with no change to the data.
-    - find bug
-    - only commit change if diff? Seems sensible because committing a
-      non-differing change causes diffs to happen elsewhere.
+  Above problem may be because we don't always die cleanly. Why is that?
 
   Worry about messages being stalled in a particular worker's input pipe
   while the worker handles an event or model change. The busy lock on
