@@ -10,36 +10,12 @@ use POSIX qw( mkfifo );
 use Path::Class;
 use String::ShellQuote;
 
+extends 'Emitron::Media::Base';
+
 has source => ( isa => 'Str',               is => 'ro', required => 1 );
 has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );
 has burnin => ( isa => 'Bool',              is => 'ro', default  => 0 );
 has dog => ( isa => 'Str', is => 'ro' );
-
-has programs => (
-  isa     => 'Emitron::Media::Programs',
-  is      => 'ro',
-  default => sub { Emitron::Media::Programs->new }
-);
-
-has globals => (
-  isa     => 'Emitron::Media::Globals',
-  is      => 'ro',
-  default => sub { Emitron::Media::Globals->new }
-);
-
-has _tmp_dir => (
-  isa     => 'File::Temp::Dir',
-  is      => 'ro',
-  lazy    => 1,
-  default => sub { File::Temp->newdir( TEMPLATE => 'emXXXXX' ) }
-);
-
-has tmp_dir => (
-  isa     => 'Str',
-  is      => 'ro',
-  lazy    => 1,
-  default => sub { shift->_tmp_dir->dirname }
-);
 
 =head1 NAME
 
@@ -256,19 +232,6 @@ sub _gst_pipe {
     'src.', '!', 'rtph264depay', '!', 'queue', '!', 'muxer.'           #
   );
 }
-
-sub _auto_clean {
-  my ( $self, $name ) = @_;
-  push @{ $self->{_auto_clean} }, $name;
-  return $name;
-}
-
-sub _cleanup {
-  my $self = shift;
-  unlink splice @{ $self->{_auto_clean} };
-}
-
-sub DEMOLISH { shift->_cleanup }
 
 sub _uid { ++( shift->{uid} ) }
 

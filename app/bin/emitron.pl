@@ -11,6 +11,7 @@ use Carp qw( verbose );
 use Emitron::App root => '/tmp/emitron';
 use Emitron::Logger;
 use Emitron::Tool::Encoder;
+use Emitron::Tool::Packager::HLS;
 
 Emitron::Logger->level( Emitron::Logger->DEBUG );
 
