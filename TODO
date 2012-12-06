@@ -1,32 +1,19 @@
-Make event, queue and model (and other things) available globally
+BUGS
 
-  All are fork-safe so it doesn't matter if we share single instances
-  or have local instances.
+  Can't restart with an existing database. Suspect something to do with
+  Moose being lazy.
 
-  But if we have local instances we at least need config to point to
-  the databases.
+  Lots of model updates with no change to the data.
+    - find bug
+    - only commit change if diff? Seems sensible because committing a
+      non-differing change causes diffs to happen elsewhere.
 
-  And, of course, config is in the model - giving us a bootstrap
-  problem...
+  Worry about messages being stalled in a particular worker's input pipe
+  while the worker handles an event or model change. The busy lock on
+  message processing stops the queue from flooding but doesn't prevent a
+  single message from stalling.
 
-  Maybe switch to Moose?
-
-Implement some basic verbs in Emitron::Core
-
-  encode_start
-  encode_stop
-  package_start
-  package_stop
-
-Get Wirecast talking to crtmpserver
-
-Implement the concept of an event as a the root entity for a bundle
-of streams
-
-What constitutes an event?
-  stream sources
-  slates / preroll etc
-  profiles?
+Make encoders run in (NTP) sync: DTS/PTS/GoP
 
 More verbs in Emitron::Core
   Stream switching
