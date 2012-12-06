@@ -27,7 +27,7 @@ has globals => (
   default => sub { Emitron::Media::Globals->new }
 );
 
-has _tmp_dir => (
+has tmp_dir => (
   isa     => 'File::Temp::Dir',
   is      => 'ro',
   default => sub { File::Temp->newdir( TEMPLATE => 'emXXXXX' ) }
@@ -73,6 +73,11 @@ sub stop {
   kill 'KILL', splice @{ $self->{pids} ||= [] };
 }
 
+sub _log {
+  my $self = shift;
+  return ' > ' . $self->_mk_log( @_ ) . ' 2>&1';
+}
+
 sub _build_cmds {
   my $self = shift;
   my @cmds = ();
@@ -81,7 +86,8 @@ sub _build_cmds {
   if ( $src =~ m{^rtsp://} ) {
     my $fifo = $self->_mk_fifo;
     push @cmds,
-     shell_quote $self->_gst_pipe( src => $src, dst => $fifo );
+     shell_quote( $self->_gst_pipe( src => $src, dst => $fifo ) )
+     . $self->_log( 'gst', 'pipe' );
     $src = $fifo;
   }
 
@@ -94,9 +100,7 @@ sub _build_cmds {
       dst => $pre_fifo,
       dog => $self->dog
     )
-   )
-   . ' > '
-   . $self->_mk_log( 'ffmpeg', 'pre' ) . ' 2>&1';
+   ) . $self->_log( 'ffmpeg', 'pre' );
 
   my @tee_fifo = ();
   for my $cfg ( @{ $self->config } ) {
@@ -110,9 +114,7 @@ sub _build_cmds {
         dst    => $cfg->{destination},
         burnin => $self->burnin
       )
-     )
-     . ' > '
-     . $self->_mk_log( 'ffmpeg', $cfg->{name} ) . ' 2>&1';
+     ) . $self->_log( 'ffmpeg', $cfg->{name} );
   }
 
   push @cmds,
@@ -159,9 +161,9 @@ sub _to_k { sprintf '%gk', $_[0] / 1000 }
 sub _burnin {
   my ( $self, $profile ) = @_;
 
-  my $sz   = join 'x', $profile->{v}{width}, $profile->{v}{height};
-  my $br   = _to_k( $profile->{v}{bitrate} );
-  my $cap  = " $sz $br "; # edit with care: non breaking spaces
+  my $sz = join 'x', $profile->{v}{width}, $profile->{v}{height};
+  my $br = _to_k( $profile->{v}{bitrate} );
+  my $cap = " $sz $br ";    # edit with care: non breaking spaces
   my $rate = $self->globals->frame_rate;
   my $font = $self->globals->font;
 
@@ -222,10 +224,11 @@ sub _gst_pipe {
   my ( $self, %args ) = @_;
   return (
     $self->programs->gst_launch,    #
-    'mpegtsmux', 'name=muxer', '!', 'filesink', "location=$args{dst}", #
-    'rtspsrc', "location=$args{src}", 'name=src',                      #
-    'src.', '!', 'rtpmp4gdepay', '!', 'queue', '!', 'muxer.',          #
-    'src.', '!', 'rtph264depay', '!', 'queue', '!', 'muxer.'           #
+    'mpegtsmux', 'name=muxer', '!', 'filesink',
+    "location=$args{dst}",          #
+    'rtspsrc', "location=$args{src}", 'name=src',    #
+    'src.', '!', 'rtpmp4gdepay', '!', 'queue', '!', 'muxer.',    #
+    'src.', '!', 'rtph264depay', '!', 'queue', '!', 'muxer.'     #
   );
 }
 
@@ -246,14 +249,14 @@ sub _uid { ++( shift->{uid} ) }
 
 sub _mk_log {
   my ( $self, $type, $id ) = @_;
-  return file( $self->_tmp_dir, "$type.$id.log" );
+  return file( $self->tmp_dir, "$type.$id.log" );
 }
 
 sub _mk_fifo {
   my ( $self, $ext ) = @_;
   my $uid  = $self->_uid;
   my $name = defined $ext ? "fifo.$uid.$ext" : "fifo.$uid";
-  my $fifo = file( $self->_tmp_dir, $name );
+  my $fifo = file( $self->tmp_dir, $name );
   mkfifo( $fifo, 0700 ) or confess "Can't create $fifo: $!";
   return $fifo;
 }
