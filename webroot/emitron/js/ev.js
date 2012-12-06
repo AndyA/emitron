@@ -8,7 +8,7 @@ function EV(endpoint) {
 
 EV.prototype = {
   on: function(evsig, cb) {
-    // This will need to get a little more subtle
+    // This might need to get a little more subtle
     this.evmap[evsig] = cb;
   },
   _despatch: function(ev) {
