@@ -2,7 +2,9 @@ package Emitron::Config;
 
 use Moose;
 
+use FindBin;
 use Net::Domain qw( hostfqdn );
+use Path::Class;
 
 =head1 NAME
 
@@ -20,6 +22,9 @@ default model.
 sub config {
   my $class = shift;
   my $fqdn  = hostfqdn;
+  my $home  = dir( $FindBin::Bin )->parent->parent;
+  my $dog   = file( $home, 'art', 'thespace-dog.png' );
+  die "Can't find/read $dog" unless -r $dog;
   return {
     config => {
       paths => { tmp => '/tmp/emitron' },
@@ -32,9 +37,14 @@ sub config {
       profiles => {
         config => {
           thumbnail => { encodes => ['t10'] },
-          pc => { encodes => [ 'p30', 'p40', 'p50', 'p60', 'p70' ] },
-          pc_hd =>
-           { encodes => [ 'p30', 'p40', 'p50', 'p60', 'p70', 'p80' ] },
+          pc        => {
+            encodes => [ 'p30', 'p40', 'p50', 'p60', 'p70' ],
+            dog     => "$dog"
+          },
+          pc_hd => {
+            encodes => [ 'p30', 'p40', 'p50', 'p60', 'p70', 'p80' ],
+            dog     => "$dog"
+          },
         },
         encodes => {
           t10 => {

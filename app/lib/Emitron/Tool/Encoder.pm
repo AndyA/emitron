@@ -28,10 +28,13 @@ sub _make_config {
   my ( $msg, $dir ) = @_;
   my %seen = ();
   my @conf = ();
+  my $dog;
+  debug "Looking up $msg->{config}";
   em->cfg(
     $msg->{config},
     sub {
       my $cfg = shift;
+      debug "config: ", $cfg;
       for my $enc ( @{ $cfg->{encodes} } ) {
         next if $seen{$enc}++;
         my $odir = dir( $dir, $enc );
@@ -48,9 +51,17 @@ sub _make_config {
           profile     => $pro
          };
       }
+      $dog ||= $cfg->{dog};
     }
   );
-  return \@conf;
+  my %arg = (
+    source  => $msg->{stream}{rtsp},
+    config  => \@conf,
+    tmp_dir => $dir
+  );
+  $arg{dog} = $dog if defined $dog;
+  debug "args: ", \%arg;
+  return %arg;
 }
 
 em->on(
@@ -61,13 +72,9 @@ em->on(
     my $dir = em->work_dir( $name, $type );
     debug "start encode $name, $type (work dir: $dir)";
 
-    my $enc = Emitron::Media::Encoder->new(
-      source => $m->{stream}{rtsp},
-      config => _make_config( $msg->msg, $dir ),
-      burnin => 1,
-      #      dog     => $DOG,
-      tmp_dir => $dir
-    );
+    my $enc
+     = Emitron::Media::Encoder->new( _make_config( $msg->msg, $dir ),
+      burnin => 1, );
 
     my $self = __PACKAGE__->new( name => $name, encoder => $enc );
 

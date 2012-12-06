@@ -28,6 +28,10 @@ em->on(
           type => "evt.stream.encode.$name.thumbnail.stop",
           msg  => {}
         );
+        em->post_event(
+          type => "evt.stream.encode.$name.pc.stop",
+          msg  => {}
+        );
         em->off_all;
       }
     );
@@ -38,6 +42,13 @@ em->on(
       msg  => {
         stream => $stream,
         config => '$.profiles.config.thumbnail'
+      }
+    );
+    em->post_message(
+      type => "msg.stream.encode.$name.pc.start",
+      msg  => {
+        stream => $stream,
+        config => '$.profiles.config.pc'
       }
     );
   }
