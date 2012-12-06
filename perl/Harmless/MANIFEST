@@ -42,8 +42,11 @@ t/data/complex.m3u8
 t/data/datetime.m3u8
 t/data/discontinuity.m3u8
 t/data/endlist.m3u8
+t/data/iframe_index.m3u8
 t/data/simple_root.m3u8
 t/data/simple_var.m3u8
 t/formatter.t
+t/m3u8.t
 t/parse_attr.t
 t/parser.t
+tools/m3u8tidy
