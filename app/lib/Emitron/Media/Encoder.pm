@@ -224,11 +224,10 @@ sub _gst_pipe {
   my ( $self, %args ) = @_;
   return (
     $self->programs->gst_launch,    #
-    'mpegtsmux', 'name=muxer', '!', 'filesink',
-    "location=$args{dst}",          #
-    'rtspsrc', "location=$args{src}", 'name=src',    #
-    'src.', '!', 'rtpmp4gdepay', '!', 'queue', '!', 'muxer.',    #
-    'src.', '!', 'rtph264depay', '!', 'queue', '!', 'muxer.'     #
+    'mpegtsmux', 'name=muxer', '!', 'filesink', "location=$args{dst}", #
+    'rtspsrc', "location=$args{src}", 'name=src',                      #
+    'src.', '!', 'rtpmp4gdepay', '!', 'queue', '!', 'muxer.',          #
+    'src.', '!', 'rtph264depay', '!', 'queue', '!', 'muxer.'           #
   );
 }
 
