@@ -47,6 +47,21 @@ em->on(
   }
 );
 
+em->on(
+  '+$.fragments.*' => sub {
+    my ( $path, undef, $frag, $name ) = @_;
+
+    info "Started encoding ($name)";
+
+    em->on(
+      "-$path" => sub {
+        info "Stopped encoding ($name)";
+        em->off_all;
+      }
+    );
+  }
+);
+
 em->run;
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl
