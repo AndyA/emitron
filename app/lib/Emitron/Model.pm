@@ -92,6 +92,15 @@ sub _retrieve {
   );
 }
 
+sub _bt {
+  my $self = shift;
+  my $lvl  = 1;
+  while ( my @c = caller $lvl ) {
+    debug "  $c[0] ($c[1]:$c[2])";
+    $lvl++;
+  }
+}
+
 sub commit {
   my ( $self, $data, $expect ) = @_;
   my $rev;
@@ -111,6 +120,7 @@ sub commit {
     $self->gc( $rev );
     debug "Committed change $rev";
   }
+  #  $self->_bt;
   return $rev;
 }
 
