@@ -1,7 +1,7 @@
 BUGS
 
   Can't restart with an existing database. Suspect something to do with
-  Moose being lazy.
+  Moose being lazy. Or maybe...
 
   Above problem may be because we don't always die cleanly. Why is that?
 
