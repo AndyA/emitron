@@ -52,10 +52,13 @@ my $CONFIG = [
 my $TMP = 'testenc/tmp';
 dir( $TMP )->mkpath;
 
+my $DOG = "$FindBin::Bin/../../art/thespace-dog.png";
+
 my $enc = Emitron::Media::Encoder->new(
   source  => 'rtsp://newstream.fenkle:5544/orac',
   config  => $CONFIG,
   burnin  => 1,
+  dog     => $DOG,
   tmp_dir => $TMP
 );
 
