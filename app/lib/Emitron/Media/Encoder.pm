@@ -161,7 +161,7 @@ sub _burnin {
 
   my $sz   = join 'x', $profile->{v}{width}, $profile->{v}{height};
   my $br   = _to_k( $profile->{v}{bitrate} );
-  my $cap  = "\xA0$sz\xA0$br\xA0";
+  my $cap  = " $sz $br "; # edit with care: non breaking spaces
   my $rate = $self->globals->frame_rate;
   my $font = $self->globals->font;
 
