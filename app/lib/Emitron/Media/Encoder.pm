@@ -169,7 +169,7 @@ sub _burnin {
   my $rate = $self->globals->frame_rate;
   my $font = $self->globals->font;
 
-  my $fs = 72;
+  my $fs = 56;
   my $sh = 2;
 
   my $dt = join( ':',
