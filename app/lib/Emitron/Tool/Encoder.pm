@@ -67,10 +67,11 @@ sub _mk_encoder {
     }
   );
   my %arg = (
+    name    => $self->name,
     source  => $stm->{rtsp},
     config  => \@conf,
     tmp_dir => $dir,
-    burnin  => $self->burnin
+    burnin  => $self->burnin,
   );
   $arg{dog} = $dog if defined $dog;
 

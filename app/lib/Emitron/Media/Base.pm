@@ -8,6 +8,8 @@ Emitron::Media::Base - Media handlers base class
 
 =cut
 
+has name => ( isa => 'Str', is => 'ro', required => 1 );
+
 has programs => (
   isa     => 'Emitron::Media::Programs',
   is      => 'ro',
