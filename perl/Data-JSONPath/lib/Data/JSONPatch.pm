@@ -111,7 +111,7 @@ sub patch {
         }
       );
     }
-    else { die "Bad op: ", $pp->{op} }
+    else { croak "Bad op: ", $pp->{op} }
   }
 }
 

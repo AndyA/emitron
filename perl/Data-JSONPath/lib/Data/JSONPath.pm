@@ -3,6 +3,8 @@ package Data::JSONPath;
 use warnings;
 use strict;
 
+use Carp qw( croak );
+
 =head1 NAME
 
 Data::JSONPath - Compute and apply JSONJSONPath compatible deltas
@@ -196,7 +198,7 @@ sub _mk_multi_iter {
 
 sub _mk_multi {
   my @pp = @{ $_[0] };
-  die "Empty []" unless @pp;
+  croak "Empty []" unless @pp;
   return $pp[0] if @pp == 1;
   return {
     match => sub {
@@ -223,12 +225,12 @@ sub _parse_brackets {
 
   my $tok = $tokr->();
   while ( $tok ) {
-    my $th = $TOKH{ $tok->{t} } or die "Syntax error: ", $tok->{m}[0];
+    my $th = $TOKH{ $tok->{t} } or croak "Syntax error: ", $tok->{m}[0];
     push @pp, $th->( $tok );
     $tok = $tokr->();
-    die "Missing ]" unless $tok;
+    croak "Missing ]" unless $tok;
     last if $tok->{t} eq 'rb';
-    die "Syntax error: ", $tok->{m}[0] unless $tok->{t} eq 'comma';
+    croak "Syntax error: ", $tok->{m}[0] unless $tok->{t} eq 'comma';
     $tok = $tokr->();
   }
   return \@pp;
@@ -247,9 +249,9 @@ sub _parse {
   );
 
   my $tok = $tokr->();
-  die "Empty path" unless defined $tok;
+  croak "Empty path" unless defined $tok;
   while ( $tok ) {
-    my $th = $TOKH{ $tok->{t} } or die "Syntax error: ", $tok->{m}[0];
+    my $th = $TOKH{ $tok->{t} } or croak "Syntax error: ", $tok->{m}[0];
     push @pp, $th->( $tok );
     $tok = $tokr->();
   }
@@ -266,7 +268,7 @@ sub parse {
 sub _split_simple {
   my ( $self, $path ) = @_;
   return split /\./, $path if $path =~ /^\$(?:\.\w+)*$/;
-  die "Needs a simple path";
+  croak "Needs a simple path";
 }
 
 sub path { @{ shift->{path} || [] } }
