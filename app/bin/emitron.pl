@@ -33,9 +33,10 @@ em->on(
     );
 
     my $enc_p = Emitron::Tool::Encoder->new(
-      name   => "${name}_pc",
+      name   => "${name}_pc_hd_lite",
       stream => $stream,
-      config => '$.profiles.config.pc'
+      config => '$.profiles.config.pc_hd_lite',
+      burnin => 1
     );
 
     em->on(
