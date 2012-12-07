@@ -57,6 +57,10 @@ sub config {
             encodes => [ 'p30', 'p40', 'p50', 'p60', 'p70', 'p80' ],
             dog     => "$dog"
           },
+          pc_hd_lite => {
+            encodes => [ 'p40', 'p60', 'p80' ],
+            dog     => "$dog"
+          },
         },
         encodes => {
           t10 => {
@@ -191,6 +195,21 @@ sub config {
               bitrate => 128_000,
               profile => 'aac_lc',
               rate    => 44_100,
+            }
+          },
+          p90 => {
+            v => {
+              bitrate => 5100_000,
+              rate    => 25,
+              profile => 'high',
+              level   => 4,
+              width   => 1920,
+              height  => 1080
+            },
+            a => {
+              bitrate => 192_000,
+              profile => 'aac_lc',
+              rate    => 48_000
             }
           },
         },
