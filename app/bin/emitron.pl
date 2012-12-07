@@ -22,6 +22,10 @@ em->on(
 
     info "Created stream ($name, $app): ", $stream;
 
+    sleep 5;
+
+    debug "Starting encoders for $name";
+
     my $enc_t = Emitron::Tool::Encoder->new(
       name   => "${name}_thumbnail",
       stream => $stream,
