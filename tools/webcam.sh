@@ -2,7 +2,7 @@
 
 #      -bsf:a aac_adtstoasc
 
-remote=newstream.fenkle
+[ -z "$remote" ] && remote=newstream.fenkle
 me=$( hostname -s )
 url=rtmp://$remote/live/$me
 rate=15
