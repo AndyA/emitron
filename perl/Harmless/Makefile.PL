@@ -24,8 +24,6 @@ WriteMakefile(
     'Storable'                  => 0,
     'Test::Differences'         => 0,
     'Test::More'                => 0,
-    'XML::LibXML'               => 0,
-    'XML::LibXML::XPathContext' => 0,
   },
   dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
   clean => { FILES    => 'Harmless-*' },

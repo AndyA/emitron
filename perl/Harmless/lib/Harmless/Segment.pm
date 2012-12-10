@@ -3,9 +3,6 @@ package Harmless::Segment;
 use strict;
 use warnings;
 
-use XML::LibXML::XPathContext;
-use XML::LibXML;
-
 =head1 NAME
 
 Harmless::Segment - An HLS segment
