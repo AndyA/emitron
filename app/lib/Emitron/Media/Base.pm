@@ -3,6 +3,8 @@ package Emitron::Media::Base;
 use Moose;
 
 use Emitron::Logger;
+use Emitron::Media::Globals;
+use Emitron::Media::Programs;
 use Emitron::Types;
 
 =head1 NAME
