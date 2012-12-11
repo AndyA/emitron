@@ -116,6 +116,8 @@ sub _make_manifest {
     sub {
       my $br = shift;
       $m3u8->push_segment(
+        # Funnily enough this is complete bollocks - which works. We
+        # need an interface to push streams into the vpl - not segments.
         Harmless::Segment->new(
           EXT_X_STREAM_INF => {
             PROGRAM_ID => 1,
