@@ -8,6 +8,7 @@ use Emitron::Media::Programs;
 use Harmless::M3U8;
 use Harmless::Segment;
 use Linux::Inotify2;
+use Path::Class;
 
 extends 'Emitron::Media::Base';
 
@@ -96,10 +97,41 @@ Emitron::Media::Packager::HLS - HLS packager
 
 sub start {
   my $self = shift;
+  $self->_make_manifest;
 }
 
 sub stop {
   my $self = shift;
+}
+
+sub _root_manifest {
+  my $self = shift;
+  return file( $self->webroot, $self->name . '.m3u8' );
+}
+
+sub _make_manifest {
+  my $self = shift;
+  my $m3u8 = Harmless::M3U8->new;
+  $self->_with_config(
+    sub {
+      my $br = shift;
+      $m3u8->push_segment(
+        Harmless::Segment->new(
+          EXT_X_STREAM_INF => {
+            PROGRAM_ID => 1,
+            BANDWIDTH  => $br->{profile}{a}{bitrate}
+             + $br->{profile}{v}{bitrate}
+          },
+          uri => join( '_', $self->name, $br->{name} ) . '.m3u8'
+        )
+      );
+    }
+  );
+
+  my $mf = $self->_root_manifest;
+  $mf->parent->mkpath;
+  debug "Writing $mf";
+  $m3u8->write( $mf );
 }
 
 sub _with_config {
