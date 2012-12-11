@@ -10,6 +10,7 @@ my $CONFIG = [];
 
 {
   ok my $pkg = Emitron::Media::Packager::HLS->new(
+    name    => 'test',
     webroot => 'webroot/live/hls/test',
     config  => $CONFIG,
    ),

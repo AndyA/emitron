@@ -49,6 +49,7 @@ my $CONFIG = [
 
 {
   ok my $enc = Emitron::Media::Encoder->new(
+    name   => 'test',
     source => 'rtsp://newstream.fenkle:5544/orac',
     config => $CONFIG,
     burnin => 1,
