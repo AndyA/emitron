@@ -2,6 +2,7 @@ package Emitron::Media::Base;
 
 use Moose;
 
+use Emitron::Logger;
 use Emitron::Types;
 
 =head1 NAME
@@ -66,6 +67,7 @@ sub spawn {
   return $self->fork(
     sub {
       setpgrp( 0, 0 );
+      #      debug "Running ", join ' ', @cmd;
       exec @cmd or die "Can't run ", join( ' ', @cmd ), ": $!";
       return 1;
     }
@@ -82,7 +84,7 @@ sub kill_all {
 
   my @pids = sort { $a <=> $b } splice @{ $self->_kids };
   my $sig = kill -9, @pids;
-  warn "Signalled only $sig of ", scalar( @pids ), "\n"
+  warning "Signalled only $sig of ", scalar( @pids ), "\n"
    unless @pids == $sig;
   my @st = ();
   for my $pid ( @pids ) {
