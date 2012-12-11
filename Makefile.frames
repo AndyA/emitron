@@ -1,0 +1,12 @@
+.PHONY: all h264 dump clean 
+
+SRCD=f
+
+PNG=$(shell find $(SRCD)/ -type f -name '*.png')
+RAW=$(patsubst %.png, %.png.raw, $(PNG))
+
+all: $(RAW)
+
+$(RAW): %.png.raw: %.png
+	convert $< rgb:$@
+
