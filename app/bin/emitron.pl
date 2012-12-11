@@ -58,14 +58,23 @@ em->on(
   '+$.fragments.*' => sub {
     my ( $path, undef, $frag, $name ) = @_;
 
-    info "Started encoding ($name)";
+    info "Started packaging ($name)";
+
+    my $pkgr = Emitron::Tool::Packager::HLS->new(
+      name   => "${name}_hls",
+      stream => $frag,
+      config => '$.packagers.default',
+    );
 
     em->on(
       "-$path" => sub {
-        info "Stopped encoding ($name)";
+        info "Stopped packaging ($name)";
+        $pkgr->stop;
         em->off_all;
       }
     );
+
+    $pkgr->start;
   }
 );
 
