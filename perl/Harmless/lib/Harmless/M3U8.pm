@@ -90,10 +90,16 @@ sub push_discontinuity {
   $self;
 }
 
-sub vpl {
-  my $self = shift;
-  $self->{_pl}{vpl} = shift if @_;
-  $self->{_pl}{vpl};
+BEGIN {
+  my @attr = qw( meta vpl closed );
+  for my $attr ( @attr ) {
+    no strict 'refs';
+    *$attr = sub {
+      my $self = shift;
+      $self->{_pl}{$attr} = shift if @_;
+      $self->{_pl}{$attr};
+    };
+  }
 }
 
 1;
