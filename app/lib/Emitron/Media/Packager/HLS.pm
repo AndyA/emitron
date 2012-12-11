@@ -104,9 +104,9 @@ sub stop {
   my $self = shift;
 }
 
-sub _root_manifest {
+sub _manifest {
   my $self = shift;
-  return file( $self->webroot, $self->name . '.m3u8' );
+  join( '_', $self->name, @_ ) . '.m3u8';
 }
 
 sub _make_manifest {
@@ -122,13 +122,13 @@ sub _make_manifest {
             BANDWIDTH  => $br->{profile}{a}{bitrate}
              + $br->{profile}{v}{bitrate}
           },
-          uri => join( '_', $self->name, $br->{name} ) . '.m3u8'
+          uri => $self->_manifest( $br->{name} )
         )
       );
     }
   );
 
-  my $mf = $self->_root_manifest;
+  my $mf = file( $self->webroot, $self->_manifest );
   $mf->parent->mkpath;
   debug "Writing $mf";
   $m3u8->write( $mf );
@@ -137,6 +137,32 @@ sub _make_manifest {
 sub _with_config {
   my ( $self, $cb ) = @_;
   $cb->( $_ ) for @{ $self->config };
+}
+
+sub _make_streams {
+  my $self = shift;
+  my @stm  = ();
+  $self->_with_config(
+    sub {
+      my $br = shift;
+      my $mf = file( $self->webroot, $self->_manifest( $br->{name} ) );
+      my $m3u8 = Harmless::M3U8->new;
+      $m3u8->read( $mf ) if -e $mf;
+      $m3u8->push_discontinuity;
+      push @stm, { mf => $mf, m3u8 => $m3u8 };
+    }
+  );
+  return \@stm;
+}
+
+sub _streams {
+  my $self = shift;
+  @{ $self->{_s} ||= $self->_make_streams };
+}
+
+sub _with_streams {
+  my ( $self, $cb ) = @_;
+  $cb->( $_ ) for $self->_streams;
 }
 
 1;
