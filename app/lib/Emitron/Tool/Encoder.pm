@@ -38,6 +38,7 @@ sub _mk_encoder {
   my $model = {};
   my $stm   = $self->stream;
   my $seg   = '%08d.ts';
+  my $seq   = 0;
   em->cfg(
     $self->config,
     sub {
@@ -54,7 +55,8 @@ sub _mk_encoder {
         $model->{$enc} = {
           dir     => "$odir",
           segment => $seg,
-          profile => $pro
+          profile => $pro,
+          order   => ++$seq
         };
         push @conf,
          {
