@@ -33,7 +33,7 @@ sub start {
   my $self = shift;
   my @cmd  = $self->_build_cmds;
   $self->_stash( 'commands', @cmd );
-  $self->{pids} = [ map { $self->_bash( $_ ) } @cmd ];
+  $self->bash( $_ ) for @cmd;
 }
 
 sub _stash {
@@ -42,38 +42,13 @@ sub _stash {
   print $fh "$_\n" for @lines;
 }
 
-sub _bash {
-  my ( $self, $cmd ) = @_;
-  my $pid = fork;
-  die "Can't fork: $!" unless defined $pid;
-  unless ( $pid ) {
-    setpgrp( 0, 0 );
-    exec $self->programs->bash, -c => $cmd or die "Can't run $cmd: $!";
-    exit 1;
-  }
-  return $pid;
-}
-
 =head2 C<< stop >>
 
-Start the encode
+Stop the encode
 
 =cut
 
-sub stop {
-  my $self = shift;
-
-  my @pids = sort { $a <=> $b } splice @{ $self->{pids} || [] };
-  my $sig = kill -9, @pids;
-  warn "Signalled only $sig of ", scalar( @pids ), "\n"
-   unless @pids == $sig;
-  my @st = ();
-  for my $pid ( @pids ) {
-    my $got = waitpid $pid, 0;
-    push @st, $? if $got >= 0;
-  }
-  return @st;
-}
+sub stop { shift->kill_all }
 
 sub _log {
   my $self = shift;
@@ -163,8 +138,8 @@ sub _to_k { sprintf '%gk', $_[0] / 1000 }
 sub _burnin {
   my ( $self, $profile ) = @_;
 
-  my $sz = join 'x', $profile->{v}{width}, $profile->{v}{height};
-  my $br = _to_k( $profile->{v}{bitrate} + $profile->{a}{bitrate} );
+  my $sz   = join 'x', $profile->{v}{width}, $profile->{v}{height};
+  my $br   = _to_k( $profile->{v}{bitrate} + $profile->{a}{bitrate} );
   my $cap  = join " ", '', $self->name, $sz, $br, '';
   my $rate = $self->globals->frame_rate;
   my $font = $self->globals->font;
