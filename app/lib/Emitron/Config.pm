@@ -35,11 +35,13 @@ sub config {
   my $class = shift;
   my $fqdn  = $class->_map_fqdn( hostfqdn );
   my $home  = dir( $FindBin::Bin )->parent->parent;
-  my $dog   = file( $home, 'art', 'thespace-dog.png' );
+  my $tmp   = dir( $home, 'tmp' );
+  $tmp->mkpath;
+  my $dog = file( $home, 'art', 'thespace-dog.png' );
   die "Can't find/read $dog" unless -r $dog;
   return {
     config => {
-      paths => { tmp => '/tmp/emitron' },
+      paths => { tmp => "$tmp" },
       uri   => {
         rtmp_stream => "rtmp://$fqdn/live/%s",
         rtsp_stream => "rtsp://$fqdn:5544/%s",
