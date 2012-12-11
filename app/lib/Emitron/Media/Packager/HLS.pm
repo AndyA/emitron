@@ -4,6 +4,7 @@ use Moose;
 
 use Emitron::Logger;
 use Emitron::Media::Globals;
+use Emitron::Media::Helpers::tsdemux;
 use Emitron::Media::Programs;
 use Harmless::M3U8;
 use Harmless::Segment;
@@ -14,6 +15,16 @@ extends 'Emitron::Media::Base';
 
 has webroot => ( isa => 'Str', is => 'ro', required => 1 );
 has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );
+
+has _tsdemux => (
+  isa     => 'Emitron::Media::Helpers::tsdemux',
+  is      => 'ro',
+  lazy    => 1,
+  default => sub {
+    Emitron::Media::Helpers::tsdemux->new(
+      programs => shift->programs );
+  }
+);
 
 has _inotify => (
   isa     => 'Linux::Inotify2',
@@ -191,10 +202,16 @@ sub _with_config {
 sub _make_streams {
   my $self = shift;
   my @stm  = ();
+  my $tsd  = $self->_tsdemux;
   $self->_with_config(
     sub {
-      my $br = shift;
-      my $mf = file( $self->webroot, $self->_manifest( $br->{name} ) );
+      my $br   = shift;
+      my $id   = $br->{name};
+      my $next = 0;
+      my $mf   = file( $self->webroot, $self->_manifest( $id ) );
+      my $name = join '_', $self->name, $id;
+      my $dstd = dir( $self->webroot, $name );
+      $dstd->mkpath;
       my $m3u8 = Harmless::M3U8->new;
       $m3u8->read( $mf ) if -e $mf;
       # TODO: sanity check / merge existing pl
@@ -214,6 +231,23 @@ sub _make_streams {
           my $evt = shift;
           debug sprintf "[%s] %s\n", indec( $evt->mask ),
            $evt->fullname;
+          my $src = $evt->fullname;
+          my $inf = $tsd->scan( $src );
+          warning "Can't find h264 stream in $src" unless $inf;
+          my $duration = $inf ? $inf->{len} : $self->globals->gop;
+          my $segn = sprintf '%08d.ts', ++$next;
+          my $uri = join '/', $name, $segn;
+          my $dst = file( $dstd, $segn );
+          link $src, $dst or die "Can't link $src -> $dst: $!";
+          $m3u8->push_segment(
+            Harmless::Segment->new(
+              title    => '',
+              duration => $duration / 1000,
+              uri      => $uri
+            )
+          );
+          debug "Updating $mf to include $uri";
+          $m3u8->write( $mf );
         }
       );
     }
