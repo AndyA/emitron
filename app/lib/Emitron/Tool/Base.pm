@@ -2,13 +2,15 @@ package Emitron::Tool::Base;
 
 use Moose;
 
+use Emitron::Types;
+
 =head1 NAME
 
 Emitron::Tool::Base - An asynchronous tool
 
 =cut
 
-has name => ( isa => 'Str', is => 'ro', required => 1 );
+has name => ( isa => 'Name', is => 'ro', required => 1 );
 
 1;
 
