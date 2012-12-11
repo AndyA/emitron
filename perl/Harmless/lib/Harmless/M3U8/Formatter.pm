@@ -177,7 +177,8 @@ sub _make_rec_formatter {
 sub _norm_seg {
   my %seg = %{ shift() };
   my ( $t, $d ) = delete @seg{ 'title', 'duration' };
-  $seg{'EXTINF'} = { title => $t, duration => $d };
+  $seg{'EXTINF'} = { title => $t, duration => $d }
+   if defined $t && defined $d;
   return \%seg;
 }
 
