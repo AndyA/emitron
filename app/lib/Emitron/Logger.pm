@@ -39,6 +39,7 @@ my @LOGCOLOUR
  = ( undef, 'white on_red', 'white on_red', 'yellow', 'cyan',
   'green', );
 
+my $TESTING  = $ENV{HARNESS_ACTIVE};
 my $LOGLEVEL = INFO;
 
 sub level {
@@ -69,11 +70,14 @@ sub _mention {
   my $ts = _ts;
   my $attr = $LOGCOLOUR[$level] || 'white';
 
-  print colored(
+  my $ll
+   = $TESTING
+   ? sub { print STDERR "# $_[0]\n" }
+   : sub { print colored( @_ ), "\n" };
+
+  $ll->(
     sprintf( '%s %-7s [%5d] %s', $ts, $lname{$level}, $$, $_ ), $attr
-   ),
-   "\n"
-   for split /\n/, $msg;
+  ) for split /\n/, $msg;
 }
 
 1;
