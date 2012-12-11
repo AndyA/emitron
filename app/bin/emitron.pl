@@ -61,7 +61,7 @@ em->on(
     info "Started packaging ($name)";
 
     my $pkgr = Emitron::Tool::Packager::HLS->new(
-      name   => "${name}_hls",
+      name   => $name,
       stream => $frag,
       config => '$.packagers.default',
     );
