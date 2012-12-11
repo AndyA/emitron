@@ -44,8 +44,9 @@ my $LOGLEVEL = INFO;
 
 sub level {
   my $class = shift;
-  $LOGLEVEL = shift if @_;
-  $LOGLEVEL;
+  return $LOGLEVEL unless @_;
+  my $ll = shift;
+  $LOGLEVEL = $level{$ll} || $ll;
 }
 
 sub _ts {
