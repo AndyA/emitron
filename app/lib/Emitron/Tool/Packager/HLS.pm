@@ -22,15 +22,31 @@ has packager => (
   handles => [ 'start', 'stop' ]
 );
 
-has config => ( isa => 'Str', is => 'ro', required => 1 );
+has stream => ( isa => 'HashRef', is => 'ro', required => 1 );
+has config => ( isa => 'Str',     is => 'ro', required => 1 );
 
 sub _mk_packager {
   my $self = shift;
-  my %arg  = (
-    name    => $self->name,
-    config  => [],
-    webroot => 'webroot/live/hls/foo',
+
+  my $stm = $self->stream;
+  my @cnf = ();
+  my @pro = (
+    sort { $stm->{$a}{order} <=> $stm->{$b}{order} }
+     keys %$stm
   );
+
+  for my $pro ( @pro ) {
+    push @cnf, { name => $pro, %{ $stm->{$pro} } };
+  }
+
+  my $cfg = em->cfg( $self->config );
+
+  my %arg = (
+    name    => $self->name,
+    config  => \@cnf,
+    webroot => $cfg->{webroot}
+  );
+
   return Emitron::Media::Packager::HLS->new( %arg );
 }
 
@@ -49,3 +65,4 @@ before stop => sub {
 1;
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl
+## Please see file perltidy.ERR
