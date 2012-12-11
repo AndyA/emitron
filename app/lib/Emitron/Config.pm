@@ -46,7 +46,8 @@ sub config {
         home        => 'http://thespace.org',
         crtmpserver => 'http://localhost:6502',
       },
-      profiles => {
+      packagers => { default => { webroot => 'webroot/live/hls' } },
+      profiles  => {
         config => {
           thumbnail => { encodes => ['t10'] },
           pc        => {
