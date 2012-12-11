@@ -112,23 +112,24 @@ sub _manifest {
 sub _make_manifest {
   my $self = shift;
   my $m3u8 = Harmless::M3U8->new;
+  my @vpl  = ();
+
   $self->_with_config(
     sub {
       my $br = shift;
-      $m3u8->push_segment(
-        # Funnily enough this is complete bollocks - which works. We
-        # need an interface to push streams into the vpl - not segments.
-        Harmless::Segment->new(
-          EXT_X_STREAM_INF => {
-            PROGRAM_ID => 1,
-            BANDWIDTH  => $br->{profile}{a}{bitrate}
-             + $br->{profile}{v}{bitrate}
-          },
-          uri => $self->_manifest( $br->{name} )
-        )
-      );
+      push @vpl,
+       {
+        EXT_X_STREAM_INF => {
+          PROGRAM_ID => 1,
+          BANDWIDTH  => $br->{profile}{a}{bitrate}
+           + $br->{profile}{v}{bitrate}
+        },
+        uri => $self->_manifest( $br->{name} )
+       };
     }
   );
+
+  $m3u8->vpl( \@vpl );
 
   my $mf = file( $self->webroot, $self->_manifest );
   $mf->parent->mkpath;
