@@ -15,6 +15,46 @@ extends 'Emitron::Media::Base';
 has webroot => ( isa => 'Str', is => 'ro', required => 1 );
 has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );
 
+has _inotify => (
+  isa     => 'Linux::Inotify2',
+  is      => 'ro',
+  default => sub { Linux::Inotify2->new }
+);
+
+{
+  my @f = qw(
+   IN_ACCESS
+   IN_MODIFY
+   IN_ATTRIB
+   IN_CLOSE_WRITE
+   IN_CLOSE_NOWRITE
+   IN_OPEN
+   IN_MOVED_FROM
+   IN_MOVED_TO
+   IN_CREATE
+   IN_DELETE
+   IN_DELETE_SELF
+   IN_MOVE_SELF
+  );
+
+  my %map = ();
+
+  for my $f ( @f ) {
+    no strict 'refs';
+    my $v = &{$f}();
+    $map{$v} = $f;
+  }
+
+  debug "inotify map ", \%map;
+
+  sub indec {
+    my $fl = shift;
+    join '+', sort map { $map{$_} } grep { $fl & $_ } keys %map;
+  }
+}
+
+# vim:ts=2:sw=2:sts=2:et:ft=perl
+
 =head1 NAME
 
 Emitron::Media::Packager::HLS - HLS packager
@@ -97,12 +137,18 @@ Emitron::Media::Packager::HLS - HLS packager
 
 sub start {
   my $self = shift;
-  $self->_make_manifest;
+  $self->fork(
+    sub {
+      $self->_make_manifest;
+      $self->_streams;
+      debug "Polling...";
+      1 while $self->_inotify->poll;
+      debug "Child exiting";
+    }
+  );
 }
 
-sub stop {
-  my $self = shift;
-}
+sub stop { shift->kill_all }
 
 sub _manifest {
   my $self = shift;
@@ -151,8 +197,25 @@ sub _make_streams {
       my $mf = file( $self->webroot, $self->_manifest( $br->{name} ) );
       my $m3u8 = Harmless::M3U8->new;
       $m3u8->read( $mf ) if -e $mf;
+      # TODO: sanity check / merge existing pl
+      $m3u8->meta(
+        {
+          EXT_X_TARGETDURATION => $self->globals->gop,
+          EXT_X_VERSION        => 3,
+          EXT_X_MEDIA_SEQUENCE => 0
+        }
+      );
       $m3u8->push_discontinuity;
-      push @stm, { mf => $mf, m3u8 => $m3u8 };
+      push @stm, { mf => $mf, m3u8 => $m3u8, br => $br };
+      $self->_inotify->watch(
+        $br->{dir},
+        IN_CLOSE_WRITE,
+        sub {
+          my $evt = shift;
+          debug sprintf "[%s] %s\n", indec( $evt->mask ),
+           $evt->fullname;
+        }
+      );
     }
   );
   return \@stm;
