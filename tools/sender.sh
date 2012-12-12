@@ -8,10 +8,10 @@ if [ -z "$out" ]; then
 fi
 
 set -x
-ffmpeg -y -re -i "$in" \
-  -acodec libfaac -b:a 32k -r:a 44100 \
-  -vcodec libx264 -bf 0 -b:v 64k -r:v 12 \
-  -f mpegts -threads 0 \
+ffmpeg -y -i "$in" \
+  -acodec libfaac -b:a 128k -r:a 44100 -ac 2 \
+  -vcodec libx264 -bf 0 -b:v 4000k -r:v 25 \
+  -f flv -threads 0 \
   "$out"
 
 # vim:ts=2:sw=2:sts=2:et:ft=sh
