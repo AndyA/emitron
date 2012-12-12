@@ -32,38 +32,6 @@ has _inotify => (
   default => sub { Linux::Inotify2->new }
 );
 
-{
-  my @f = qw(
-   IN_ACCESS
-   IN_MODIFY
-   IN_ATTRIB
-   IN_CLOSE_WRITE
-   IN_CLOSE_NOWRITE
-   IN_OPEN
-   IN_MOVED_FROM
-   IN_MOVED_TO
-   IN_CREATE
-   IN_DELETE
-   IN_DELETE_SELF
-   IN_MOVE_SELF
-  );
-
-  my %map = ();
-
-  for my $f ( @f ) {
-    no strict 'refs';
-    my $v = &{$f}();
-    $map{$v} = $f;
-  }
-
-  debug "inotify map ", \%map;
-
-  sub indec {
-    my $fl = shift;
-    join '+', sort map { $map{$_} } grep { $fl & $_ } keys %map;
-  }
-}
-
 # vim:ts=2:sw=2:sts=2:et:ft=perl
 
 =head1 NAME
@@ -232,8 +200,6 @@ sub _make_streams {
         IN_CLOSE_WRITE,
         sub {
           my $evt = shift;
-          debug sprintf "[%s] %s\n", indec( $evt->mask ),
-           $evt->fullname;
           my $src = $evt->fullname;
           my $inf = $tsd->scan( $src );
           warning "Can't find h264 stream in $src" unless $inf;
