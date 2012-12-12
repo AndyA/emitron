@@ -56,7 +56,7 @@ my $CONFIG = [
    ),
    'new';
   isa_ok $enc, 'Emitron::Media::Encoder';
-  is $enc->programs->ffmpeg, 'ffmpeg', 'ffmpeg';
+  is $enc->globals->ffmpeg, 'ffmpeg', 'ffmpeg';
   is $enc->globals->aspect_ratio_str( ':' ), '16:9', 'aspect_ratio_str';
 }
 

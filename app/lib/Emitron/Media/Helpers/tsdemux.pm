@@ -2,20 +2,20 @@ package Emitron::Media::Helpers::tsdemux;
 
 use Moose;
 
-use Emitron::Media::Programs;
 use String::ShellQuote;
+
+has globals => (
+  isa     => 'Emitron::Media::Globals',
+  is      => 'ro',
+  lazy    => 1,
+  default => sub {
+    Emitron::Media::Globals->new;
+  }
+);
 
 =head1 NAME
 
 Emitron::Media::Helpers::tsdemux - A wrapper for tsdemux
-
-=cut
-
-has programs => (
-  isa     => 'Emitron::Media::Programs',
-  is      => 'ro',
-  default => sub { Emitron::Media::Programs->new }
-);
 
 =for reference
 
@@ -35,10 +35,9 @@ time: 0 sec
 
 sub scan {
   my ( $self, $fn ) = @_;
-  my $prg = $self->programs;
-  my $cmd = shell_quote( $prg->tsdemux, -p => $fn );
+  my $cmd = shell_quote( $self->globals->tsdemux, -p => $fn );
 
-  open my $fh, '-|', $prg->bash, -c => "$cmd 2>&1"
+  open my $fh, '-|', $self->globals->bash, -c => "$cmd 2>&1"
    or die "Can't run $cmd: $!\n";
   while ( <$fh> ) {
     chomp( my $ln = $_ );

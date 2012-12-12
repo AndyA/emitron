@@ -17,6 +17,13 @@ has gop        => ( isa => 'Num', is => 'ro', default => 4 );
 has acodec     => ( isa => 'Str', is => 'ro', default => 'libfaac' );
 has vcodec     => ( isa => 'Str', is => 'ro', default => 'libx264' );
 
+# Programs
+
+has bash       => ( isa => 'Str', is => 'ro', default => '/bin/bash' );
+has ffmpeg     => ( isa => 'Str', is => 'ro', default => 'ffmpeg' );
+has gst_launch => ( isa => 'Str', is => 'ro', default => 'gst-launch' );
+has tsdemux    => ( isa => 'Str', is => 'ro', default => 'tsdemux' );
+
 has home => (
   isa     => 'Str',
   is      => 'ro',

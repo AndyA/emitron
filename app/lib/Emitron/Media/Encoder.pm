@@ -4,7 +4,6 @@ use Moose;
 
 use Carp qw( confess carp );
 use Emitron::Media::Globals;
-use Emitron::Media::Programs;
 use File::Temp;
 use POSIX qw( mkfifo );
 use Path::Class;
@@ -115,7 +114,7 @@ sub _ff_decoder {
   }
   my $ar  = $self->globals->aspect_ratio;
   my @cmd = (
-    $self->programs->ffmpeg,
+    $self->globals->ffmpeg,
     -vsync => 'cfr',
     -y     => -i => $args{src},
     '-r:v' => $self->globals->frame_rate,
@@ -167,7 +166,7 @@ sub _ff_encoder {
   my @burn = $args{burnin} ? ( -vf => $self->_burnin( $profile ) ) : ();
 
   my @cmd = (
-    $self->programs->ffmpeg,
+    $self->globals->ffmpeg,
     -vsync        => 'cfr',
     -f            => 'avi',
     -y            => -i => $args{src},
@@ -200,7 +199,7 @@ sub _ff_encoder {
 sub _gst_pipe {
   my ( $self, %args ) = @_;
   return (
-    $self->programs->gst_launch,    #
+    $self->globals->gst_launch,    #
     'mpegtsmux', 'name=muxer', '!', 'filesink', "location=$args{dst}", #
     'rtspsrc', "location=$args{src}", 'name=src',                      #
     'src.', '!', 'rtpmp4gdepay', '!', 'queue', '!', 'muxer.',          #

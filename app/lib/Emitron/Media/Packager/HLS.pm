@@ -5,7 +5,6 @@ use Moose;
 use Emitron::Logger;
 use Emitron::Media::Globals;
 use Emitron::Media::Helpers::tsdemux;
-use Emitron::Media::Programs;
 use Harmless::M3U8;
 use Harmless::Segment;
 use Linux::Inotify2;
@@ -21,8 +20,7 @@ has _tsdemux => (
   is      => 'ro',
   lazy    => 1,
   default => sub {
-    Emitron::Media::Helpers::tsdemux->new(
-      programs => shift->programs );
+    Emitron::Media::Helpers::tsdemux->new( globals => shift->globals );
   }
 );
 

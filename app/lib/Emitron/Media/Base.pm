@@ -4,7 +4,6 @@ use Moose;
 
 use Emitron::Logger;
 use Emitron::Media::Globals;
-use Emitron::Media::Programs;
 use Emitron::Types;
 
 =head1 NAME
@@ -14,12 +13,6 @@ Emitron::Media::Base - Media handlers base class
 =cut
 
 has name => ( isa => 'Name', is => 'ro', required => 1 );
-
-has programs => (
-  isa     => 'Emitron::Media::Programs',
-  is      => 'ro',
-  default => sub { Emitron::Media::Programs->new }
-);
 
 has globals => (
   isa     => 'Emitron::Media::Globals',
@@ -78,7 +71,7 @@ sub spawn {
 
 sub bash {
   my ( $self, $cmd ) = @_;
-  return $self->spawn( $self->programs->bash, -c => $cmd );
+  return $self->spawn( $self->globals->bash, -c => $cmd );
 }
 
 sub kill_all {
