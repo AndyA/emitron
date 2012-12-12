@@ -19,10 +19,9 @@ Emitron::Model - versioned model
 =cut
 
 sub _obj_name { file( shift->root, @_ ) }
-
-sub _index { shift->_obj_name( 'index' ) }
-
-sub _stash { shift->_obj_name( "r$_[0].json" ) }
+sub _index    { shift->_obj_name( 'index' ) }
+sub _stash    { shift->_obj_name( "r$_[0].json" ) }
+sub _current  { shift->_obj_name( 'current.json' ) }
 
 sub init {
   my $self = shift;
@@ -110,8 +109,7 @@ sub commit {
       chomp( $rev = <$fh> );
       $rev ||= 0;
       if ( defined $expect && $expect != $rev ) { undef $rev; return }
-      my $stash = $self->_stash( ++$rev );
-      $self->_store( $stash, $data );
+      $self->_save( $data, ++$rev );
       seek $fh, 0, 0;
       print $fh "$rev\n";
     }
@@ -122,6 +120,19 @@ sub commit {
   }
   #  $self->_bt;
   return $rev;
+}
+
+sub _save {
+  my ( $self, $data, $rev ) = @_;
+  my $stash   = $self->_stash( $rev );
+  my $current = $self->_current;
+  my $temp    = "$current.tmp";
+  $self->_store( $stash, $data );
+  unlink $temp;
+  link $stash, $temp
+   or warning "Failed to link $stash to $current: $!";
+  rename $temp, $current
+   or warning "Failed to rename $temp to $current: $!";
 }
 
 sub checkout {
