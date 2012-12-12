@@ -199,6 +199,8 @@ sub _with_config {
   $cb->( $_ ) for @{ $self->config };
 }
 
+sub _token { join '.', $$, int( time ) }
+
 sub _make_streams {
   my $self = shift;
   my @stm  = ();
@@ -207,6 +209,7 @@ sub _make_streams {
     sub {
       my $br   = shift;
       my $id   = $br->{name};
+      my $tok  = $self->_token;
       my $next = 0;
       my $mf   = file( $self->webroot, $self->_manifest( $id ) );
       my $name = join '_', $self->name, $id;
@@ -235,7 +238,7 @@ sub _make_streams {
           my $inf = $tsd->scan( $src );
           warning "Can't find h264 stream in $src" unless $inf;
           my $duration = $inf ? $inf->{len} : $self->globals->gop;
-          my $segn = sprintf '%08d.ts', ++$next;
+          my $segn = sprintf '%s.%08d.ts', $tok, ++$next;
           my $uri = join '/', $name, $segn;
           my $dst = file( $dstd, $segn );
           link $src, $dst or die "Can't link $src -> $dst: $!";
