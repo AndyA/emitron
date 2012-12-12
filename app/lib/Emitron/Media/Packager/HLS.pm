@@ -15,15 +15,6 @@ extends 'Emitron::Media::Base';
 has webroot => ( isa => 'Str', is => 'ro', required => 1 );
 has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );
 
-has _tsdemux => (
-  isa     => 'Emitron::Media::Helpers::tsdemux',
-  is      => 'ro',
-  lazy    => 1,
-  default => sub {
-    Emitron::Media::Helpers::tsdemux->new( globals => shift->globals );
-  }
-);
-
 has _inotify => (
   isa     => 'Linux::Inotify2',
   is      => 'ro',
@@ -170,7 +161,8 @@ sub _token { join '.', $$, int( time ) }
 sub _make_streams {
   my $self = shift;
   my @stm  = ();
-  my $tsd  = $self->_tsdemux;
+  my $tsd
+   = Emitron::Media::Helpers::tsdemux->new( globals => shift->globals );
   $self->_with_config(
     sub {
       my $br   = shift;
