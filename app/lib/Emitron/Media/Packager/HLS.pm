@@ -11,6 +11,7 @@ use Linux::Inotify2;
 use Path::Class;
 
 extends 'Emitron::Media::Base';
+with 'Emitron::Media::Roles::Forker';
 
 has webroot => ( isa => 'Str', is => 'ro', required => 1 );
 has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );

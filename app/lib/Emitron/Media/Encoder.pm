@@ -10,6 +10,7 @@ use Path::Class;
 use String::ShellQuote;
 
 extends 'Emitron::Media::Base';
+with 'Emitron::Media::Roles::Forker';
 
 has source => ( isa => 'Str',               is => 'ro', required => 1 );
 has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );
