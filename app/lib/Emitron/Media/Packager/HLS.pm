@@ -162,7 +162,7 @@ sub _make_streams {
   my $self = shift;
   my @stm  = ();
   my $tsd
-   = Emitron::Media::Helpers::tsdemux->new( globals => shift->globals );
+   = Emitron::Media::Helpers::tsdemux->new( globals => $self->globals );
   $self->_with_config(
     sub {
       my $br   = shift;
