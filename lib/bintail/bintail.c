@@ -17,11 +17,13 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <time.h>
 
 #define BUFSIZE (1024 * 1024)
 #define SLEEP 100000
 
 static int verbose = 0;
+static int timeout = 0;
 
 static void die(const char *msg, ...) {
   va_list ap;
@@ -61,8 +63,9 @@ static void *alloc(size_t sz) {
 static void usage(const char *prog) {
   fprintf(stderr, "Usage: %s [options] <file>...\n\n"
           "Options:\n"
-          "  -v,      --verbose        Verbose output\n"
-          "  -h,      --help           See this text\n\n", prog);
+          "  -t, --timeout <seconds>   How long to wait for file growth\n"
+          "  -v, --verbose             Verbose output\n"
+          "  -h, --help                See this text\n\n", prog);
   exit(1);
 }
 
@@ -73,13 +76,17 @@ static void parse_options(int *argc, char ***argv) {
   static struct option opts[] = {
     {"help", no_argument, NULL, 'h'},
     {"verbose", no_argument, NULL, 'v'},
+    {"timeout", required_argument, NULL, 't'},
     {NULL, 0, NULL, 0}
   };
 
-  while (ch = getopt_long(*argc, *argv, "hv", opts, NULL), ch != -1) {
+  while (ch = getopt_long(*argc, *argv, "hvt:", opts, NULL), ch != -1) {
     switch (ch) {
     case 'v':
       verbose++;
+      break;
+    case 't':
+      timeout = atoi(optarg);
       break;
     case 'h':
     default:
@@ -97,6 +104,8 @@ static void parse_options(int *argc, char ***argv) {
 
 static void tail(int outfd, int nfile, char *file[]) {
   unsigned char *buf = alloc(BUFSIZE);
+  enum { READING, WAITING } state = READING;
+  time_t deadline;
 
   while (nfile-- > 0) {
     const char *fn = *file++;
@@ -119,6 +128,17 @@ static void tail(int outfd, int nfile, char *file[]) {
       }
 
       if (got == 0) { // eof
+        time_t now = time(NULL);
+        if (state == READING) {
+          state = WAITING;
+          deadline = now + timeout;
+        }
+
+        if (timeout && now >= deadline) {
+          mention("Giving up waiting for %s to grow", fn);
+          goto skip;
+        }
+
         if (nfn) {
           struct stat st;
           if (0 == stat(nfn, &st)) goto skip;
@@ -130,10 +150,16 @@ static void tail(int outfd, int nfile, char *file[]) {
           warn("Failed to tail %s: %s", fn, strerror(errno));
           goto skip;
         }
-
-        continue;
       }
-      write(outfd, buf, got);
+      else {
+        while (got) {
+          ssize_t put = write(outfd, buf, got);
+          if ((ssize_t) - 1 == put)
+            die("Write error: %s", strerror(errno));
+          got -= put;
+        }
+        state = READING;
+      }
     }
 
   skip:
