@@ -1,4 +1,6 @@
-.PHONY: all clean tags
+.PHONY: all clean tags install
+
+PREFIX ?= /usr/local
 
 VPATH = ../common
 
@@ -10,6 +12,7 @@ BINOBJS=$(addsuffix .o,$(BINS))
 MISCOBJS=
 OBJS=$(BINOBJS) $(MISCOBJS)
 DEPS=$(OBJS:.o=.d) 
+INST_BINS=$(PREFIX)/bin
 
 all: $(BINS)
 
@@ -28,3 +31,6 @@ tags:
 
 clean:
 	rm -f $(OBJS) $(DEPS) $(BINS) tags
+
+install:
+	install -s -m 770 -t $(INST_BINS) $(BINS)
