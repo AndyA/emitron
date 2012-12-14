@@ -95,7 +95,7 @@ static void parse_options(int *argc, char ***argv) {
     {"delete", no_argument, NULL, 'D'},
     {"help", no_argument, NULL, 'h'},
     {"increment", no_argument, NULL, 'v'},
-    {"fd", required_argument, NULL, 't'},
+    {"fd", required_argument, NULL, 2},
     {"timeout", required_argument, NULL, 't'},
     {"verbose", no_argument, NULL, 'v'},
     {"wait", optional_argument, NULL, 1},
@@ -107,6 +107,9 @@ static void parse_options(int *argc, char ***argv) {
     case 1:
       waitfor = 1;
       waitdelay = optarg ? atoi(optarg) : 0;
+      break;
+    case 2:
+      outfd = atoi(optarg);
       break;
     case 'D':
       rmeach++;
@@ -252,8 +255,11 @@ static void tail(int outfd, int nfile, char *file[]) {
 
   skip:
     close(fd);
-    if (rmeach && unlink(ofn) < 0)
-      warn("Failed to remove %s: %s", ofn, strerror(errno));
+    if (rmeach) {
+      mention("Deleting %s", ofn);
+      if (unlink(ofn) < 0)
+        warn("Failed to remove %s: %s", ofn, strerror(errno));
+    }
   skip2:
     free(ofn);
     free(nfn);
