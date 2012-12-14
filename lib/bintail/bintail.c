@@ -5,6 +5,7 @@
  *
  */
 
+#include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +25,9 @@
 
 static int verbose = 0;
 static int timeout = 0;
+static int increment = 0;
+static int waitfor = 0;
+static int waitdelay = 0;
 
 static void die(const char *msg, ...) {
   va_list ap;
@@ -60,37 +64,56 @@ static void *alloc(size_t sz) {
   return m;
 }
 
+static char *sstrdup(const char *s) {
+  size_t sz = strlen(s) + 1;
+  char *ss = alloc(sz);
+  memcpy(ss, s, sz);
+  return ss;
+}
+
 static void usage(const char *prog) {
   fprintf(stderr, "Usage: %s [options] <file>...\n\n"
           "Options:\n"
+          "  -h, --help                See this text\n"
+          "  -i, --increment           Follow numbered files\n"
           "  -t, --timeout <seconds>   How long to wait for file growth\n"
           "  -v, --verbose             Verbose output\n"
-          "  -h, --help                See this text\n\n", prog);
+          "      --wait [=<seconds>]   Wait for first file\n"
+          "\n", prog);
   exit(1);
 }
 
 static void parse_options(int *argc, char ***argv) {
   const char *prog = (*argv)[0];
-  int ch;
+  int ch, oidx;
 
   static struct option opts[] = {
     {"help", no_argument, NULL, 'h'},
-    {"verbose", no_argument, NULL, 'v'},
+    {"increment", no_argument, NULL, 'v'},
     {"timeout", required_argument, NULL, 't'},
+    {"verbose", no_argument, NULL, 'v'},
+    {"wait", optional_argument, NULL, 1},
     {NULL, 0, NULL, 0}
   };
 
-  while (ch = getopt_long(*argc, *argv, "hvt:", opts, NULL), ch != -1) {
+  while (ch = getopt_long(*argc, *argv, "hivt:", opts, &oidx), ch != -1) {
     switch (ch) {
-    case 'v':
-      verbose++;
-      break;
-    case 't':
-      timeout = atoi(optarg);
+    case 1:
+      waitfor = 1;
+      waitdelay = optarg ? atoi(optarg) : 0;
       break;
     case 'h':
     default:
       usage(prog);
+    case 'i':
+      increment++;
+      break;
+    case 't':
+      timeout = atoi(optarg);
+      break;
+    case 'v':
+      verbose++;
+      break;
     }
   }
 
@@ -102,19 +125,67 @@ static void parse_options(int *argc, char ***argv) {
   }
 }
 
+static int exists(const char *fn) {
+  struct stat st;
+  return 0 == stat(fn, &st);
+}
+
+static int inc_name(char *name) {
+  int carry = 1;
+  int pos = strlen(name) - 1;
+  while (pos >= 0 && !isdigit(name[pos])) pos--;
+  while (carry && pos >= 0 && isdigit(name[pos])) {
+    name[pos]++;
+    if (name[pos] == '9' + 1) name[pos--] = '0';
+    else carry = 0;
+  }
+  return carry;
+}
+
+static char *next_name(char *name) {
+  if (!increment) return NULL;
+  char *nn = sstrdup(name);
+  if (inc_name(nn)) {
+    warn("Can't increment %s", name);
+    free(nn);
+    return NULL;
+  }
+  return nn;
+}
+
+static int wait_for(const char *fn, int seconds) {
+  time_t deadline = time(NULL) + seconds;
+  mention("Waiting for %s to be created", fn);
+  while (seconds == 0 || time(NULL) < deadline) {
+    if (exists(fn)) return 1;
+    usleep(SLEEP);
+  }
+  return 0;
+}
+
 static void tail(int outfd, int nfile, char *file[]) {
   unsigned char *buf = alloc(BUFSIZE);
   enum { READING, WAITING } state = READING;
   time_t deadline;
+  char *fn = sstrdup(*file++);
+  nfile--;
 
-  while (nfile-- > 0) {
-    const char *fn = *file++;
-    const char *nfn = nfile > 0 ? *file : NULL;
+  if (waitfor && !exists(fn) && !wait_for(fn, waitdelay)) {
+    warn("%s didn't appear, giving up", fn);
+    return;
+  }
+
+  while (fn) {
+    char *ifn = next_name(fn);
+    char *nfn = nfile > 0 ? sstrdup(*file) : NULL;
+
     int fd = open(fn, O_RDONLY | O_LARGEFILE);
 
-    if (!fd) {
+    if (fd < 0) {
       warn("Can't read %s: %s", fn, strerror(errno));
-      continue;
+      free(fn);
+      fn = NULL;
+      goto skip2;
     }
 
     mention("Tailing %s", fn);
@@ -122,10 +193,8 @@ static void tail(int outfd, int nfile, char *file[]) {
     for (;;) {
       ssize_t got = read(fd, buf, BUFSIZE);
 
-      if (got == (ssize_t) - 1) {
-        warn("I/O error on %s: %s", fn, strerror(errno));
-        goto skip;
-      }
+      if (got == (ssize_t) - 1)
+        die("I/O error on %s: %s", fn, strerror(errno));
 
       if (got == 0) { // eof
         time_t now = time(NULL);
@@ -136,18 +205,32 @@ static void tail(int outfd, int nfile, char *file[]) {
 
         if (timeout && now >= deadline) {
           mention("Giving up waiting for %s to grow", fn);
+          free(fn);
+          fn = NULL;
           goto skip;
         }
 
-        if (nfn) {
-          struct stat st;
-          if (0 == stat(nfn, &st)) goto skip;
+        if (ifn && exists(ifn)) {
+          free(fn);
+          fn = ifn;
+          ifn = NULL;
+          goto skip;
+        }
+
+        if (nfn && exists(nfn)) {
+          free(fn);
+          fn = nfn;
+          nfn = NULL;
+          nfile--;
+          goto skip;
         }
 
         usleep(SLEEP);
 
         if ((off_t) - 1 == lseek(fd, 0, SEEK_CUR)) {
           warn("Failed to tail %s: %s", fn, strerror(errno));
+          free(fn);
+          fn = NULL;
           goto skip;
         }
       }
@@ -164,6 +247,9 @@ static void tail(int outfd, int nfile, char *file[]) {
 
   skip:
     close(fd);
+  skip2:
+    free(nfn);
+    free(ifn);
   }
 
   free(buf);
