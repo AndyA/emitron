@@ -28,6 +28,7 @@ static int timeout = 0;
 static int increment = 0;
 static int waitfor = 0;
 static int waitdelay = 0;
+static int rmeach = 0;
 
 static void die(const char *msg, ...) {
   va_list ap;
@@ -74,11 +75,12 @@ static char *sstrdup(const char *s) {
 static void usage(const char *prog) {
   fprintf(stderr, "Usage: %s [options] <file>...\n\n"
           "Options:\n"
-          "  -h, --help                See this text\n"
           "  -i, --increment           Follow numbered files\n"
           "  -t, --timeout <seconds>   How long to wait for file growth\n"
-          "  -v, --verbose             Verbose output\n"
           "      --wait [=<seconds>]   Wait for first file\n"
+          "  -D, --delete              Delete each file after reading it\n"
+          "  -h, --help                See this text\n"
+          "  -v, --verbose             Verbose output\n"
           "\n", prog);
   exit(1);
 }
@@ -88,6 +90,7 @@ static void parse_options(int *argc, char ***argv) {
   int ch, oidx;
 
   static struct option opts[] = {
+    {"delete", no_argument, NULL, 'D'},
     {"help", no_argument, NULL, 'h'},
     {"increment", no_argument, NULL, 'v'},
     {"timeout", required_argument, NULL, 't'},
@@ -96,11 +99,14 @@ static void parse_options(int *argc, char ***argv) {
     {NULL, 0, NULL, 0}
   };
 
-  while (ch = getopt_long(*argc, *argv, "hivt:", opts, &oidx), ch != -1) {
+  while (ch = getopt_long(*argc, *argv, "Dhivt:", opts, &oidx), ch != -1) {
     switch (ch) {
     case 1:
       waitfor = 1;
       waitdelay = optarg ? atoi(optarg) : 0;
+      break;
+    case 'D':
+      rmeach++;
       break;
     case 'h':
     default:
@@ -178,12 +184,12 @@ static void tail(int outfd, int nfile, char *file[]) {
   while (fn) {
     char *ifn = next_name(fn);
     char *nfn = nfile > 0 ? sstrdup(*file) : NULL;
+    char *ofn = fn;
 
     int fd = open(fn, O_RDONLY | O_LARGEFILE);
 
     if (fd < 0) {
       warn("Can't read %s: %s", fn, strerror(errno));
-      free(fn);
       fn = NULL;
       goto skip2;
     }
@@ -205,20 +211,17 @@ static void tail(int outfd, int nfile, char *file[]) {
 
         if (timeout && now >= deadline) {
           mention("Giving up waiting for %s to grow", fn);
-          free(fn);
           fn = NULL;
           goto skip;
         }
 
         if (ifn && exists(ifn)) {
-          free(fn);
           fn = ifn;
           ifn = NULL;
           goto skip;
         }
 
         if (nfn && exists(nfn)) {
-          free(fn);
           fn = nfn;
           nfn = NULL;
           nfile--;
@@ -229,7 +232,6 @@ static void tail(int outfd, int nfile, char *file[]) {
 
         if ((off_t) - 1 == lseek(fd, 0, SEEK_CUR)) {
           warn("Failed to tail %s: %s", fn, strerror(errno));
-          free(fn);
           fn = NULL;
           goto skip;
         }
@@ -247,7 +249,10 @@ static void tail(int outfd, int nfile, char *file[]) {
 
   skip:
     close(fd);
+    if (rmeach && unlink(ofn) < 0)
+      warn("Failed to remove %s: %s", ofn, strerror(errno));
   skip2:
+    free(ofn);
     free(nfn);
     free(ifn);
   }
