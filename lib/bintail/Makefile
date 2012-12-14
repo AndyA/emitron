@@ -2,8 +2,8 @@
 
 VPATH = ../common
 
-CFLAGS=-Wall -g3 -I../common
-LDFLAGS=-lc -lm -lpthread -lasound
+CFLAGS=-Wall -g3 -I../common -D_LARGEFILE64_SOURCE
+LDFLAGS=-lc
 
 BINS=bintail
 BINOBJS=$(addsuffix .o,$(BINS))
