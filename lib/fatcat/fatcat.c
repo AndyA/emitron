@@ -17,6 +17,8 @@
 #include <unistd.h>
 #include <time.h>
 
+#include "buffer.h"
+
 #define BUFSIZE (1024 * 1024)
 
 static int verbose = 0;
