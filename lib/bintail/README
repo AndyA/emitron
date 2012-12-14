@@ -4,11 +4,13 @@ Binary Tail
 Usage: bintail [options] <file>...
 
 Options:
-  -h, --help                See this text
   -i, --increment           Follow numbered files
   -t, --timeout <seconds>   How long to wait for file growth
-  -v, --verbose             Verbose output
       --wait [=<seconds>]   Wait for first file
+  -D, --delete              Delete each file after reading it
+      --fd=<fd>             Output to fd instead of stdout
+  -h, --help                See this text
+  -v, --verbose             Verbose output
 
 bintail does for binary files what tail -f does for text files. Actually
 tail -f works with binaries too - but bintail is dedicated to the task
@@ -73,4 +75,14 @@ It is possible to name multiple files with the -i option:
 In that case bintail will read as many dat#####.bin files as it can find
 but switch to reading the extra#####.bin sequence as soon as
 extra00000.bin is created.
+
+Numbering can start at any decimal value. Numeric fields must be fixed
+width; they're incremented odometer-style. The rightmost contiguous set
+of digits are the only part of the name bintail will incrememnt and when
+it runs out of digits the sequence of files is considered complete and
+bintail will move on to the next command line argument - if any:
+
+  $ bintail -i file00.txt
+
+would read file00.text up to file99.txt but no further.
 
