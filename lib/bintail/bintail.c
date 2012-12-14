@@ -193,7 +193,7 @@ static void tail(int outfd, int nfile, char *file[]) {
     for (;;) {
       ssize_t got = read(fd, buf, BUFSIZE);
 
-      if (got == (ssize_t) - 1)
+      if ((ssize_t) - 1 == got)
         die("I/O error on %s: %s", fn, strerror(errno));
 
       if (got == 0) { // eof
