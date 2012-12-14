@@ -192,7 +192,11 @@ static void tail(int outfd, int nfile, char *file[]) {
     char *nfn = nfile > 0 ? sstrdup(*file) : NULL;
     char *ofn = fn;
 
-    int fd = open(fn, O_RDONLY | O_LARGEFILE);
+    int fd = open(fn, O_RDONLY
+#ifdef O_LARGEFILE
+      | O_LARGEFILE
+#endif
+    );
 
     if (fd < 0) {
       warn("Can't read %s: %s", fn, strerror(errno));

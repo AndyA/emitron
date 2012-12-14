@@ -31,4 +31,4 @@ clean:
 	rm -f $(OBJS) $(DEPS) $(BINS) tags
 
 install:
-	install -s -m 770 -t $(INST_BINS) $(BINS)
+	install -s -m 770 $(BINS) $(INST_BINS)
