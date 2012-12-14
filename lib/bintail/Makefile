@@ -2,9 +2,7 @@
 
 PREFIX ?= /usr/local
 
-VPATH = ../common
-
-CFLAGS=-Wall -g3 -I../common -D_LARGEFILE64_SOURCE
+CFLAGS=-Wall -O2 -D_LARGEFILE64_SOURCE
 LDFLAGS=-lc
 
 BINS=bintail
