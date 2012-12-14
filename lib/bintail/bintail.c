@@ -29,6 +29,7 @@ static int increment = 0;
 static int waitfor = 0;
 static int waitdelay = 0;
 static int rmeach = 0;
+static int outfd = 1;
 
 static void die(const char *msg, ...) {
   va_list ap;
@@ -79,6 +80,7 @@ static void usage(const char *prog) {
           "  -t, --timeout <seconds>   How long to wait for file growth\n"
           "      --wait [=<seconds>]   Wait for first file\n"
           "  -D, --delete              Delete each file after reading it\n"
+          "      --fd=<fd>             Output to fd instead of stdout\n"
           "  -h, --help                See this text\n"
           "  -v, --verbose             Verbose output\n"
           "\n", prog);
@@ -93,6 +95,7 @@ static void parse_options(int *argc, char ***argv) {
     {"delete", no_argument, NULL, 'D'},
     {"help", no_argument, NULL, 'h'},
     {"increment", no_argument, NULL, 'v'},
+    {"fd", required_argument, NULL, 't'},
     {"timeout", required_argument, NULL, 't'},
     {"verbose", no_argument, NULL, 'v'},
     {"wait", optional_argument, NULL, 1},
@@ -262,7 +265,7 @@ static void tail(int outfd, int nfile, char *file[]) {
 
 int main(int argc, char *argv[]) {
   parse_options(&argc, &argv);
-  tail(1, argc, argv);
+  tail(outfd, argc, argv);
   return 0;
 }
 
