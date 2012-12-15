@@ -31,9 +31,9 @@ static size_t get_size(const char *opt) {
 static void usage(const char *prog) {
   fprintf(stderr, "Usage: %s [options] <file>...\n\n"
           "Options:\n"
-          "  -i             <file>     Input file\n"
-          "  -b             <size>     Buffer size\n"
-          "  -h, --help                See this text\n"
+          "  -i, --input  <file>  Input file\n"
+          "  -b, --buffer <size>  Buffer size\n"
+          "  -h, --help           See this text\n"
           "\n", prog);
   exit(1);
 }
@@ -44,6 +44,8 @@ static void parse_options(int *argc, char ***argv) {
 
   static struct option opts[] = {
     {"help", no_argument, NULL, 'h'},
+    {"input", required_argument, NULL, 'i'},
+    {"buffer", required_argument, NULL, 'b'},
     {NULL, 0, NULL, 0}
   };
 
