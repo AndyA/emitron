@@ -77,7 +77,12 @@ struct wtr_ctx {
 static void *writer(void *ctx) {
   struct wtr_ctx *cx = (struct wtr_ctx *) ctx;
   if (cx->file) {
-    cx->fd = open(cx->file, O_WRONLY | O_CREAT, 0666);
+    cx->fd = open(cx->file, O_WRONLY | O_CREAT
+#ifdef O_LARGEFILE
+      | O_LARGEFILE
+#endif
+      , 0666
+    );
     if (cx->fd < 0) die("Can't write %s: %s", cx->file, strerror(errno));
     free(cx->file);
     cx->file = NULL;
@@ -109,7 +114,11 @@ static void fatcat(int nfile, char *file[]) {
   int ifd = 0;
 
   if (infile) {
-    ifd = open(infile, O_RDONLY);
+    ifd = open(infile, O_RDONLY
+#ifdef O_LARGEFILE
+      | O_LARGEFILE
+#endif
+    );
     if (ifd < 0) die("Can't read %s: %s", infile, strerror(errno));
   }
 
