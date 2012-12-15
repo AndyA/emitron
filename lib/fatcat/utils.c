@@ -100,7 +100,9 @@ ssize_t parse_size(const char *opt) {
     if (!strcmp(end, size_unit[i].name)) {
       scale = size_unit[i].scale;
       if (scale < 100) scale = pow(2, scale);
-      return (ssize_t) val * scale;
+      double bs = val * scale;
+      if (bs > (size_t) - 1) die("Too large");
+      return bs;
     }
   }
 
