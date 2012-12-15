@@ -68,11 +68,18 @@ static void parse_options(int *argc, char ***argv) {
 struct wtr_ctx {
   buffer_reader *br;
   int fd;
+  char *file;
   pthread_t t;
 };
 
 static void *writer(void *ctx) {
   struct wtr_ctx *cx = (struct wtr_ctx *) ctx;
+  if (cx->file) {
+    cx->fd = open(cx->file, O_WRONLY | O_CREAT, 0666);
+    if (cx->fd < 0) die("Can't write %s: %s", cx->file, strerror(errno));
+    free(cx->file);
+    cx->file = NULL;
+  }
   for (;;) {
     buffer_iov iov;
     size_t spc = b_wait_output(cx->br, &iov);
@@ -84,10 +91,11 @@ static void *writer(void *ctx) {
   return NULL;
 }
 
-static struct wtr_ctx *add_writer(buffer *b, int fd) {
+static struct wtr_ctx *add_writer(buffer *b, int fd, char *file) {
   struct wtr_ctx *ctx = alloc(sizeof(struct wtr_ctx));
   ctx->br = b_add_reader(b);
   ctx->fd = fd;
+  ctx->file = file;
   pthread_create(&ctx->t, NULL, writer, ctx);
   return ctx;
 }
@@ -105,14 +113,13 @@ static void fatcat(int nfile, char *file[]) {
 
   if (nfile) {
     while (nfile) {
-      int fd = open(file[wi], O_WRONLY | O_CREAT, 0666);
-      if (fd < 0) die("Can't write %s: %s", file[wi], strerror(errno));
-      ws[wi++] = add_writer(b, fd);
+      char *fn = sstrdup(file[wi]);
+      ws[wi++] = add_writer(b, -1, fn);
       nfile--;
     }
   }
   else {
-    ws[wi++] = add_writer(b, 1); // stdout
+    ws[wi++] = add_writer(b, 1, NULL); // stdout
   }
 
   for (;;) {
