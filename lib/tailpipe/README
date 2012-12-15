@@ -1,7 +1,7 @@
 Binary Tail
 ===========
 
-Usage: bintail [options] <file>...
+Usage: tailpipe [options] <file>...
 
 Options:
   -i, --increment           Follow numbered files
@@ -12,46 +12,46 @@ Options:
   -h, --help                See this text
   -v, --verbose             Verbose output
 
-bintail does for binary files what tail -f does for text files. Actually
-tail -f works with binaries too - but bintail is dedicated to the task
+tailpipe does for binary files what tail -f does for text files. Actually
+tail -f works with binaries too - but tailpipe is dedicated to the task
 and provides a few features that tail does not.
 
 Invoked with a filename like this
 
-  $ bintail somefile
+  $ tailpipe somefile
 
-bintail will output the entire current contents of somefile and then
+tailpipe will output the entire current contents of somefile and then
 wait for somefile to be appended to. Each time more data is written to
-somefile bintail will output it.
+somefile tailpipe will output it.
 
-You can give bintail multiple files
+You can give tailpipe multiple files
 
-  $ bintail somefile anotherfile
+  $ tailpipe somefile anotherfile
 
 As before all of somefile will be read and output. What happens then
-depends on whether anotherfile exists. If it doesn't exist bintail will
+depends on whether anotherfile exists. If it doesn't exist tailpipe will
 continue to watch somefile and output any additional data. As soon as
-anotherfile is created (or if it already exists) bintail will switch to
+anotherfile is created (or if it already exists) tailpipe will switch to
 anotherfile.
 
-To make bintail give up waiting altogether after a certain period of
+To make tailpipe give up waiting altogether after a certain period of
 time use the timeout option:
 
-  $ bintail -t 10 somefile
+  $ tailpipe -t 10 somefile
 
-As before bintail will output the contents of somefile. It will then
+As before tailpipe will output the contents of somefile. It will then
 wait for up to 10 seconds for somefile to be extended. Each time
-somefile grows the timer resets. The net effect is that bintail will
+somefile grows the timer resets. The net effect is that tailpipe will
 give up waiting when somefile hasn't grown for 10 seconds.
 
-Normally bintail will complain if the first named file doesn't initially
-exist. You can ask bintail to wait for the first file to be created
+Normally tailpipe will complain if the first named file doesn't initially
+exist. You can ask tailpipe to wait for the first file to be created
 using the wait option:
 
-  $ bintail --wait=10 somefile
+  $ tailpipe --wait=10 somefile
 
 That will wait for up to 10 seconds for somefile to be created. If you
-use --wait on its own without specifying a timeout bintail will
+use --wait on its own without specifying a timeout tailpipe will
 wait for ever.
 
 Often it's useful to be able to work with sequentially named files:
@@ -59,30 +59,30 @@ Often it's useful to be able to work with sequentially named files:
   $ ls
   dat00000.bin dat00001.bin dat00002.bin
 
-The -i option tells bintail to attempt to increment a numeric filename
+The -i option tells tailpipe to attempt to increment a numeric filename
 to generate a sequence of such names:
 
-  $ bintail -i dat00000.bin
+  $ tailpipe -i dat00000.bin
 
 Given the above three files (dat000000.bin, dat00001.bin & dat00002.bin)
-bintail will read each of them in turn and then wait for dat00003.bin to
+tailpipe will read each of them in turn and then wait for dat00003.bin to
 be created.
 
 It is possible to name multiple files with the -i option:
 
-  $ bintail -i dat00000.bin extra00000.bin
+  $ tailpipe -i dat00000.bin extra00000.bin
 
-In that case bintail will read as many dat#####.bin files as it can find
+In that case tailpipe will read as many dat#####.bin files as it can find
 but switch to reading the extra#####.bin sequence as soon as
 extra00000.bin is created.
 
 Numbering can start at any decimal value. Numeric fields must be fixed
 width; they're incremented odometer-style. The rightmost contiguous set
-of digits are the only part of the name bintail will incrememnt and when
+of digits are the only part of the name tailpipe will incrememnt and when
 it runs out of digits the sequence of files is considered complete and
-bintail will move on to the next command line argument - if any:
+tailpipe will move on to the next command line argument - if any:
 
-  $ bintail -i file00.txt
+  $ tailpipe -i file00.txt
 
 would read file00.text up to file99.txt but no further.
 

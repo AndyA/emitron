@@ -5,7 +5,7 @@ PREFIX ?= /usr/local
 CFLAGS=-Wall -O2 -D_LARGEFILE64_SOURCE
 LDFLAGS=-lc
 
-BINS=bintail
+BINS=tailpipe
 BINOBJS=$(addsuffix .o,$(BINS))
 MISCOBJS=
 OBJS=$(BINOBJS) $(MISCOBJS)
