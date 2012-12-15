@@ -57,35 +57,46 @@ static size_t _b_get_buf(const buffer *b, buffer_iov *bi,
   return avail;
 }
 
-size_t b_space(buffer *b) {
+static size_t _b_space(buffer *b) {
   buffer_reader *br;
   size_t space = 0;
-  /*  pthread_mutex_lock(&b->mutex);*/
   for (br = b->br; br; br = br->next) {
     ssize_t sp = br->pos - b->pos;
     if (sp <= 0) sp += b->size;
     if (space == 0 || sp < space) space = sp;
   }
-  /*  pthread_mutex_unlock(&b->mutex);*/
   if (space > 0) return space - 1;
   return 0;
 }
 
-size_t b_available(buffer_reader *br) {
+static size_t _b_available(buffer_reader *br) {
   buffer *b = br->b;
-  /*  pthread_mutex_lock(&b->mutex);*/
   ssize_t avail = b->pos - br->pos;
   if (avail < 0) avail += b->size;
-  /*  pthread_mutex_unlock(&b->mutex);*/
+  return avail;
+}
+
+size_t b_space(buffer *b) {
+  pthread_mutex_lock(&b->mutex);
+  size_t space = _b_space(b);
+  pthread_mutex_unlock(&b->mutex);
+  return space;
+}
+
+size_t b_available(buffer_reader *br) {
+  buffer *b = br->b;
+  pthread_mutex_lock(&b->mutex);
+  size_t avail = _b_available(br);
+  pthread_mutex_unlock(&b->mutex);
   return avail;
 }
 
 size_t b_get_input(buffer *b, buffer_iov *bi) {
-  return _b_get_buf(b, bi, b_space(b), b->pos);
+  return _b_get_buf(b, bi, _b_space(b), b->pos);
 }
 
 size_t b_get_output(buffer_reader *br, buffer_iov *bi) {
-  return _b_get_buf(br->b, bi, b_available(br), br->pos);
+  return _b_get_buf(br->b, bi, _b_available(br), br->pos);
 }
 
 void b_commit_input(buffer *b, size_t len) {
