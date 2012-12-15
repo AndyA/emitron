@@ -7,7 +7,7 @@ LDFLAGS=-lc -lm -lpthread
 
 BINS=fatcat
 BINOBJS=$(addsuffix .o,$(BINS))
-MISCOBJS=buffer.o
+MISCOBJS=buffer.o utils.o
 OBJS=$(BINOBJS) $(MISCOBJS)
 DEPS=$(OBJS:.o=.d) 
 INST_BINS=$(PREFIX)/bin
