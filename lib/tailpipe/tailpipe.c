@@ -26,6 +26,7 @@
 static int verbose = 0;
 static int timeout = 0;
 static int increment = 0;
+static int filecount = -1;
 static int waitfor = 0;
 static int waitdelay = 0;
 static int rmeach = 0;
@@ -80,6 +81,7 @@ static void usage(const char *prog) {
           "  -t, --timeout <seconds>   How long to wait for file growth\n"
           "      --wait [=<seconds>]   Wait for first file\n"
           "  -D, --delete              Delete each file after reading it\n"
+          "  -c, --count=<n>           Stop after n files\n"
           "      --fd=<fd>             Output to fd instead of stdout\n"
           "  -h, --help                See this text\n"
           "  -v, --verbose             Verbose output\n"
@@ -97,12 +99,13 @@ static void parse_options(int *argc, char ***argv) {
     {"increment", no_argument, NULL, 'v'},
     {"fd", required_argument, NULL, 2},
     {"timeout", required_argument, NULL, 't'},
+    {"count", required_argument, NULL, 'c'},
     {"verbose", no_argument, NULL, 'v'},
     {"wait", optional_argument, NULL, 1},
     {NULL, 0, NULL, 0}
   };
 
-  while (ch = getopt_long(*argc, *argv, "Dhivt:", opts, &oidx), ch != -1) {
+  while (ch = getopt_long(*argc, *argv, "Dhivc:t:", opts, &oidx), ch != -1) {
     switch (ch) {
     case 1:
       waitfor = 1;
@@ -122,6 +125,9 @@ static void parse_options(int *argc, char ***argv) {
       break;
     case 't':
       timeout = atoi(optarg);
+      break;
+    case 'c':
+      filecount = atoi(optarg);
       break;
     case 'v':
       verbose++;
@@ -187,7 +193,7 @@ static void tail(int outfd, int nfile, char *file[]) {
     return;
   }
 
-  while (fn) {
+  while (fn && (filecount == -1 || filecount--)) {
     char *ifn = next_name(fn);
     char *nfn = nfile > 0 ? sstrdup(*file) : NULL;
     char *ofn = fn;
