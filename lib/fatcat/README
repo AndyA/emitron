@@ -1,6 +1,13 @@
 Fat Cat
 ===========
 
+Usage: fatcat [options] <file>...
+
+Options:
+  -i, --input  <file>  Input file
+  -b, --buffer <size>  Buffer size
+  -h, --help           See this text
+
 Fat Cat (fatcat) is a combination of cat, buffer and tee. It accepts
 input from a single source, buffers it in memory and distributes it to
 one or more destinations.
@@ -25,8 +32,8 @@ An input can be named like this:
 
   $ fatcat -i somefile other1 other2
 
-By default a 1MB buffer is allocated. This can be overridden using the -b option:
+By default a 1MB buffer is allocated. This can be overridden using the
+-b option:
 
   $ fatcat -b 100MB
-
 
