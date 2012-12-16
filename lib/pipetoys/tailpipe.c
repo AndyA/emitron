@@ -23,6 +23,7 @@
 #include "utils.h"
 #include "version.h"
 
+#define PROG "tailpipe"
 #define BUFSIZE (1024 * 1024)
 #define SLEEP 100000
 
@@ -34,8 +35,8 @@ static int waitdelay = 0;
 static int rmeach = 0;
 static int outfd = 1;
 
-static void usage(const char *prog) {
-  fprintf(stderr, "Usage: %s [options] <file>...\n\n"
+static void usage() {
+  fprintf(stderr, "Usage: " PROG " [options] <file>...\n\n"
           "Options:\n"
           "  -i, --increment           Follow numbered files\n"
           "  -t, --timeout <seconds>   How long to wait for file growth\n"
@@ -46,12 +47,11 @@ static void usage(const char *prog) {
           "  -h, --help                See this text\n"
           "  -v, --verbose             Verbose output\n"
           "  -V, --version             Show version\n"
-          "\n", prog);
+          "\n");
   exit(1);
 }
 
 static void parse_options(int *argc, char ***argv) {
-  const char *prog = (*argv)[0];
   int ch, oidx;
 
   static struct option opts[] = {
@@ -81,7 +81,7 @@ static void parse_options(int *argc, char ***argv) {
       break;
     case 'h':
     default:
-      usage(prog);
+      usage();
     case 'i':
       increment++;
       break;
@@ -104,7 +104,7 @@ static void parse_options(int *argc, char ***argv) {
   *argv += optind;
 
   if (*argc == 0) {
-    usage(prog);
+    usage();
   }
 }
 

@@ -19,6 +19,7 @@
 #include "utils.h"
 #include "version.h"
 
+#define PROG "spliff"
 #define BUFSIZE   (1024 * 1024)
 #define SPLITSIZE (1024 * 1024)
 
@@ -32,8 +33,8 @@ static size_t get_size(const char *opt) {
   return (size_t) sz;
 }
 
-static void usage(const char *prog) {
-  fprintf(stderr, "Usage: %s [options] <file>\n\n"
+static void usage() {
+  fprintf(stderr, "Usage: " PROG " [options] <file>\n\n"
           "Options:\n"
           "  -s, --size <size>    Chunk size\n"
           "  -i, --input  <file>  Input file\n"
@@ -41,12 +42,11 @@ static void usage(const char *prog) {
           "  -v, --verbose        Verbose output\n"
           "  -h, --help           See this text\n"
           "  -V, --version        Show version\n"
-          "\n", prog);
+          "\n");
   exit(1);
 }
 
 static void parse_options(int *argc, char ***argv) {
-  const char *prog = (*argv)[0];
   int ch, oidx;
 
   static struct option opts[] = {
@@ -78,14 +78,14 @@ static void parse_options(int *argc, char ***argv) {
       break;
     case 'h':
     default:
-      usage(prog);
+      usage();
     }
   }
 
   *argc -= optind;
   *argv += optind;
 
-  if (*argc != 1) usage(prog);
+  if (*argc != 1) usage();
 }
 
 static int inc_name(char *name) {
