@@ -35,6 +35,7 @@ void *alloc(size_t sz) {
 }
 
 char *sstrdup(const char *s) {
+  if (!s) return NULL;
   size_t sz = strlen(s) + 1;
   char *ss = alloc(sz);
   memcpy(ss, s, sz);

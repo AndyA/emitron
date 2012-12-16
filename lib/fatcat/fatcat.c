@@ -79,10 +79,10 @@ static void *writer(void *ctx) {
   if (cx->file) {
     cx->fd = open(cx->file, O_WRONLY | O_CREAT
 #ifdef O_LARGEFILE
-      | O_LARGEFILE
+                  | O_LARGEFILE
 #endif
-      , 0666
-    );
+                  , 0666
+                 );
     if (cx->fd < 0) die("Can't write %s: %s", cx->file, strerror(errno));
     free(cx->file);
     cx->file = NULL;
@@ -102,7 +102,7 @@ static struct wtr_ctx *add_writer(buffer *b, int fd, char *file) {
   struct wtr_ctx *ctx = alloc(sizeof(struct wtr_ctx));
   ctx->br = b_add_reader(b);
   ctx->fd = fd;
-  ctx->file = file;
+  ctx->file = sstrdup(file);
   pthread_create(&ctx->t, NULL, writer, ctx);
   return ctx;
 }
@@ -116,16 +116,16 @@ static void fatcat(int nfile, char *file[]) {
   if (infile) {
     ifd = open(infile, O_RDONLY
 #ifdef O_LARGEFILE
-      | O_LARGEFILE
+               | O_LARGEFILE
 #endif
-    );
+              );
     if (ifd < 0) die("Can't read %s: %s", infile, strerror(errno));
   }
 
   if (nfile) {
     while (nfile) {
-      char *fn = sstrdup(file[wi]);
-      ws[wi++] = add_writer(b, -1, fn);
+      ws[wi] = add_writer(b, -1, file[wi]);
+      wi++;
       nfile--;
     }
   }
