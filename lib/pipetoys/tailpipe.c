@@ -200,9 +200,9 @@ static void tail(int outfd, int nfile, char *file[]) {
 
     int fd = open(fn, O_RDONLY
 #ifdef O_LARGEFILE
-      | O_LARGEFILE
+                  | O_LARGEFILE
 #endif
-    );
+                 );
 
     if (fd < 0) {
       warn("Can't read %s: %s", fn, strerror(errno));
