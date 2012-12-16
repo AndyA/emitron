@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm -rf fatcat tailpipe spliff
 for d in pipetoys; do
   make -C $d install
 done
