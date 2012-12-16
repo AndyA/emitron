@@ -14,8 +14,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "utils.h"
 #include "buffer.h"
+#include "utils.h"
 #include "version.h"
 
 #define PROG "fatcat"
@@ -39,11 +39,6 @@ static void usage() {
           "  -V, --version        Show version\n"
           "\n" PROG " " V_INFO "\n");
   exit(1);
-}
-
-static void version() {
-  fprintf(stderr, "%s\n", V_INFO);
-  exit(0);
 }
 
 static void parse_options(int *argc, char ***argv) {

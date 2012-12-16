@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "utils.h"
+#include "version.h"
 
 void die(const char *msg, ...) {
   va_list ap;
@@ -25,6 +26,11 @@ void warn(const char *msg, ...) {
   vfprintf(stderr, msg, ap);
   fprintf(stderr, "\n");
   va_end(ap);
+}
+
+void version() {
+  fprintf(stderr, "%s\n", V_INFO);
+  exit(0);
 }
 
 void *alloc(size_t sz) {

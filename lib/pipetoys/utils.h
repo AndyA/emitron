@@ -8,6 +8,7 @@ ssize_t parse_size(const char *opt);
 void *alloc(size_t sz);
 void die(const char *msg, ...);
 void warn(const char *msg, ...);
+void version();
 
 #endif
 
