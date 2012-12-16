@@ -26,7 +26,6 @@
 #define BUFSIZE (1024 * 1024)
 #define SLEEP 100000
 
-static int verbose = 0;
 static int timeout = 0;
 static int increment = 0;
 static int filecount = -1;
@@ -34,16 +33,6 @@ static int waitfor = 0;
 static int waitdelay = 0;
 static int rmeach = 0;
 static int outfd = 1;
-
-static void mention(const char *msg, ...) {
-  if (verbose) {
-    va_list ap;
-    va_start(ap, msg);
-    vfprintf(stderr, msg, ap);
-    fprintf(stderr, "\n");
-    va_end(ap);
-  }
-}
 
 static void usage(const char *prog) {
   fprintf(stderr, "Usage: %s [options] <file>...\n\n"

@@ -22,20 +22,9 @@
 #define BUFSIZE   (1024 * 1024)
 #define SPLITSIZE (1024 * 1024)
 
-static int verbose = 0;
 static size_t bufsize = BUFSIZE;
 static size_t splitsize = SPLITSIZE;
 static const char *infile;
-
-static void mention(const char *msg, ...) {
-  if (verbose) {
-    va_list ap;
-    va_start(ap, msg);
-    vfprintf(stderr, msg, ap);
-    fprintf(stderr, "\n");
-    va_end(ap);
-  }
-}
 
 static size_t get_size(const char *opt) {
   ssize_t sz = parse_size(opt);

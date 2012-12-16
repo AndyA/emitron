@@ -9,6 +9,8 @@
 #include "utils.h"
 #include "version.h"
 
+int verbose = 0;
+
 void die(const char *msg, ...) {
   va_list ap;
   va_start(ap, msg);
@@ -26,6 +28,16 @@ void warn(const char *msg, ...) {
   vfprintf(stderr, msg, ap);
   fprintf(stderr, "\n");
   va_end(ap);
+}
+
+void mention(const char *msg, ...) {
+  if (verbose) {
+    va_list ap;
+    va_start(ap, msg);
+    vfprintf(stderr, msg, ap);
+    fprintf(stderr, "\n");
+    va_end(ap);
+  }
 }
 
 void version() {
