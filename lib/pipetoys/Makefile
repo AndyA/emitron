@@ -3,11 +3,11 @@
 PREFIX ?= /usr/local
 
 CFLAGS=-Wall -O2 -D_LARGEFILE64_SOURCE
-LDFLAGS=-lc
+LDFLAGS=-lc -lm -lpthread
 
-BINS=tailpipe
+BINS=fatcat spliff tailpipe
 BINOBJS=$(addsuffix .o,$(BINS))
-MISCOBJS=
+MISCOBJS=buffer.o utils.o
 OBJS=$(BINOBJS) $(MISCOBJS)
 DEPS=$(OBJS:.o=.d) 
 INST_BINS=$(PREFIX)/bin

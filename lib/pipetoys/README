@@ -1,5 +1,65 @@
-Binary Tail
-===========
+======
+fatcat
+======
+
+Usage: fatcat [options] <file>...
+
+Options:
+  -i, --input  <file>  Input file
+  -b, --buffer <size>  Buffer size
+  -h, --help           See this text
+
+Fat Cat (fatcat) is a combination of cat, buffer and tee. It accepts
+input from a single source, buffers it in memory and distributes it to
+one or more destinations.
+
+At its simplest it behaves like cat:
+
+  $ ls | fatcat | sort  # is just like...
+  $ ls | cat | sort     # ...this
+
+Unlike cat (and like tee) any named parameters are files to output to:
+
+  $ cat somefile | fatcat other1 other2
+
+behaves like
+
+  $ cat somefile | tee other1 other2 > /dev/null
+
+Note that when outputting to a file or files output to stdout is
+disabled.
+
+An input can be named like this:
+
+  $ fatcat -i somefile other1 other2
+
+By default a 1MB buffer is allocated. This can be overridden using the
+-b option:
+
+  $ fatcat -b 100MB
+
+======
+spliff
+======
+
+Usage: spliff [options] <file>
+
+Options:
+  -s, --size <size>    Chunk size
+  -i, --input  <file>  Input file
+  -b, --buffer <size>  Buffer size
+  -v, --verbose        Verbose output
+  -h, --help           See this text
+
+Split the input (which may be a named file or standard input) into fixed
+size, sequentially named chunks.
+
+By default each chunk will contain 1MiB. The chunk size can be set using
+the -s option.
+
+========
+tailpipe
+========
 
 Usage: tailpipe [options] <file>...
 
