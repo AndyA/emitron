@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <time.h>
 
+#include "utils.h"
 #include "version.h"
 
 #define BUFSIZE (1024 * 1024)
@@ -34,25 +35,6 @@ static int waitdelay = 0;
 static int rmeach = 0;
 static int outfd = 1;
 
-static void die(const char *msg, ...) {
-  va_list ap;
-  va_start(ap, msg);
-  fprintf(stderr, "Fatal: ");
-  vfprintf(stderr, msg, ap);
-  fprintf(stderr, "\n");
-  va_end(ap);
-  exit(1);
-}
-
-static void warn(const char *msg, ...) {
-  va_list ap;
-  va_start(ap, msg);
-  fprintf(stderr, "Warning: ");
-  vfprintf(stderr, msg, ap);
-  fprintf(stderr, "\n");
-  va_end(ap);
-}
-
 static void mention(const char *msg, ...) {
   if (verbose) {
     va_list ap;
@@ -61,19 +43,6 @@ static void mention(const char *msg, ...) {
     fprintf(stderr, "\n");
     va_end(ap);
   }
-}
-
-static void *alloc(size_t sz) {
-  void *m = malloc(sz);
-  if (!m) die("Out of memory");
-  return m;
-}
-
-static char *sstrdup(const char *s) {
-  size_t sz = strlen(s) + 1;
-  char *ss = alloc(sz);
-  memcpy(ss, s, sz);
-  return ss;
 }
 
 static void usage(const char *prog) {
@@ -90,11 +59,6 @@ static void usage(const char *prog) {
           "  -V, --version             Show version\n"
           "\n", prog);
   exit(1);
-}
-
-static void version() {
-  fprintf(stderr, "%s\n", V_INFO);
-  exit(0);
 }
 
 static void parse_options(int *argc, char ***argv) {
