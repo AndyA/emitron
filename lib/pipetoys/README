@@ -1,3 +1,7 @@
+fatcat    - buffered cat to multiple outputs
+tailpipe  - binary tail, follow sequence of numbered files
+spliff    - split input into numbered fragment files
+
 ======
 fatcat
 ======
