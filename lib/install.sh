@@ -2,7 +2,6 @@
 
 cd "$( dirname "$0" )"
 
-rm -rf fatcat tailpipe spliff
 for d in pipetoys; do
   make -C $d install
 done
