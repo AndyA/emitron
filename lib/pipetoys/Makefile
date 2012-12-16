@@ -18,7 +18,7 @@ version.h: VERSION
 	perl tools/version.pl > version.h
 
 %: %.o $(MISCOBJ)
-	cc -o $@ $^ $(LDFLAGS)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 %.d: %.c version.h
 	@$(SHELL) -ec '$(CC) -MM $(CFLAGS) $< \
