@@ -33,6 +33,9 @@ tags:
 clean:
 	rm -f $(OBJS) $(DEPS) $(BINS) tags version.h
 
+version:
+	perl tools/bump_version.pl VERSION
+
 install: $(BINS)
 	touch VERSION
 	$(MAKE)
