@@ -39,4 +39,4 @@ version:
 install: $(BINS)
 	touch VERSION
 	$(MAKE)
-	install -s -m 770 $(BINS) $(INST_BINS)
+	install -s -m 775 $(BINS) $(INST_BINS)
