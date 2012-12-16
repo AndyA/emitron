@@ -240,6 +240,7 @@ static void tail(int outfd, int nfile, char *file[]) {
         if (nfn && exists(nfn)) {
           fn = nfn;
           nfn = NULL;
+          file++;
           nfile--;
           goto skip;
         }
