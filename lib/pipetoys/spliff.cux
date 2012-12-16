@@ -1,31 +1,39 @@
 usage: spliff [options] <file>
 
 option: s/size <size>
-description: Chunk size
+description:
+  Chunk size
 
 handler:
   splitsize = get_size(optarg);
 
 option: i/input <file>
-description: Input file
+description: 
+  Input file
 
 handler:
   infile = optarg;
 
 option: b/buffer <size>
-description: Buffer size
+description: 
+  Buffer size
 
 handler:
   bufsize = get_size(optarg);
 
 option: v/verbose
-description: Verbose output
+description: 
+  Verbose output
 
 handler:
   verbose++;
 
 option: h/help
-description: See this help text
+description: 
+  See this help text
 
 handler:
+  usage();
+
+default:
   usage();
