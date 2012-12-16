@@ -13,11 +13,8 @@ while ( my $f = shift ) {
   );
   die "Malformed version: $ver" unless $ver =~ /^\d+\.\d\d$/;
   my ( $maj, $min ) = split( /\./, $ver, 2 );
+  if ( ++$min > 99 ) { $min = 0; ++$maj }
   {
-    if ( ++$min > 99 ) {
-      $min = 0;
-      ++$maj;
-    }
     open my $fh, '>', $f or die "Can't write $f: $!\n";
     printf $fh "%d.%02d\n", $maj, $min;
   }
