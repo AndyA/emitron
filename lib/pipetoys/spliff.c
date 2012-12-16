@@ -17,6 +17,7 @@
 
 #include "buffer.h"
 #include "utils.h"
+#include "version.h"
 
 #define BUFSIZE   (1024 * 1024)
 #define SPLITSIZE (1024 * 1024)
@@ -50,8 +51,14 @@ static void usage(const char *prog) {
           "  -b, --buffer <size>  Buffer size\n"
           "  -v, --verbose        Verbose output\n"
           "  -h, --help           See this text\n"
+          "  -V, --version        Show version\n"
           "\n", prog);
   exit(1);
+}
+
+static void version() {
+  fprintf(stderr, "%s\n", V_INFO);
+  exit(0);
 }
 
 static void parse_options(int *argc, char ***argv) {
@@ -64,10 +71,11 @@ static void parse_options(int *argc, char ***argv) {
     {"input", required_argument, NULL, 'i'},
     {"size", required_argument, NULL, 's'},
     {"buffer", required_argument, NULL, 'b'},
+    {"version", no_argument, NULL, 'V'},
     {NULL, 0, NULL, 0}
   };
 
-  while (ch = getopt_long(*argc, *argv, "dhvs:b:i:", opts, &oidx), ch != -1) {
+  while (ch = getopt_long(*argc, *argv, "dhvVs:b:i:", opts, &oidx), ch != -1) {
     switch (ch) {
     case 'i':
       infile = optarg;
@@ -77,6 +85,9 @@ static void parse_options(int *argc, char ***argv) {
       break;
     case 's':
       splitsize = get_size(optarg);
+      break;
+    case 'V':
+      version();
       break;
     case 'v':
       verbose++;

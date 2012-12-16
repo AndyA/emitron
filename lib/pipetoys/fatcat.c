@@ -16,7 +16,9 @@
 
 #include "utils.h"
 #include "buffer.h"
+#include "version.h"
 
+#define PROG "fatcat"
 #define BUFSIZE (1024 * 1024)
 
 static size_t bufsize = BUFSIZE;
@@ -28,28 +30,34 @@ static size_t get_size(const char *opt) {
   return (size_t) sz;
 }
 
-static void usage(const char *prog) {
-  fprintf(stderr, "Usage: %s [options] <file>...\n\n"
+static void usage() {
+  fprintf(stderr, "Usage: " PROG " [options] <file>...\n\n"
           "Options:\n"
           "  -i, --input  <file>  Input file\n"
           "  -b, --buffer <size>  Buffer size\n"
           "  -h, --help           See this text\n"
-          "\n", prog);
+          "  -V, --version        Show version\n"
+          "\n" PROG " " V_INFO "\n");
   exit(1);
 }
 
+static void version() {
+  fprintf(stderr, "%s\n", V_INFO);
+  exit(0);
+}
+
 static void parse_options(int *argc, char ***argv) {
-  const char *prog = (*argv)[0];
   int ch, oidx;
 
   static struct option opts[] = {
     {"help", no_argument, NULL, 'h'},
     {"input", required_argument, NULL, 'i'},
     {"buffer", required_argument, NULL, 'b'},
+    {"version", no_argument, NULL, 'V'},
     {NULL, 0, NULL, 0}
   };
 
-  while (ch = getopt_long(*argc, *argv, "dhvb:i:", opts, &oidx), ch != -1) {
+  while (ch = getopt_long(*argc, *argv, "dhvVb:i:", opts, &oidx), ch != -1) {
     switch (ch) {
     case 'i':
       infile = optarg;
@@ -57,9 +65,12 @@ static void parse_options(int *argc, char ***argv) {
     case 'b':
       bufsize = get_size(optarg);
       break;
+    case 'V':
+      version();
+      break;
     case 'h':
     default:
-      usage(prog);
+      usage();
     }
   }
 

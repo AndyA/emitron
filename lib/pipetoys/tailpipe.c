@@ -20,6 +20,8 @@
 #include <unistd.h>
 #include <time.h>
 
+#include "version.h"
+
 #define BUFSIZE (1024 * 1024)
 #define SLEEP 100000
 
@@ -85,8 +87,14 @@ static void usage(const char *prog) {
           "      --fd=<fd>             Output to fd instead of stdout\n"
           "  -h, --help                See this text\n"
           "  -v, --verbose             Verbose output\n"
+          "  -V, --version             Show version\n"
           "\n", prog);
   exit(1);
+}
+
+static void version() {
+  fprintf(stderr, "%s\n", V_INFO);
+  exit(0);
 }
 
 static void parse_options(int *argc, char ***argv) {
@@ -102,10 +110,11 @@ static void parse_options(int *argc, char ***argv) {
     {"count", required_argument, NULL, 'c'},
     {"verbose", no_argument, NULL, 'v'},
     {"wait", optional_argument, NULL, 1},
+    {"version", no_argument, NULL, 'V'},
     {NULL, 0, NULL, 0}
   };
 
-  while (ch = getopt_long(*argc, *argv, "Dhivc:t:", opts, &oidx), ch != -1) {
+  while (ch = getopt_long(*argc, *argv, "DhivVc:t:", opts, &oidx), ch != -1) {
     switch (ch) {
     case 1:
       waitfor = 1;
@@ -128,6 +137,9 @@ static void parse_options(int *argc, char ***argv) {
       break;
     case 'c':
       filecount = atoi(optarg);
+      break;
+    case 'V':
+      version();
       break;
     case 'v':
       verbose++;
