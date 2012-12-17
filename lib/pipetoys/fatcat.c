@@ -117,6 +117,7 @@ static void fatcat(int nfile, char *file[]) {
   struct wtr_ctx **ws = alloc(nfile * sizeof(struct wtr_ctx *));
   int wi = 0, i;
   int ifd = 0;
+  int nf = nfile;
 
   if (infile) {
     ifd = open(infile, O_RDONLY
@@ -157,6 +158,8 @@ static void fatcat(int nfile, char *file[]) {
 
   if (ifd > 2) close(ifd);
   b_free(b);
+  for (i = 0; i < nf; i++) free(ws[i]);
+  free(ws);
 }
 
 int main(int argc, char *argv[]) {

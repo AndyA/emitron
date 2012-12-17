@@ -201,6 +201,7 @@ static void spliff(char *file) {
   pthread_join(cx->t, &rv);
   if (ifd > 2) close(ifd);
   b_free(b);
+  free(cx);
 }
 
 int main(int argc, char *argv[]) {
