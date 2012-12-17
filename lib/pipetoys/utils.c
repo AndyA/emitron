@@ -11,6 +11,8 @@
 
 int verbose = 0;
 
+const char *v_info = V_INFO;
+
 void die(const char *msg, ...) {
   va_list ap;
   va_start(ap, msg);
@@ -41,7 +43,7 @@ void mention(const char *msg, ...) {
 }
 
 void version() {
-  fprintf(stderr, "%s\n", V_INFO);
+  fprintf(stderr, "%s\n", v_info);
   exit(0);
 }
 

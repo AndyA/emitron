@@ -4,6 +4,7 @@
 #define __UTILS_H
 
 extern int verbose;
+extern const char *v_info;
 
 char *sstrdup(const char *s);
 ssize_t parse_size(const char *opt);

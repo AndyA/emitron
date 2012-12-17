@@ -16,7 +16,6 @@
 
 #include "buffer.h"
 #include "utils.h"
-#include "version.h"
 
 #define PROG "fatcat"
 #define BUFSIZE (1024 * 1024)
@@ -37,7 +36,7 @@ static void usage() {
           "  -b, --buffer <size>  Buffer size\n"
           "  -h, --help           See this text\n"
           "  -V, --version        Show version\n"
-          "\n" PROG " " V_INFO "\n");
+          "\n" PROG " %s\n", v_info);
   exit(1);
 }
 
