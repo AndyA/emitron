@@ -43,6 +43,7 @@ static void usage() {
           "      --wait [=<seconds>]   Wait for first file\n"
           "  -D, --delete              Delete each file after reading it\n"
           "  -c, --count=<n>           Stop after n files\n"
+          "  -o, --output=<file>       Output to file instead of stdout\n"
           "      --fd=<fd>             Output to fd instead of stdout\n"
           "  -h, --help                See this text\n"
           "  -v, --verbose             Verbose output\n"
@@ -59,6 +60,7 @@ static void parse_options(int *argc, char ***argv) {
     {"help", no_argument, NULL, 'h'},
     {"increment", no_argument, NULL, 'v'},
     {"fd", required_argument, NULL, 2},
+    {"output", required_argument, NULL, 'o'},
     {"timeout", required_argument, NULL, 't'},
     {"count", required_argument, NULL, 'c'},
     {"verbose", no_argument, NULL, 'v'},
@@ -67,7 +69,7 @@ static void parse_options(int *argc, char ***argv) {
     {NULL, 0, NULL, 0}
   };
 
-  while (ch = getopt_long(*argc, *argv, "DhivVc:t:", opts, &oidx), ch != -1) {
+  while (ch = getopt_long(*argc, *argv, "DhivVc:t:o:", opts, &oidx), ch != -1) {
     switch (ch) {
     case 1:
       waitfor = 1;
@@ -75,6 +77,15 @@ static void parse_options(int *argc, char ***argv) {
       break;
     case 2:
       outfd = atoi(optarg);
+      break;
+    case 'o':
+      outfd = open(optarg, O_WRONLY | O_CREAT
+#ifdef O_LARGEFILE
+                   | O_LARGEFILE
+#endif
+                   , 0666
+                  );
+      if (outfd < 0) die("Can't write %s: %s", optarg, strerror(errno));
       break;
     case 'D':
       rmeach++;
