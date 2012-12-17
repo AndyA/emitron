@@ -4,9 +4,9 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
   NAME         => 'Emitron',
-  AUTHOR       => q{YOUR NAME <youremail@example.com>},
+  AUTHOR       => q{Andy Armstrong <andy@hexten.net>},
   VERSION_FROM => 'lib/Emitron.pm',
-  ABSTRACT     => 'YOUR APPLICATION ABSTRACT',
+  ABSTRACT     => 'Live streaming for everyone',
   ( $ExtUtils::MakeMaker::VERSION >= 6.3002
     ? ( 'LICENSE' => 'perl' )
     : () ),
@@ -26,6 +26,7 @@ WriteMakefile(
     'File::Temp'                => 0,
     'FindBin'                   => 0,
     'Getopt::Long'              => 0,
+    'Harmless'                  => 0,
     'IO::Handle'                => 0,
     'IO::Select'                => 0,
     'JSON'                      => 0,
@@ -40,6 +41,7 @@ WriteMakefile(
     'Plack::Runner'             => 0,
     'Scalar::Util'              => 0,
     'Storable'                  => 0,
+    'String::ShellQuote'        => '1.03',
     'Sys::Hostname'             => 0,
     'Term::ANSIColor'           => 0,
     'Test::More'                => 0,
@@ -48,7 +50,6 @@ WriteMakefile(
     'XML::LibXML'               => 0,
     'XML::LibXML::XPathContext' => 0,
     'YAML'                      => 0,
-    'accessors::ro'             => 0,
   },
   dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
   clean => { FILES    => 'Emitron-*' },
