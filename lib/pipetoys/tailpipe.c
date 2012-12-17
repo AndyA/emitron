@@ -48,7 +48,7 @@ static void usage() {
           "  -h, --help                See this text\n"
           "  -v, --verbose             Verbose output\n"
           "  -V, --version             Show version\n"
-          "\n");
+          "\n" PROG " " V_INFO "\n");
   exit(1);
 }
 
