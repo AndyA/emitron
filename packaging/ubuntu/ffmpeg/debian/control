@@ -1,0 +1,675 @@
+Source: ffmpeg
+Section: libs
+Priority: optional
+Maintainer: Andy Armstrong <andy@hexten.net>
+XSBC-Original-Maintainer: Debian Multimedia Maintainers <pkg-multimedia-maintainers@lists.alioth.debian.org>
+Standards-Version: 3.9.3
+Vcs-Git: git://git.debian.org/git/pkg-multimedia/libav.git
+Vcs-Browser: http://git.debian.org/?p=pkg-multimedia/libav.git;a=summary
+Homepage: http://ffmpeg.org/
+Build-Depends-Indep:
+ doxygen
+Build-Depends:
+ debhelper (>= 8.1.3~),
+ frei0r-plugins-dev,
+ libasound2-dev [linux-any],
+ libbz2-dev,
+ libcdio-cdda-dev,
+ libcdio-dev,
+ libcdio-paranoia-dev,
+ libcv-dev,
+ libdc1394-22-dev [linux-any],
+ libfreetype6-dev,
+ libgnutls-dev,
+ libgsm1-dev,
+ libimlib2-dev,
+ libjack-dev,
+ liblzo2-dev,
+ libmp3lame-dev (>= 3.98.3),
+ libopencore-amrnb-dev,
+ libopencore-amrwb-dev,
+ libopencv-dev,
+ libopenjpeg-dev,
+ libpulse-dev,
+ libraw1394-dev [linux-any],
+ librtmp-dev,
+ libschroedinger-dev,
+ libsdl1.2-dev,
+ libspeex-dev,
+ libtheora-dev,
+ libtiff5-dev | libtiff4-dev | libtiff-dev,
+ libva-dev [!hurd-any],
+ libvdpau-dev,
+ libvo-aacenc-dev,
+ libvo-amrwbenc-dev,
+ libvorbis-dev,
+ libvpx-dev (>= 0.9.6),
+ libx11-dev,
+ libx264-dev (>= 2:0.118),
+ libxext-dev,
+ libxfixes-dev,
+ libxvmc-dev,
+ texi2html,
+ yasm [any-amd64 any-i386],
+ zlib1g-dev
+
+Package: ffmpeg
+Section: video
+Architecture: any
+Provides:
+ libav-tools
+Replaces:
+ libav-tools (<< 6:0.10~),
+ libavcodec-extra-52 (<< 4:0.6~),
+ libavcodec52 (<< 4:0.6-2~)
+Pre-Depends:
+ dpkg (>= 1.15.6~),
+ ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Breaks:
+ libav-tools (<< 6:0.10~)
+Conflicts:
+ ffprobe
+Description: Multimedia player, server, encoder and transcoder
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package contains the ffplay multimedia player, the ffserver
+ streaming server, the ffmpeg audio and video encoder, and the ffprobe
+ stream analyzer.  They support most existing file formats (AVI, MPEG,
+ OGG, Matroska, ASF...) and encoding formats (MPEG, DivX, MPEG4, AC3,
+ DV...). Additionally, it contains the qt-faststart utility which
+ rearranges Quicktime files to facilitate network streaming.
+
+Package: libav-tools
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ ffmpeg (>= 6:0.10~),
+ ${misc:Depends}
+Description: Multimedia player, server, encoder and transcoder (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package is only used for transitional purposes and can be safely
+ removed when no other packages depend on this package.
+
+Package: libav-dbg
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ ffmpeg-dbg (>= 6:0.10~),
+ ${misc:Depends}
+Description: Debug symbols for FFmpeg related packages (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package serves as a transitional package to ffmpeg-dbg.
+
+Package: ffmpeg-dbg
+Section: debug
+Priority: extra
+Architecture: any
+Provides:
+ ffmpeg-libs-dbg,
+ ffmpeg-extra-dbg,
+ libav-dbg,
+ libav-extra-dbg
+Replaces:
+ ffmpeg-libs-dbg (<< 6:1.0.0~),
+ ffmpeg-extra-dbg (<< 6:1.0.0~),
+ libav-dbg (<< 6:0.10~),
+ libav-extra-dbg (<< 6:0.10~)
+Breaks:
+ ffmpeg-libs-dbg (<< 6:1.0.0~),
+ ffmpeg-extra-dbg (<< 6:1.0.0~),
+ libav-dbg (<< 6:0.10~),
+ libav-extra-dbg (<< 6:0.10~)
+Pre-Depends:
+ dpkg (>= 1.15.6~),
+ ${misc:Pre-Depends}
+Depends:
+ ffmpeg (= ${binary:Version}),
+ libavcodec54 (= ${binary:Version}) | libavcodec-extra-54 (= ${binary:Version}),
+ libavdevice54 (= ${binary:Version}),
+ libavformat54 (= ${binary:Version}),
+ libavfilter3 (= ${binary:Version}),
+ libavutil51 (= ${binary:Version}),
+ libpostproc52 (= ${binary:Version}),
+ libswscale2 (= ${binary:Version}),
+ libswresample0 (= ${binary:Version}),
+ ${misc:Depends}
+Description: Debug symbols for FFmpeg related packages
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package contains debug data of the FFmpeg related shared libraries.
+ .
+ Most people will not need this package. Please install it to produce useful
+ stacktraces to help debugging the FFmpeg shared libraries.
+
+Package: libav-extra-dbg
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ ffmpeg-dbg (>= 6:1.0.0~),
+ ${misc:Depends}
+Description: Debug symbols for FFmpeg related packages (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package serves as a transitional package to ffmpeg-dbg.
+
+Package: ffmpeg-libs-dbg
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ ffmpeg-dbg (>= 6:1.0.0~),
+ ${misc:Depends}
+Description: Debug symbols for FFmpeg related packages (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package serves as a transitional package to ffmpeg-dbg.
+
+Package: ffmpeg-extra-dbg
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ ffmpeg-dbg (>= 6:1.0.0~),
+ ${misc:Depends}
+Description: Debug symbols for FFmpeg related packages (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package serves as a transitional package to ffmpeg-dbg.
+
+Package: libav-doc
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ ffmpeg-doc (>= 6:0.10~),
+ ${misc:Depends}
+Description: Documentation of the FFmpeg API (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package contains the html doxygen documentation of the FFmpeg API.
+ .
+ Only application developers will find this package useful.
+ .
+ This package is only used for transitional purposes and can be safely
+ removed.
+
+Package: ffmpeg-doc
+Section: doc
+Architecture: all
+Pre-Depends:
+ dpkg (>= 1.15.6~),
+ ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends}
+Breaks:
+ libav-doc (<< 6:0.10~)
+Replaces:
+ libav-doc (<< 6:0.10~)
+Description: Documentation of the FFmpeg API
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package contains the html doxygen documentation of the FFmpeg API.
+ .
+ Only application developers will find this package useful.
+
+Package: libavutil51
+Architecture: any
+Multi-Arch: same
+Pre-Depends:
+ dpkg (>= 1.15.6~),
+ ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Provides:
+ libavutil-extra-51
+Replaces:
+ libavutil-extra-51
+Breaks:
+ libavutil-extra-51 (<< 6:1.0.0~)
+Description: FFmpeg utility library
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the common utility library from FFmpeg. It contains shared code
+ used by all other FFmpeg libraries.
+
+Package: libavcodec54
+Architecture: any
+Multi-Arch: same
+Pre-Depends:
+ dpkg (>= 1.15.6~),
+ ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Conflicts:
+ libavcodec-extra-54
+Breaks:
+ mplayer (<< 2:1.0~rc4.dfsg1+svn34540-1~)
+Description: FFmpeg codec library
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the codec library from FFmpeg (both encoding and decoding).
+ .
+ It supports most existing codecs (MPEG, MPEG2, MPEG4, AC3, DV...).
+
+Package: libavdevice54
+Architecture: any
+Multi-Arch: same
+Pre-Depends:
+ dpkg (>= 1.15.6~),
+ ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Provides:
+ libavdevice-extra-54
+Replaces:
+ libavdevice-extra-54
+Breaks:
+ libavdevice-extra-54 (<< 6:1.0.0~)
+Description: FFmpeg device handling library
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the device handling library from FFmpeg.
+
+Package: libavformat54
+Architecture: any
+Multi-Arch: same
+Pre-Depends:
+ dpkg (>= 1.15.6~),
+ ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Provides:
+ libavformat-extra-54
+Replaces:
+ libavformat-extra-54
+Breaks:
+ libavformat-extra-54 (<< 6:1.0.0~)
+Description: FFmpeg file format library
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the library for handling file formats from FFmpeg.
+ .
+ It supports most existing file formats (AVI, MPEG, OGG, Matroska,
+ ASF...).
+
+Package: libavfilter3
+Architecture: any
+Multi-Arch: same
+Pre-Depends:
+ dpkg (>= 1.15.6~),
+ ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Provides:
+ libavfilter-extra-3
+Replaces:
+ libavfilter-extra-3
+Breaks:
+ libavfilter-extra-3 (<< 6:1.0.0~)
+Description: FFmpeg video filtering library
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the video filtering library from FFmpeg.
+
+Package: libpostproc52
+Architecture: any
+Multi-Arch: same
+Pre-Depends:
+ dpkg (>= 1.15.6~),
+ ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Provides:
+ libpostproc-extra-52
+Replaces:
+ libpostproc-extra-52
+Breaks:
+ libpostproc-extra-52 (<< 6:1.0.0~)
+Description: FFmpeg video postprocessing library
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the video postprocessing library from FFmpeg.
+
+Package: libswscale2
+Architecture: any
+Multi-Arch: same
+Pre-Depends:
+ dpkg (>= 1.15.6~),
+ ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Provides:
+ libswscale-extra-2
+Replaces:
+ libswscale-extra-2
+Breaks:
+ libswscale-extra-2 (<< 6:1.0.0~)
+Description: FFmpeg video software scaling library
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the video software scaling library from FFmpeg.
+
+Package: libswresample0
+Architecture: any
+Multi-Arch: same
+Pre-Depends:
+ dpkg (>= 1.15.6~),
+ ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Provides:
+ libswresample-extra-0
+Replaces:
+ libswresample-extra-0
+Breaks:
+ libswresample-extra-0 (<< 6:1.0.0~)
+Description: FFmpeg video resampling library
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the video software resampling library from FFmpeg.
+
+Package: libavutil-dev
+Section: libdevel
+Architecture: any
+Depends:
+ libavutil51 (= ${binary:Version}),
+ ${misc:Depends}
+Description: Development files for libavutil
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the common utility library from FFmpeg.
+ .
+ This package contains the header files and static libraries needed to
+ compile applications or shared objects that use libavutil.
+
+Package: libavcodec-dev
+Section: libdevel
+Architecture: any
+Depends:
+ libavcodec54 (<= ${source:Upstream-Version}-99) | libavcodec-extra-54 (<= ${source:Upstream-Version}-99),
+ libavcodec54 (>= ${binary:Version}) | libavcodec-extra-54 (>= ${binary:Version}),
+ libavutil-dev (= ${binary:Version}),
+ ${misc:Depends}
+Suggests:
+ libdc1394-22-dev [linux-any],
+ libgsm1-dev,
+ libogg-dev,
+ libraw1394-dev [linux-any],
+ libschroedinger-dev,
+ libspeex-dev,
+ libtheora-dev (>> 0.0.0.alpha4),
+ libvorbis-dev,
+ libx11-dev,
+ libxext-dev,
+ zlib1g-dev
+Description: Development files for libavcodec
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the codec library from FFmpeg. It supports most existing
+ encoding formats (MPEG, DivX, MPEG4, AC3, DV...).
+ .
+ This package contains the header files and static libraries needed to
+ compile applications or shared objects that use libavcodec.
+
+Package: libavdevice-dev
+Section: libdevel
+Architecture: any
+Depends:
+ libavdevice54 (= ${binary:Version}),
+ libavformat-dev (= ${binary:Version}),
+ ${misc:Depends}
+Description: Development files for libavdevice
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the device handling library from FFmpeg.
+ .
+ This package contains the header files and static libraries needed to
+ compile applications or shared objects that use libavdevice.
+
+Package: libavformat-dev
+Section: libdevel
+Architecture: any
+Depends:
+ libavcodec-dev (= ${binary:Version}),
+ libavformat54 (= ${binary:Version}),
+ libavutil-dev (= ${binary:Version}),
+ ${misc:Depends}
+Description: Development files for libavformat
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the demuxer library from FFmpeg. It supports most
+ existing file formats (AVI, MPEG, OGG, Matroska, ASF...).
+ .
+ This package contains the header files and static libraries needed to
+ compile applications or shared objects that use libavformat.
+
+Package: libavfilter-dev
+Section: libdevel
+Architecture: any
+Depends:
+ libavcodec-dev (= ${binary:Version}),
+ libavfilter3 (= ${binary:Version}),
+ ${misc:Depends}
+Description: Development files for libavfilter
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the video filtering library from FFmpeg.
+ .
+ This package contains the header files and static libraries needed to
+ compile applications or shared objects that use libavfilter.
+
+Package: libpostproc-dev
+Section: libdevel
+Architecture: any
+Depends:
+ libavutil-dev (= ${binary:Version}),
+ libpostproc52 (= ${binary:Version}),
+ ${misc:Depends}
+Description: Development files for libpostproc
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the video postprocessing library from FFmpeg.
+ .
+ This package contains the header files and static libraries needed to
+ compile applications or shared objects that use libpostproc.
+
+Package: libswscale-dev
+Section: libdevel
+Architecture: any
+Depends:
+ libavutil-dev (= ${binary:Version}),
+ libswscale2 (= ${binary:Version}),
+ ${misc:Depends}
+Description: Development files for libswscale
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the video software scaling library from FFmpeg.
+ .
+ This package contains the header files and static libraries needed to
+ compile applications or shared objects that use libswscale.
+
+Package: libswresample-dev
+Section: libdevel
+Architecture: any
+Depends:
+ libavutil-dev (= ${binary:Version}),
+ libswresample0 (= ${binary:Version}),
+ ${misc:Depends}
+Description: Development files for libswresample
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the video software resampling library from FFmpeg.
+ .
+ This package contains the header files and static libraries needed to
+ compile applications or shared objects that use libswresample.
+
+Package: libavutil-extra-51
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ libavutil51,
+ ${misc:Depends},
+Description: FFmpeg utility library (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package is only used for transitional purposes and can be safely
+ removed when no other packages depend on this package.
+
+Package: libavcodec-extra-54
+Architecture: any
+Multi-Arch: same
+Pre-Depends:
+ dpkg (>= 1.15.6~),
+ ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Replaces:
+ libavcodec54
+Breaks:
+ libavcodec54,
+ mplayer (<< 2:1.0~rc4.dfsg1+svn34540-1~)
+Description: FFmpeg codec library (additional codecs)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This is the codec library from FFmpeg (both encoding and decoding).
+ .
+ This package is a replacement for the regular libavcodec54 library package;
+ it contains the following additional codecs:
+ .
+  * OpenCORE Adaptive Multi-Rate (AMR) Narrow-Band (Encoder/Decoder)
+  * OpenCORE Adaptive Multi-Rate (AMR) Wide-Band (Decoder)
+  * Android VisualOn AAC (Encoder)
+  * Android VisualOn Adaptive Multi-Rate (AMR) Wide-Band (Encoder)
+ .
+ Because this package links against libraries that are licensed under
+ Apache License 2.0, the resulting binaries are distributed under the
+ GPL version 3 or later.
+
+Package: libavdevice-extra-54
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ libavdevice54,
+ ${misc:Depends},
+Description: FFmpeg device handling library (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package is only used for transitional purposes and can be safely
+ removed when no other packages depend on this package.
+
+Package: libavfilter-extra-3
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ libavfilter3,
+ ${misc:Depends},
+Description: FFmpeg filter library (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package is only used for transitional purposes and can be safely
+ removed when no other packages depend on this package.
+
+Package: libpostproc-extra-52
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ libpostproc52,
+ ${misc:Depends},
+Description: FFmpeg video postprocessing library (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package is only used for transitional purposes and can be safely
+ removed when no other packages depend on this package.
+
+Package: libavformat-extra-54
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ libavformat54,
+ ${misc:Depends},
+Description: FFmpeg video postprocessing library (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package is only used for transitional purposes and can be safely
+ removed when no other packages depend on this package.
+
+Package: libswscale-extra-2
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ libswscale2,
+ ${misc:Depends},
+Description: FFmpeg video software scaling library (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package is only used for transitional purposes and can be safely
+ removed when no other packages depend on this package.
+
+Package: libswresample-extra-0
+Section: oldlibs
+Priority: extra
+Architecture: all
+Depends:
+ libswresample0,
+ ${misc:Depends},
+Description: FFmpeg video software resampling library (transitional package)
+ FFmpeg is a complete, cross-platform solution to decode, encode, record,
+ convert and stream audio and video.
+ .
+ This package is only used for transitional purposes and can be safely
+ removed when no other packages depend on this package.

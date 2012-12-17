@@ -1,0 +1,4 @@
+usr/include/libswresample
+usr/lib/@DEB_HOST_MULTIARCH@/libswresample.a
+usr/lib/@DEB_HOST_MULTIARCH_OPT@/libswresample.so
+usr/lib/@DEB_HOST_MULTIARCH@/pkgconfig/libswresample.pc

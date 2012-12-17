@@ -1,0 +1,14 @@
+*.debhelper
+*.debhelper.log
+*.install
+*.substvars
+*/codecs.txt
+.*.sw?
+.pc/
+/*.changes
+/*/build-*
+/*/debian*/
+/*/doxy/
+/*/formats-*.txt
+/ffmpeg/
+Session.vim

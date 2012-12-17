@@ -1,0 +1,4 @@
+# libav-dbg is an empty, transitional package
+ffmpeg source: dbg-package-missing-depends libav-dbg
+# Ignore this, since currently only debhelper (>= 8.1.3~) is needed.
+ffmpeg source: package-needs-versioned-debhelper-build-depends 9

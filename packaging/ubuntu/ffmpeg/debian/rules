@@ -1,0 +1,189 @@
+#!/usr/bin/make -f
+
+EPOCH=6:
+DEB_SOURCE := $(shell dpkg-parsechangelog | sed -n 's/^Source: //p')
+DEB_VERSION := $(shell dpkg-parsechangelog | sed -n 's/^Version: //p')
+UPSTREAM_VERSION := $(shell echo $(DEB_VERSION) | sed -r 's/[^:]+://; s/-[^-]+$$//')
+SHLIBS_VERSION := $(EPOCH)1.0.1~
+
+# these package do not build -extra variants
+LIB_PKGS := $(shell sed -nr 's/^Package:[[:space:]]*(lib(avutil|avdevice|avformat|avfilter|postproc|swscale|swresample)[0-9]+)[[:space:]]*$$/\1/p' debian/control)
+# these packages do build -extra variants
+LIB_PKGS2 := $(shell sed -nr 's/^Package:[[:space:]]*(libavcodec[0-9]+)[[:space:]]*$$/\1/p' debian/control)
+# these packages are the -extra- variants
+LIB_EXTRA_PKGS := $(shell sed -nr 's/^Package:[[:space:]]*(libavcodec-extra-[0-9]+)[[:space:]]*$$/\1/p' debian/control)
+# these are the -dev packages
+DEV_PKGS := $(shell echo $(LIB_PKGS) $(LIB_PKGS2) | sed 's/[0-9]\+\>/-dev/g')
+
+# Support multiple makes at once
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+NUMJOBS = -j$(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+else
+# on i386 and amd64, we query the system unless overriden by DEB_BUILD_OPTIONS
+ifeq      ($(DEB_HOST_ARCH),i386)
+NUMJOBS := -j$(shell getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
+else ifeq ($(DEB_HOST_ARCH),amd64)
+NUMJOBS := -j$(shell getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
+endif
+endif
+
+include debian/confflags
+OPT_FLAVORS := $(filter-out static shared, $(FLAVORS))
+
+$(info FLAVORS = $(FLAVORS))
+$(info DEB_BUILD_OPTIONS = $(DEB_BUILD_OPTIONS))
+$(info CFLAGS = $(CFLAGS))
+$(info CPPFLAGS = $(CPPFLAGS))
+$(info LDFLAGS = $(LDFLAGS))
+
+define dh_install_file_opt_flavor
+	  grep @DEB_HOST_MULTIARCH_OPT@ < $(1).in | \
+	  sed 's:@DEB_HOST_MULTIARCH_OPT@:$(DEB_HOST_MULTIARCH)/$($(2)_shlibdir):g' >> $(1)
+
+endef
+
+DH_INSTALL_FILES := $(foreach pkg, $(LIB_PKGS) $(LIB_PKGS2) $(LIB_EXTRA_PKGS) $(DEV_PKGS), debian/$(pkg).install)
+$(DH_INSTALL_FILES):
+	sed 's/@DEB_HOST_MULTIARCH\(_OPT\)\?@/$(DEB_HOST_MULTIARCH)/g' $@.in > $@
+	$(foreach opt_flavor,$(OPT_FLAVORS),$(call dh_install_file_opt_flavor,$@,$(opt_flavor)))
+
+configure-%: configure-stamp-%
+configure-stamp-%:
+	dh_testdir
+	mkdir -p debian-$*
+	cd debian-$* && CFLAGS="$(CFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" $(CURDIR)/configure \
+		$($*_build_confflags) $(extra_$*_build_confflags)
+	touch $@
+configure-extra-stamp-%:
+	dh_testdir
+	mkdir -p debian-extra-$*
+	cd debian-extra-$* && CFLAGS="$(CFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" $(CURDIR)/configure \
+		$($*_build_confflags) $(v3_confflags) $(extra_$*_build_confflags)
+	touch $@
+
+build-%: build-stamp-%
+build-stamp-%: configure-stamp-%
+	dh_testdir
+	$(MAKE) -C debian-$* $(NUMJOBS) V=1
+	touch $@
+build-extra-stamp-%: configure-extra-stamp-%
+	dh_testdir
+	$(MAKE) -C debian-extra-$* $(NUMJOBS) V=1
+	touch $@
+
+debian-shared/tools/qt-faststart: build-stamp-shared
+	$(MAKE) -C debian-shared tools/qt-faststart V=1
+
+build-doxy: build-doxy-stamp
+build-doxy-stamp:
+	dh_testdir
+	[ ! -x /usr/bin/doxygen ] || doxygen
+	touch $@
+
+build: build-stamp build-extra
+build-stamp: $(addprefix build-stamp-, $(FLAVORS)) debian-shared/tools/qt-faststart
+	touch $@
+build-extra: $(addprefix build-extra-stamp-, $(filter-out static,$(FLAVORS)))
+	touch $@
+
+clean:
+	dh_testdir
+	rm -f build-stamp build-extra $(addprefix build-stamp-, $(FLAVORS)) \
+	    $(addprefix build-extra-stamp-, $(FLAVORS)) \
+	    $(addprefix configure-stamp-, $(FLAVORS)) \
+	    $(addprefix configure-extra-stamp-, $(FLAVORS)) \
+	    build-doxy-stamp
+	rm -rf $(addprefix debian-, $(FLAVORS)) \
+		$(addprefix debian-extra-, $(FLAVORS)) doxy
+	dh_clean $(DH_INSTALL_FILES) $(wildcard formats*.txt) $(wildcard codecs*.txt)
+
+# The trailing newline is important!
+define install_flavor
+	$(MAKE) -C debian-$(1) install DESTDIR=$(CURDIR)/debian/tmp \
+	    mandir=$(CURDIR)/debian/tmp/usr/share/man
+
+endef
+
+# The trailing newline is important!
+define install_flavor_extra
+	$(MAKE) -C debian-extra-$(1) install DESTDIR=$(CURDIR)/debian/tmp/extra \
+	    mandir=$(CURDIR)/debian/tmp/usr/share/man
+
+endef
+
+install: install-common install-extra
+install-common: build $(DH_INSTALL_FILES)
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs -ptmp usr/src
+	dh_installdirs -ptmp usr/share/doc/ffmpeg/html etc
+	dh_installdirs -ptmp usr/share/doc/ffmpeg-doc/html
+	$(foreach flavor,$(FLAVORS),$(call install_flavor,$(flavor)))
+	# don't fail on binary-indep only builds.
+	[ ! -d doxy ] || cp -af doxy/html debian/tmp/usr/share/doc/ffmpeg-doc
+	install -m 644 -D debian-shared/doc/*.html debian/tmp/usr/share/doc/ffmpeg/html/
+	install -m 644 -D doc/ffserver.conf debian/tmp/etc/
+	install -m 644 -D debian-shared/tools/qt-faststart debian/tmp/usr/bin/qt-faststart
+	dh_install $(addprefix -N,$(LIB_EXTRA_PKGS)) \
+		-Xusr/share/doc/ffmpeg-doc -Xusr/share/doc/ffmpeg \
+		--list-missing --sourcedir=debian/tmp
+	dh_install -pffmpeg --sourcedir=debian/tmp
+	env LD_LIBRARY_PATH="$(LD_LIBRARY_PATH):$(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)" \
+	debian/tmp/usr/bin/ffmpeg -formats | tee formats-$(DEB_HOST_ARCH).txt
+	env LD_LIBRARY_PATH="$(LD_LIBRARY_PATH):$(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)" \
+	debian/tmp/usr/bin/ffmpeg -codecs | tee codecs.txt
+	dh_installdocs -plibavformat54 formats-$(DEB_HOST_ARCH).txt
+	dh_installdocs -plibavcodec54 codecs.txt
+install-extra: build $(DH_INSTALL_FILES)
+	dh_testdir
+	dh_testroot
+	$(foreach flavor,$(filter-out static,$(FLAVORS)),$(call install_flavor_extra,$(flavor)))
+	dh_install $(addprefix -p,$(LIB_EXTRA_PKGS)) \
+		-Xusr/share/doc/ffmpeg-doc -Xusr/share/doc/ffmpeg \
+		--list-missing --sourcedir=debian/tmp/extra
+	env LD_LIBRARY_PATH="$(LD_LIBRARY_PATH):$(CURDIR)/debian/tmp/extra/usr/lib/$(DEB_HOST_MULTIARCH)" \
+	debian/tmp/usr/bin/ffmpeg -codecs | tee codecs.txt
+	dh_installdocs -plibavcodec-extra-54 codecs.txt
+
+binary-indep: build-doxy install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installman -pffmpeg debian/qt-faststart.1
+	dh_installdocs doc/optimization.txt
+	dh_installdocs -A debian/README.Debian
+	dh_installdocs \
+		-plibavutil-dev -plibavcodec-dev -plibavdevice-dev \
+		-plibavformat-dev -plibavfilter-dev \
+		-plibpostproc-dev -plibswscale-dev -plibswresample-dev \
+		-pffmpeg-doc doc/APIchanges
+	dh_installexamples -p ffmpeg doc/ffserver.conf debian/recordshow.sh
+	dh_installchangelogs Changelog
+	dh_lintian
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_strip --dbg-package=ffmpeg-dbg
+
+	for pkg in $(LIB_PKGS) $(LIB_EXTRA_PKGS); do \
+	    dh_makeshlibs -p"$$pkg" -V"$$pkg (>= $(SHLIBS_VERSION))"; \
+	done
+	for pkg in $(LIB_PKGS2); do \
+	    upkg=$$(echo "$$pkg" | sed -r 's/([0-9]+)$$/-extra-\1/'); \
+	    dh_makeshlibs -p"$$pkg" -V"$$pkg (>= $(SHLIBS_VERSION)) | $$upkg (>= $(EPOCH)$(UPSTREAM_VERSION))"; \
+	done
+	dh_shlibdeps
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb -- -Zxz
+
+binary: binary-indep binary-arch
+
+.PHONY: build $(addprefix build-, $(FLAVORS)) build-doxy \
+	clean \
+	configure $(addprefix configure-, $(FLAVORS)) \
+	binary binary-indep binary-arch \
+	install

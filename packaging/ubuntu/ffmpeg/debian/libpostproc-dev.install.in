@@ -1,0 +1,4 @@
+usr/include/libpostproc
+usr/lib/@DEB_HOST_MULTIARCH@/libpostproc.a
+usr/lib/@DEB_HOST_MULTIARCH_OPT@/libpostproc.so
+usr/lib/@DEB_HOST_MULTIARCH@/pkgconfig/libpostproc.pc
