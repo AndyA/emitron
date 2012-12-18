@@ -7,22 +7,12 @@ extends 'ForkPipe::Engine::Base';
 
 enum 'WorkerState' => [qw( PENDING READY BUSY DONE )];
 
+with 'ForkPipe::Role::Queue';
+
 has _state => (
   isa     => 'WorkerState',
   is      => 'rw',
   default => 'PENDING'
-);
-
-has _queue => (
-  traits  => ['Array'],
-  isa     => 'ArrayRef',
-  is      => 'rw',
-  default => sub { [] },
-  handles => {
-    _m_put   => 'push',
-    _m_get   => 'shift',
-    _m_avail => 'count',
-  }
 );
 
 has upstream => (

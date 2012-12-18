@@ -2,7 +2,7 @@ package ForkPipe::Engine::Base;
 
 use Moose;
 
-use Carp qw( confess );
+use Carp qw( confess carp );
 
 =head1 NAME
 
@@ -10,26 +10,12 @@ ForkPipe::Engine::Base - Base class for engines
 
 =cut
 
+with 'ForkPipe::Role::Listener', 'ForkPipe::Role::Handler';
+
 has [ 'msg', 'ctl' ] => (
   isa      => 'ForkPipe::Pipe',
   is       => 'ro',
   required => 1
-);
-
-has listener => (
-  isa      => 'ForkPipe::Listener',
-  is       => 'ro',
-  required => 1,
-  lazy     => 1,
-  default  => sub { ForkPipe::Listener->new },
-  handles  => [ 'peek', 'poll' ]
-);
-
-has on => (
-  isa     => 'CodeRef',
-  is      => 'rw',
-  lazy    => 1,
-  builder => '_default_handler'
 );
 
 sub BUILD {
@@ -52,19 +38,14 @@ sub DEMOLISH {
   $li->remove( $self->ctl->rd );
 }
 
-sub handle_message { my $self = shift; $self->on->( @_ ) }
-
-sub _default_handler {
-  sub {
-    my $msg = shift;
-    eval 'require Data::Dumper';
-    Data::Dumper->new( [$msg] )->Indent( 2 )->Quotekeys( 0 )
-     ->Useqq( 1 )->Terse( 1 )->Dump;
-  };
-}
+sub handle_message { my $self = shift; $self->_trigger( @_ ) }
 
 sub handle_control {
   my ( $self, $msg ) = @_;
+  unless ( defined $msg ) {
+    carp "Control channel closed";
+    return;
+  }
   confess "Wasn't expecting a control message";
 }
 
