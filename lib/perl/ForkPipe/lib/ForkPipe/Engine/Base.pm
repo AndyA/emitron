@@ -58,7 +58,7 @@ sub _default_handler {
   sub {
     my $msg = shift;
     eval 'require Data::Dumper';
-     Data::Dumper->new( [$msg] )->Indent( 2 )->Quotekeys( 0 )
+    Data::Dumper->new( [$msg] )->Indent( 2 )->Quotekeys( 0 )
      ->Useqq( 1 )->Terse( 1 )->Dump;
   };
 }
@@ -66,6 +66,14 @@ sub _default_handler {
 sub handle_control {
   my ( $self, $msg ) = @_;
   confess "Wasn't expecting a control message";
+}
+
+sub stats {
+  my $self = shift;
+  return {
+    ctl => $self->ctl->stats,
+    msg => $self->msg->stats
+  };
 }
 
 1;

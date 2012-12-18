@@ -76,6 +76,22 @@ use ForkPipe;
 
   # don't want to print huge value on failure
   ok $got eq $want, 'long message';
+
+  # Fragile 
+  eq_or_diff $fp->stats,
+   {
+    'msg' => {
+      'receive' => 17,
+      'send'    => 17,
+      'read'    => 3146076,
+      'write'   => 3146168
+    },
+    'ctl' => {
+      'receive' => 18,
+      'read'    => 486
+    }
+   },
+   'stats';
 }
 
 done_testing();

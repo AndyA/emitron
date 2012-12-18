@@ -13,6 +13,8 @@ ForkPipe::Pipe - A message pipe between two proesses
 
 =cut
 
+with 'ForkPipe::Role::Stats';
+
 has [ 'rd', 'wr' ] => (
   isa      => 'IO::Handle',
   is       => 'ro',
@@ -39,13 +41,16 @@ sub _raw_write {
   my $rc   = syswrite $self->wr, $data;
   croak "Communication error: $!"
    unless defined $rc && $rc == length( $data );
+  $self->count( write => length( $data ), send => 1 );
 }
 
 sub _msg_read {
   my $self = shift;
   my $len = $self->_raw_read( length pack 'N', 0 );
   return unless defined $len;
-  return $self->_raw_read( unpack 'N', $len );
+  my $data = $self->_raw_read( unpack 'N', $len );
+  $self->count( read => length( $data ), receive => 1 );
+  return $data;
 }
 
 sub receive {

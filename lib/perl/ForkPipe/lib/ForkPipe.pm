@@ -17,7 +17,7 @@ has _opid => ( isa => 'Num', is => 'ro', default => sub { $$ } );
 has '_engine' => (
   isa     => 'ForkPipe::Engine::Base',
   is      => 'rw',
-  handles => [ 'send', 'peek', 'poll', 'on' ]
+  handles => [ 'send', 'peek', 'poll', 'on', 'stats' ]
 );
 
 BEGIN {
