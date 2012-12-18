@@ -5,7 +5,7 @@ use Moose::Util::TypeConstraints;
 
 extends 'ForkPipe::Engine::Base';
 
-enum 'WorkerState' => [qw( PENDING READY BUSY )];
+enum 'WorkerState' => [qw( PENDING READY BUSY DONE )];
 
 has _state => (
   isa     => 'WorkerState',
@@ -33,6 +33,10 @@ ForkPipe::Engine::Parent - Parent engine
 
 sub handle_control {
   my ( $self, $msg ) = @_;
+  unless ( defined $msg ) {
+    $self->_state( 'DONE' );
+    return;
+  }
   $self->_state( $msg );
   $self->_send;
 }
