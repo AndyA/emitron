@@ -86,6 +86,8 @@ sub test_it(&) {
   $poller->( $li );
 
   eq_or_diff $cl, { r1 => 2, r2 => 2 }, "r2 callback";
+
+  eq_or_diff $li->stats, { handled => 4 }, 'stats';
 }
 
 test_it {

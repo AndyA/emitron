@@ -11,6 +11,8 @@ ForkPipe::Listener - Select on multiple handles
 
 =cut
 
+with 'ForkPipe::Role::Stats';
+
 has _sel => (
   isa     => 'IO::Select',
   is      => 'ro',
@@ -29,6 +31,7 @@ sub _poll {
   for my $rdy ( $self->_sel->can_read( @args ) ) {
     my ( $fh, $cb, @args ) = @$rdy;
     $cb->( $fh, @args );
+    $self->count( handled => 1 );
   }
 }
 

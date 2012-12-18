@@ -74,7 +74,7 @@ use ForkPipe;
   my $want = run_them( $parent, $child, $init );
   my $got = fork_them( $parent, $child, $init, $fp );
 
-  # don't want to print huge value on failure
+  # use 'ok': don't want to print huge value on failure
   ok $got eq $want, 'long message';
 
   # Fragile 
