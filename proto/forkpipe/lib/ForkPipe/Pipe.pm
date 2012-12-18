@@ -1,4 +1,4 @@
-package ForkPipe::Pipe::Base;
+package ForkPipe::Pipe;
 
 use Moose;
 
@@ -9,7 +9,7 @@ use ForkPipe::Listener;
 
 =head1 NAME
 
-ForkPipe::Pipe::Base - Base class for pipes
+ForkPipe::Pipe - A message pipe between two proesses
 
 =cut
 

@@ -7,8 +7,8 @@ use IO::Handle;
 
 use ForkPipe::Engine::Child;
 use ForkPipe::Engine::Parent;
-use ForkPipe::Pipe::Child;
-use ForkPipe::Pipe::Parent;
+use ForkPipe::Pipe;
+use ForkPipe::Pipe;
 
 our $VERSION = '0.01';
 
@@ -53,8 +53,8 @@ sub fork {
 
     $self->_engine(
       ForkPipe::Engine::Parent->new(
-        ctl => ForkPipe::Pipe::Parent->new( wr => $p[3], rd => $p[0] ),
-        msg => ForkPipe::Pipe::Parent->new( wr => $p[7], rd => $p[4] )
+        ctl => ForkPipe::Pipe->new( wr => $p[3], rd => $p[0] ),
+        msg => ForkPipe::Pipe->new( wr => $p[7], rd => $p[4] )
       )
     );
   }
@@ -63,8 +63,8 @@ sub fork {
 
     $self->_engine(
       ForkPipe::Engine::Child->new(
-        ctl => ForkPipe::Pipe::Child->new( wr => $p[1], rd => $p[2] ),
-        msg => ForkPipe::Pipe::Child->new( wr => $p[5], rd => $p[6] )
+        ctl => ForkPipe::Pipe->new( wr => $p[1], rd => $p[2] ),
+        msg => ForkPipe::Pipe->new( wr => $p[5], rd => $p[6] )
       )
     );
 

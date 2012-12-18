@@ -11,7 +11,7 @@ ForkPipe::Engine::Base - Base class for engines
 =cut
 
 has [ 'msg', 'ctl' ] => (
-  isa      => 'ForkPipe::Pipe::Base',
+  isa      => 'ForkPipe::Pipe',
   is       => 'ro',
   required => 1
 );
