@@ -123,11 +123,12 @@ sub _ff_decoder {
     -s     => $self->globals->full_screen,
     -vf    => "pad=ih*$ar->[0]/$ar->[1]:ih:(ow-iw)/2:(oh-ih)/2",
     @extra,
-    -map    => '0:0',
-    -map    => '0:1',
-    -acodec => 'pcm_s16le',
-    -vcodec => 'rawvideo',
-    -f      => 'avi',
+    -map     => '0:0',
+    -map     => '0:1',
+    -acodec  => 'pcm_s16le',
+    -vcodec  => 'rawvideo',
+    -pix_fmt => 'yuv420p',
+    -f       => 'avi',
     $args{dst}
   );
   return @cmd;
