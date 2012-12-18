@@ -86,9 +86,9 @@ sub lwm { min( all_frags( @_ ) ) }
 sub write_index {
   my $dir   = shift;
   my $name  = basename $dir;
-  my $list  = File::Spec->catfile( $dir, "$name.m3u8" );
   my $index = File::Spec->catfile( $dir, "index.html" );
   return if -f $index;
+  print "Writing $index\n";
   open my $fh, '>', $index or die "Can't write $index: $!\n";
   print $fh make_index( $name, "$name.m3u8" );
 }
@@ -97,7 +97,8 @@ sub write_master {
   my ( $dir, @stm ) = @_;
   my $name = basename $dir;
   my $list = File::Spec->catfile( $dir, "$name.m3u8" );
-  my $tmp  = "$list.tmp";
+  print "Writing $list\n";
+  my $tmp = "$list.tmp";
   {
     open my $fh, '>', $tmp or die "Can't write $tmp: $!\n";
     print $fh "#EXTM3U\n";
@@ -121,7 +122,7 @@ sub write_master {
 sub stm::find_streams {
   my ( $class, $dir ) = @_;
   my $name = basename $dir;
-  my $like = qr{^\Q$name\E-\d+$};
+  my $like = qr{^\Q$name\E-\w+$};
   opendir my $dh, $dir or die "Can't read $dir: $!\n";
   return
    map { $class->new( base => $dir, dir => $_, list => "$_.m3u8", ); }
@@ -158,7 +159,7 @@ sub stm::find_frags {
     $got++;
     $self->{next}++;
     push @{ $self->frags }, join '/', $self->dir, $frag;
-    print "Found $frag\n";
+    #    print "Found $frag\n";
   }
   return $got;
 }
