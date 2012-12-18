@@ -2,7 +2,11 @@
 
 use strict;
 use warnings;
+
+use Test::Differences;
 use Test::More;
+
+use Data::Dumper;
 
 use ForkPipe;
 
@@ -30,11 +34,6 @@ sub ork(&@) {
 
   ok !$fp->in_child, 'not in_child';
   ork { $fp->in_child } 'in_child';
-
-#  if ( my $pid = $fp->fork ) {
-#  }
-#  else {
-#  }
 }
 
 done_testing();
