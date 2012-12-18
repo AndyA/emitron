@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts ':lbpd:' opt; do
+while getopts ':lbipd:' opt; do
   case $opt in
     b) 
       burnin=1 
@@ -9,6 +9,10 @@ while getopts ':lbpd:' opt; do
       live=1
       ;;
     p)
+      preprocess=1
+      ;;
+    i)
+      deinterlace=1
       preprocess=1
       ;;
     d)
@@ -45,15 +49,20 @@ font="$HOME/Dropbox/Fonts/Envy Code R.ttf"
 
 #rates="
 #  W=400;H=224;R=25;BV=300;BA=96;AR=44100;P=baseline
-#  W=640;H=360;R=25;BV=704;BA=96;AR=44100;P=main
-#  W=688;H=384;R=25;BV=1372;BA=128;AR=48000;P=main
-#  W=1024;H=576;R=25;BV=2000;BA=96;AR=44100;P=main"
+#  W=640;H=360;R=25;BV=704;BA=96;AR=44100;P=baseline
+#  W=688;H=384;R=25;BV=1372;BA=128;AR=48000;P=baseline
+#  W=1024;H=576;R=25;BV=2000;BA=96;AR=44100;P=baseline"
 
 rates="
-  W=400;H=224;R=25;BV=300;BA=96;AR=44100;P=baseline
-  W=640;H=360;R=25;BV=704;BA=96;AR=44100;P=baseline
-  W=688;H=384;R=25;BV=1372;BA=128;AR=48000;P=baseline
-  W=1024;H=576;R=25;BV=2000;BA=96;AR=44100;P=baseline"
+  N=p10;BV=32;R=5;P=baseline;W=224;H=126;BA=24;AR=22050
+  N=p20;BV=128;R=12.5;P=baseline;level=3;W=400;H=224;BA=48;AR=44100
+  N=p30;BV=304;R=25;P=baseline;level=3;W=400;H=224;BA=64;AR=44100
+  N=p40;BV=400;R=25;P=main;level=3;W=512;H=288;BA=96;AR=44100
+  N=p50;BV=700;R=25;P=main;level=3;W=640;H=360;BA=96;AR=44100
+  N=p60;BV=1200;R=25;P=main;level=3;W=704;H=396;BA=96;AR=44100
+  N=p70;BV=2016;R=25;P=main;level=3.1;W=1024;H=576;BA=96;AR=44100
+  N=p80;BV=3372;R=25;P=high;level=4;W=1280;H=720;BA=128;AR=44100
+  N=p90;BV=5100;R=25;P=high;level=4;W=1920;H=1080;BA=192;AR=48000"
 
 fifos=""
 tees=""
@@ -112,7 +121,10 @@ if [ "$preprocess" ]; then
   log="$logs/pre.log"
   extra=""
   if [ "$dog" ]; then
-    extra="-i $dog -r:v 25 -filter_complex overlay=120:40"
+    extra="$extra -i $dog -r:v 25 -filter_complex overlay=120:40"
+  fi
+  if [ "$deinterlace" ]; then
+    extra="$extra -filter:v yadif"
   fi
   # Make it 16x9
   pad="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
@@ -130,13 +142,13 @@ if [ "$preprocess" ]; then
 fi
 
 tees="cat '$source'"
-idx=1
 for rt in $rates; do
-  pfx="$outfile-$idx"
+  N=; W=; H=; R=; BV=; BA=; P=; AR=
+  eval $rt
+
+  pfx="$outfile-$N"
   frag="$pfx/%08d.ts"
 
-  W=; H=; R=; BV=; BA=; P=; AR=
-  eval $rt
 
   S="${W}x${H}"
   keyint=$( perl -e "print $gop*$R" )
@@ -155,10 +167,10 @@ for rt in $rates; do
     dt="null"
   fi
 
-  echo "Encoding bit rate $idx ($S, ${BV}k)"
+  echo "Encoding bit rate $N ($S, ${BV}k)"
   mkdir -p "$pfx"
-  fifo="$work/br.$idx.fifo"
-  log="$logs/ffmpeg.$idx.log"
+  fifo="$work/br.$N.fifo"
+  log="$logs/ffmpeg.$N.log"
   fifos="$fifos $fifo"
   tees="$tees | tee $fifo"
   mkfifo $fifo
@@ -175,7 +187,6 @@ for rt in $rates; do
     echo
     echo "Exit code: $?"
   } > "$log" 2>&1 &
-  idx=$[idx+1]
 done
 
 tees="$tees > /dev/null"
