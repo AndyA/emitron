@@ -14,10 +14,15 @@ our $VERSION = '0.01';
 
 has _opid => ( isa => 'Num', is => 'ro', default => sub { $$ } );
 
-has '_engine' => (
+has 'engine' => (
   isa     => 'ForkPipe::Engine::Base',
   is      => 'rw',
   handles => [ 'send', 'peek', 'poll', 'on', 'stats' ]
+);
+
+has listener => (
+  isa => 'ForkPipe::Listener | Undef',
+  is  => 'ro'
 );
 
 BEGIN {
@@ -54,6 +59,11 @@ sub _make_pipes {
   return @h;
 }
 
+sub _attr {
+  my %a = @_;
+  map { $_ => $a{$_} } grep { defined $a{$_} } keys %a;
+}
+
 sub fork {
   my $self = shift;
 
@@ -62,21 +72,10 @@ sub fork {
   my $pid = fork;
   croak "Fork failed: $!" unless defined $pid;
 
-  if ( $pid ) {
-    # Parent
-    close $_ for @p[ 1, 2, 5, 6 ];
-
-    $self->_engine(
-      ForkPipe::Engine::Parent->new(
-        ctl => ForkPipe::Pipe->new( wr => $p[3], rd => $p[0] ),
-        msg => ForkPipe::Pipe->new( wr => $p[7], rd => $p[4] )
-      )
-    );
-  }
-  else {
+  unless ( $pid ) {
     close $_ for @p[ 0, 3, 4, 7 ];
 
-    $self->_engine(
+    $self->engine(
       ForkPipe::Engine::Child->new(
         ctl => ForkPipe::Pipe->new( wr => $p[1], rd => $p[2] ),
         msg => ForkPipe::Pipe->new( wr => $p[5], rd => $p[6] )
@@ -86,7 +85,19 @@ sub fork {
     # Don't execute any END blocks
     use POSIX '_exit';
     eval q{END { _exit 0 }};
+    return;
   }
+
+  # Parent
+  close $_ for @p[ 1, 2, 5, 6 ];
+
+  $self->engine(
+    ForkPipe::Engine::Parent->new(
+      _attr( listener => $self->listener ),
+      ctl => ForkPipe::Pipe->new( wr => $p[3], rd => $p[0] ),
+      msg => ForkPipe::Pipe->new( wr => $p[7], rd => $p[4] )
+    )
+  );
 
   return $pid;
 }

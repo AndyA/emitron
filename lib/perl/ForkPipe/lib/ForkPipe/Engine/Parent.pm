@@ -25,6 +25,15 @@ has _queue => (
   }
 );
 
+has upstream => (
+  isa     => 'CodeRef',
+  is      => 'rw',
+  lazy    => 1,
+  default => sub {
+    sub { return }
+  }
+);
+
 =head1 NAME
 
 ForkPipe::Engine::Parent - Parent engine
@@ -33,27 +42,41 @@ ForkPipe::Engine::Parent - Parent engine
 
 sub handle_control {
   my ( $self, $msg ) = @_;
-  unless ( defined $msg ) {
-    $self->_state( 'DONE' );
-    return;
-  }
-  $self->_state( $msg );
-  $self->_send;
+  $self->_state( defined $msg ? $msg : 'DONE' );
+  $self->send_pending;
 }
 
-sub _send {
+sub is_ready { shift->_state eq 'READY' }
+
+sub _fetch_up { shift->upstream->() }
+sub _busy     { shift->_state( 'BUSY' ) }
+
+sub send_pending {
   my $self = shift;
-  # TODO: hook to check for upstream messages
-  return unless $self->_m_avail && $self->_state eq 'READY';
-  $self->msg->send( $self->_m_get );
-  $self->_state( 'BUSY' );
-  return 1;
+
+  return unless $self->is_ready;
+
+  # Check our queue...
+  if ( $self->_m_avail ) {
+    $self->msg->send( $self->_m_get );
+    $self->_busy;
+    return 1;
+  }
+
+  # ...then upstream queue
+  if ( defined( my $msg = $self->_fetch_up ) ) {
+    $self->msg->send( $msg );
+    $self->_busy;
+    return 1;
+  }
+
+  return;
 }
 
 sub send {
   my ( $self, $msg ) = @_;
   $self->_m_put( $msg );
-  $self->_send;
+  $self->send_pending;
 }
 
 1;
