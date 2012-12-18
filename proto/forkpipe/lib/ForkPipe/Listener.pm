@@ -26,7 +26,6 @@ sub add {
 
 sub _poll {
   my ( $self, @args ) = @_;
-  print "$$ Polling...\n";
   for my $rdy ( $self->_sel->can_read( @args ) ) {
     my ( $fh, $cb, @args ) = @$rdy;
     $cb->( $fh, @args );

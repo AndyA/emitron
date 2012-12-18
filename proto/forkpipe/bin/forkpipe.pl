@@ -9,11 +9,11 @@ use Data::Dumper;
 my $fp = ForkPipe->new;
 
 if ( my $pid = $fp->fork ) {
-  print "$$ In parent, child is $pid\n";
+  $fp->log( "In parent, child is $pid" );
   $fp->on(
     sub {
       my $msg = shift;
-      print "$$ Got: ", dd( $msg ), "\n";
+      $fp->log( "Got: ", dd( $msg ) );
       $msg->{sn}++;
       $fp->send( $msg );
     }
@@ -23,11 +23,11 @@ if ( my $pid = $fp->fork ) {
   waitpid $pid, 0;
 }
 else {
-  print "$$ In child\n";
+  $fp->log( "In child" );
   $fp->on(
     sub {
       my $msg = shift;
-      print "$$ Got: ", dd( $msg ), "\n";
+      $fp->log( "Got: ", dd( $msg ) );
       $msg->{sn}++;
       sleep 2;
       $fp->send( $msg );

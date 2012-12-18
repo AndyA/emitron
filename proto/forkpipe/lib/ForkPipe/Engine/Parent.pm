@@ -33,7 +33,6 @@ ForkPipe::Engine::Parent - Parent engine
 
 sub handle_control {
   my ( $self, $msg ) = @_;
-  print "$$ Got $msg\n";
   $self->_state( $msg );
   $self->_send;
 }
@@ -41,9 +40,7 @@ sub handle_control {
 sub _send {
   my $self = shift;
   # TODO: hook to check for upstream messages
-  print "$$ State: ", $self->_state, "\n";
   return unless $self->_m_avail && $self->_state eq 'READY';
-  print "$$ Sending message\n";
   $self->msg->send( $self->_m_get );
   $self->_state( 'BUSY' );
   return 1;

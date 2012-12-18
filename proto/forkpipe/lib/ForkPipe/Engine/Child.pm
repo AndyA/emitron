@@ -12,9 +12,7 @@ ForkPipe::Engine::Child - Child engine
 
 sub _ready {
   my $self = shift;
-  print "$$ Setting READY\n";
   $self->ctl->send( 'READY' );
-  print "$$ Done setting READY\n";
 }
 
 before poll => sub { shift->_ready };

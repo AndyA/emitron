@@ -26,19 +26,10 @@ has listener => (
 );
 
 has on => (
-  isa      => 'CodeRef',
-  is       => 'rw',
-  required => 1,
-  lazy     => 1,
-  default  => sub {
-    sub {
-      my $msg = shift;
-      eval 'require Data::Dumper';
-      print "$$ Unhandled message: ",
-       Data::Dumper->new( [$msg] )->Indent( 2 )->Quotekeys( 0 )
-       ->Useqq( 1 )->Terse( 1 )->Dump;
-     }
-  },
+  isa     => 'CodeRef',
+  is      => 'rw',
+  lazy    => 1,
+  builder => '_default_handler'
 );
 
 sub BUILD {
@@ -62,6 +53,15 @@ sub DEMOLISH {
 }
 
 sub handle_message { my $self = shift; $self->on->( @_ ) }
+
+sub _default_handler {
+  sub {
+    my $msg = shift;
+    eval 'require Data::Dumper';
+     Data::Dumper->new( [$msg] )->Indent( 2 )->Quotekeys( 0 )
+     ->Useqq( 1 )->Terse( 1 )->Dump;
+  };
+}
 
 sub handle_control {
   my ( $self, $msg ) = @_;

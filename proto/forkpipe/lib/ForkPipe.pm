@@ -20,6 +20,21 @@ has '_engine' => (
   handles => [ 'send', 'peek', 'poll', 'on' ]
 );
 
+BEGIN {
+  no strict 'refs';
+  *{'_log'} = eval 'require Term::ANSIColor'
+   ? sub {
+    my ( $self, $msg ) = @_;
+    my $col = $self->in_child ? 'yellow' : 'cyan';
+    print Term::ANSIColor::colored( "[$$] $msg", $col ), "\n";
+   }
+   : sub {
+    my ( $self, $msg ) = @_;
+    my $where = $self->in_child ? "CHILD $$" : "PARENT";
+    print "[$where] $msg\n";
+   };
+}
+
 =head1 NAME
 
 ForkPipe - Fork and talk
@@ -74,6 +89,12 @@ sub fork {
   }
 
   return $pid;
+}
+
+sub log {
+  my $self = shift;
+  my $msg = join '', @_;
+  $self->_log( $_ ) for split /\n/, $msg;
 }
 
 1;
