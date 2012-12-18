@@ -19,6 +19,8 @@ sub _ready {
 
 before poll => sub { shift->_ready };
 
+after handle_message => sub { shift->_ready };
+
 sub send {
   my $self = shift;
   $self->msg->send( @_ );

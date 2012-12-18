@@ -32,7 +32,7 @@ has on => (
   lazy     => 1,
   default  => sub {
     sub {
-      my ( $self, $msg ) = @_;
+      my $msg = shift;
       eval 'require Data::Dumper';
       print "$$ Unhandled message: ",
        Data::Dumper->new( [$msg] )->Indent( 2 )->Quotekeys( 0 )
@@ -61,7 +61,7 @@ sub DEMOLISH {
   $li->remove( $self->ctl->rd );
 }
 
-sub handle_message { shift->on->( @_ ) }
+sub handle_message { my $self = shift; $self->on->( @_ ) }
 
 sub handle_control {
   my ( $self, $msg ) = @_;
