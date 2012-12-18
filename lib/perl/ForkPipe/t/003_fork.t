@@ -7,6 +7,7 @@ use Test::Differences;
 use Test::More;
 
 use Data::Dumper;
+use POSIX ":sys_wait_h";
 
 use ForkPipe;
 
@@ -20,7 +21,6 @@ use ForkPipe;
     $fp->on(
       sub {
         my $msg = shift;
-        #        $fp->log( Dumper( $msg ) );
         if ( $msg->{done} ) {
           $running = 0;
           return;
@@ -39,7 +39,6 @@ use ForkPipe;
     $fp->on(
       sub {
         my $msg = shift;
-        #        $fp->log( Dumper( $msg ) );
         if ( $msg->{sn}++ > 500 ) {
           $msg->{done} = 1;
           $running = 0;
@@ -53,7 +52,78 @@ use ForkPipe;
   eq_or_diff \@got, [ 2, 5, 11, 23, 47, 95, 191, 383 ], 'messages';
 }
 
+{
+  my $fp = ForkPipe->new;
+
+  my $parent = sub {
+    my $msg = shift;
+    my $gsm = reverse $msg;
+    return $gsm;
+  };
+
+  my $child = sub {
+    my $msg = shift;
+    return if length( $msg ) > 1_000_000;
+    ( my $ext = $msg ) =~ tr/A-Za-z/ZzA-Ya-y/;
+    my $out = join ' ', $msg, $ext;
+    return $out;
+  };
+
+  my $init = 'Another Porky Prime Cut';
+
+  my $want = run_them( $parent, $child, $init );
+  my $got = fork_them( $parent, $child, $init, $fp );
+
+  # don't want to print huge value on failure
+  ok $got eq $want, 'long message';
+}
+
 done_testing();
+
+sub run_them {
+  my ( $parent, $child, $msg ) = @_;
+  for ( ;; ) {
+    my $nm = $child->( $msg );
+    return $msg unless defined $nm;
+    $msg = $parent->( $nm );
+  }
+}
+
+sub fork_them {
+  my ( $parent, $child, $msg, $fp ) = @_;
+
+  my $pid = $fp->fork;
+  unless ( $pid ) {
+    $fp->on(
+      sub {
+        my $msg = shift;
+        my $nm  = $child->( $msg );
+        $fp->send( $nm );
+        exit 0 unless defined $nm;
+      }
+    );
+
+    $fp->poll( 0.1 ) while 1;
+  }
+
+  my ( $out, $done );
+
+  $fp->on(
+    sub {
+      my $msg = shift;
+      if ( defined $msg ) {
+        $fp->send( $out = $parent->( $msg ) );
+        return;
+      }
+      $done++;
+    }
+  );
+
+  $fp->send( $msg );
+  $fp->poll( 0.1 ) until $done;
+
+  return $out;
+}
 
 # vim:ts=2:sw=2:et:ft=perl
 
