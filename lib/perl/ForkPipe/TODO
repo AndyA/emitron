@@ -1,0 +1,5 @@
+What should the parent do when the child dies.
+
+Presumably it should generate some kind of notification and then shut
+itself down.
+
