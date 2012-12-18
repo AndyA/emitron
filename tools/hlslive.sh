@@ -64,6 +64,9 @@ rates="
   N=p80;BV=3372;R=25;P=high;level=4;W=1280;H=720;BA=128;AR=44100
   N=p90;BV=5100;R=25;P=high;level=4;W=1920;H=1080;BA=192;AR=48000"
 
+#rates="
+#  N=p90;BV=5100;R=25;P=high;level=4;W=1920;H=1080;BA=192;AR=48000"
+
 fifos=""
 tees=""
 tokill=""
@@ -128,17 +131,19 @@ if [ "$preprocess" ]; then
   fi
   # Make it 16x9
   pad="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
+  pixfmt="-pix_fmt yuv420p "
+  pipefmt="avi"
   mkfifo $fifo
   {
+    set -x
     ffmpeg -vsync cfr  -y -i "$source" -r:v 25 -r:a 48000 \
       -s 1920x1080 -vf "$pad" $extra \
       -map 0:0 -map 0:1 \
       -acodec pcm_s16le -vcodec rawvideo \
-      -f avi "$fifo"
+      $pixfmt -f $pipefmt "$fifo"
   } > "$log" 2>&1 &
   tokill="$! $tokill"
   source="$fifo"
-  pipefmt=avi
 fi
 
 tees="cat '$source'"
@@ -175,6 +180,7 @@ for rt in $rates; do
   tees="$tees | tee $fifo"
   mkfifo $fifo
   {
+    set -x
     ffmpeg -vsync cfr -f $pipefmt -i "$fifo" \
       -map 0:0 -map 0:1 \
       $audio_options -r:a $AR -b:a ${BA}k \
