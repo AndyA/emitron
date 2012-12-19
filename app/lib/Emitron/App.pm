@@ -15,6 +15,7 @@ use Emitron::Worker::CRTMPServerWatcher;
 use Emitron::Worker::EventWatcher;
 use Emitron::Worker::ModelWatcher;
 use Emitron::Worker::Script;
+use Emitron::Worker::Tickler;
 use Path::Class;
 use Time::HiRes qw( sleep time );
 
@@ -110,11 +111,13 @@ sub make_workers {
 
   #  push @w, Emitron::Worker::EventWatcher->new;
 
-  push @w,
-   Emitron::Worker::CRTMPServerWatcher->new(
-    uri => $self->uri( 'crtmpserver' ) );
-
-  push @w, $self->_watcher;
+  push @w, (
+    Emitron::Worker::CRTMPServerWatcher->new(
+      uri => $self->uri( 'crtmpserver' )
+    ),
+    #    Emitron::Worker::Tickler->new,
+    $self->_watcher
+  );
 
   for ( 1 .. 5 ) {
     push @w, Emitron::Worker::Script->new;
