@@ -6,9 +6,11 @@
 me=$( hostname -s )
 url=rtmp://$remote/live/$me
 rate=15
+echo "$$" > /tmp/webcam.pid
 
 function wc_default() {
   v4l2-ctl -p $rate
+  date
   ffmpeg -y \
     -f alsa -ac 1 -r:a 48000 -i hw:1,0 \
     -f video4linux2 -r:v $rate -i /dev/video0 \
@@ -22,6 +24,7 @@ function wc_default() {
 function wc_igloo() {
   v4l2-ctl --set-fmt-video=width=1024,height=576,pixelformat=0
   v4l2-ctl -p $rate
+  date
   ffmpeg -y \
     -f alsa -ac 1 -r:a 48000 -i hw:1,0 \
     -f video4linux2 -r:v $rate -i /dev/video0 \
@@ -36,6 +39,7 @@ function wc_orac() {
   rate=15
   v4l2-ctl --set-fmt-video=width=1920,height=1080,pixelformat=1
   v4l2-ctl --set-parm=$rate
+  date
   ffmpeg -y \
     -f alsa -ac 2 -r:a 48000 -i hw:1,0 \
     -f h264 -i <( tools/capture -o ) \
