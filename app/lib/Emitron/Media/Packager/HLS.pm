@@ -2,6 +2,7 @@ package Emitron::Media::Packager::HLS;
 
 use Moose;
 
+use Carp qw( croak );
 use Emitron::Logger;
 use Emitron::Media::Globals;
 use Emitron::Media::Helpers::tsdemux;
@@ -20,7 +21,10 @@ has _inotify => (
   isa     => 'Linux::Inotify2',
   is      => 'ro',
   lazy    => 1,
-  default => sub { Linux::Inotify2->new }
+  default => sub {
+    Linux::Inotify2->new
+     or croak "Can't create inotify: $!";
+  }
 );
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl
