@@ -15,6 +15,7 @@ use Emitron::Worker::CRTMPServerWatcher;
 use Emitron::Worker::EventWatcher;
 use Emitron::Worker::ModelWatcher;
 use Emitron::Worker::Script;
+use Emitron::Worker::Tickler;
 use Path::Class;
 use Time::HiRes qw( sleep time );
 
@@ -110,11 +111,13 @@ sub make_workers {
 
   #  push @w, Emitron::Worker::EventWatcher->new;
 
-  push @w,
-   Emitron::Worker::CRTMPServerWatcher->new(
-    uri => $self->uri( 'crtmpserver' ) );
-
-  push @w, $self->_watcher;
+  push @w, (
+    Emitron::Worker::CRTMPServerWatcher->new(
+      uri => $self->uri( 'crtmpserver' )
+    ),
+    #    Emitron::Worker::Tickler->new,
+    $self->_watcher
+  );
 
   for ( 1 .. 5 ) {
     push @w, Emitron::Worker::Script->new;
@@ -155,6 +158,7 @@ sub _wrap_handler {
 sub handle_events {
   my $self  = shift;
   my $event = $self->event;
+  # FIXME sometimes rev is undef at startup. Race?
   my $rev   = $event->revision;
   $self->add_listener(
     $event->fileno,
@@ -244,6 +248,7 @@ sub _on {
 sub on {
   my ( $self, $name, $handler, $group ) = @_;
   $group = uid unless defined $group;
+  debug "on '$name', group: ", $group;
   my $hh = $self->_wrap_handler( $handler );
   for my $n ( 'ARRAY' eq ref $name ? @$name : $name ) {
     $self->_on( $n, $hh, $group );

@@ -53,8 +53,13 @@ sub handle_messages {
     sub {
       my $fn  = shift;
       my $msg = Emitron::Message->recv( $fn );
-      debug "Handling msg ", $msg->type;
-      $self->despatcher->despatch( $msg );
+      if ( defined $msg ) {
+        debug "Handling msg ", $msg->type;
+        $self->despatcher->despatch( $msg );
+      }
+      else {
+        warning "Undefined msg";
+      }
       $self->_signal_ready;
     }
   );
