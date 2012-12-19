@@ -17,6 +17,13 @@ use Emitron::Tool::Packager::HLS;
 Emitron::Logger->level( Emitron::Logger->DEBUG );
 
 em->on(
+  '$.misc' => sub {
+    my ( $p, $b, $a ) = @_;
+    debug "misc: ", $b, " --> ", $a;
+  }
+);
+
+em->on(
   '+$.streams.*.INR.*' => sub {
     my ( $path, undef, $stream, $name, $app ) = @_;
 
