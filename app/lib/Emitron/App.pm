@@ -158,6 +158,7 @@ sub _wrap_handler {
 sub handle_events {
   my $self  = shift;
   my $event = $self->event;
+  # FIXME sometimes rev is undef at startup. Race?
   my $rev   = $event->revision;
   $self->add_listener(
     $event->fileno,
