@@ -8,6 +8,9 @@ BUGS
   of the warning about not being killed) also causes us to run out of
   inotify handles after a few packaging jobs.
 
+  Maybe making PipeFork cleanly stackable - so INT/TERM propagate to all
+  children is the way forward.
+
   Encoding artefacts:
 
     Where are the coming from? Don't look like B-frame related problems
