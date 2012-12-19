@@ -248,6 +248,7 @@ sub _on {
 sub on {
   my ( $self, $name, $handler, $group ) = @_;
   $group = uid unless defined $group;
+  debug "on '$name', group: ", $group;
   my $hh = $self->_wrap_handler( $handler );
   for my $n ( 'ARRAY' eq ref $name ? @$name : $name ) {
     $self->_on( $n, $hh, $group );

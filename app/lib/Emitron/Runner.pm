@@ -73,6 +73,7 @@ sub run {
       die unless defined $ar;
       my $wrk = $ar->{wrk};
       my $msg = Emitron::Message->recv( $wrk->reader );
+      #      debug "Got message: ", $msg;
       unless ( defined $msg ) {
         $self->recycle( $wrk->pid );
         next;
@@ -85,6 +86,7 @@ sub run {
         }
       }
       else {
+        #        debug "Sending message: ", $msg;
         $self->enqueue( $msg );
       }
     }

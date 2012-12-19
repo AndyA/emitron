@@ -73,7 +73,7 @@ sub _bind_message {
 
 sub despatch {
   my ( $self, $msg ) = @_;
-
+  debug "Despatching: ", $msg->type;
   my @hh = $self->_bind_message( $msg->type );
   info "Unhandled message: ", $msg->type unless @hh;
   for my $hh ( @hh ) {

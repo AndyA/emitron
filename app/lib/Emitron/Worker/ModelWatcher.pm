@@ -55,6 +55,8 @@ sub listen {
   $self->_trigger->on(
     $path,
     sub {
+      my ( $p, $b, $a ) = @_;
+      debug "Firing $sig for change to $p (matches $path)";
       $self->post_message(
         type => $sig,
         msg  => [ $self->_revision, @_ ]
