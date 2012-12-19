@@ -36,28 +36,41 @@ has _active => (
   default => sub { {} }
 );
 
-has [ '_workers', '_mq' ] => (
-  isa      => 'ArrayRef',
+has _workers => (
+  traits   => ['Array'],
+  isa      => 'ArrayRef[Emitron::Worker::Base]',
   is       => 'ro',
   default  => sub { [] },
-  init_arg => 'workers'
+  init_arg => 'workers',
+  handles  => {
+    _w_put   => 'push',
+    _w_avail => 'count',
+    _w_get   => 'shift',
+  },
 );
 
-sub enqueue {
-  my ( $self, $msg ) = @_;
-  push @{ $self->_mq }, $msg;
-}
+has _mq => (
+  traits  => ['Array'],
+  isa     => 'ArrayRef[Emitron::Message]',
+  is      => 'ro',
+  default => sub { [] },
+  handles => {
+    enqueue  => 'push',
+    _requeue => 'unshift',
+    _m_avail => 'count',
+    _m_get   => 'shift',
+  },
+);
 
 sub run {
-  my $self    = shift;
-  my $active  = $self->_active;
-  my $mq      = $self->_mq;
-  my $rds     = $self->_rds;
-  my $workers = $self->_workers;
+  my $self   = shift;
+  my $active = $self->_active;
+  my $rds    = $self->_rds;
 
   while () {
-    while ( @$workers ) {
-      my $handler = shift @$workers;
+    while ( $self->_w_avail ) {
+      my $handler = $self->_w_get;
+      debug "New worker: ", ref $handler;
       my $wrk = Emitron::Worker->new( worker => $handler );
       $active->{ $wrk->pid } = {
         handler => $handler,
@@ -97,10 +110,11 @@ sub run {
       sort { $a->pid <=> $b->pid } map { $_->{wrk} } values %$active );
 
     my @ready = grep { $_->{wrk}->is_ready } values %$active;
-    while ( @ready && @$mq ) {
-      my $msg = shift @$mq;
+    while ( @ready && $self->_m_avail ) {
+      my $msg = $self->_m_get;
       my $ar  = shift @ready;
       $ar->{msg} = $msg;
+      debug "Delivering ", $msg->type, " to ", $ar->{wrk}{pid};
       $ar->{wrk}->send( $msg );
     }
 
@@ -114,11 +128,13 @@ sub run {
 
 sub recycle {
   my ( $self, $pid ) = @_;
+  info "Recyling $pid";
   if ( my $ar = delete $self->_active->{$pid} ) {
     $self->_rds->remove( $ar->{wrk}->reader );
-    push @{ $self->_workers }, $ar->{handler};
+    debug "Regenerating ", $ar->{handler};
+    $self->_w_put( $ar->{handler} );
     if ( my $msg = delete $ar->{msg} ) {
-      unshift @{ $self->_mq }, $msg;
+      $self->_requeue( $msg );
     }
   }
 }
