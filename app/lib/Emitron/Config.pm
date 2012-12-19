@@ -53,15 +53,15 @@ sub config {
         config => {
           thumbnail => { encodes => ['t10'] },
           pc        => {
-            encodes => [ 'p30', 'p40', 'p50', 'p60', 'p70' ],
+            encodes => [ 'p50', 'p30', 'p40', 'p60', 'p70' ],
             dog     => "$dog"
           },
           pc_hd => {
-            encodes => [ 'p30', 'p40', 'p50', 'p60', 'p70', 'p80' ],
+            encodes => [ 'p50', 'p30', 'p40', 'p60', 'p70', 'p80' ],
             dog     => "$dog"
           },
           pc_hd_lite => {
-            encodes => [ 'p40', 'p60', 'p80' ],
+            encodes => [ 'p60', 'p40', 'p80' ],
             dog     => "$dog"
           },
         },
