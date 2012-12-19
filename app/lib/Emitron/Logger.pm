@@ -36,8 +36,7 @@ BEGIN {
 }
 
 my @LOGCOLOUR
- = ( undef, 'white on_red', 'white on_red', 'yellow', 'cyan',
-  'green', );
+ = ( undef, 'white on_red', 'white on_red', 'red', 'cyan', 'green', );
 
 my $TESTING  = $ENV{HARNESS_ACTIVE};
 my $LOGLEVEL = INFO;
