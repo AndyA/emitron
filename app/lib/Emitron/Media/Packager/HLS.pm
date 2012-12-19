@@ -19,6 +19,7 @@ has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );
 has _inotify => (
   isa     => 'Linux::Inotify2',
   is      => 'ro',
+  lazy    => 1,
   default => sub { Linux::Inotify2->new }
 );
 
