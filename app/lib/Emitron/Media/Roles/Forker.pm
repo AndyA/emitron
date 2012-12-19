@@ -3,6 +3,7 @@ package Emitron::Media::Roles::Forker;
 use Moose::Role;
 
 use Emitron::Logger;
+use POSIX ":sys_wait_h";
 
 requires 'globals';
 
@@ -60,7 +61,7 @@ sub kill_all {
    unless @pids == $sig;
   my @st = ();
   for my $pid ( @pids ) {
-    my $got = waitpid $pid, 0;
+    my $got = waitpid $pid, WNOHANG;
     push @st, $? if $got >= 0;
   }
   return @st;
