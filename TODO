@@ -4,11 +4,24 @@ BUGS
   Moose being lazy. Or maybe...
 
   Above problem may be because we don't always die cleanly. Why is that?
+  The fact that the HLS packager worker doesn't die (and is the subject
+  of the warning about not being killed) also causes us to run out of
+  inotify handles after a few packaging jobs.
 
-  Worry about messages being stalled in a particular worker's input pipe
-  while the worker handles an event or model change. The busy lock on
-  message processing stops the queue from flooding but doesn't prevent a
-  single message from stalling.
+  Encoding artefacts:
+
+    Where are the coming from? Don't look like B-frame related problems
+    - the ordering is OK.
+
+  Playback:
+
+    Even from the h264 webcam playback starts to freeze after a while
+    (double check).
+
+    Video from The Space started stalling every segment after a
+    few hours.
+
+Push fragments to S3.
 
 Make encoders run in (NTP) sync: DTS/PTS/GoP
 
