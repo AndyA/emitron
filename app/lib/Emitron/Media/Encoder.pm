@@ -110,7 +110,7 @@ sub _ff_decoder {
     @extra = (
       -i              => $args{dog},
       '-r:v'          => $self->globals->frame_rate,
-      -filter_complex => 'overlay=120:40'
+      -filter_complex => 'overlay=40:40'
     );
   }
   my $ar  = $self->globals->aspect_ratio;
