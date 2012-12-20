@@ -195,7 +195,8 @@ sub stm::write_list {
      '#EXT-X-PLAYLIST-TYPE:EVENT',
      '#EXT-X-MEDIA-SEQUENCE:1', '';
     for my $frag ( @{ $self->frags } ) {
-      print $fh join "\n", "#EXTINF:" . $O{gop}, $frag, '';
+      print $fh join "\n", "#EXTINF:" . join( ',', $O{gop}, '' ),
+       $frag, '';
     }
     print $fh "#EXT-X-ENDLIST\n" if $self->{closed};
   }
