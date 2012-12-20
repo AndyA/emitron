@@ -123,21 +123,39 @@ if [ "$preprocess" ]; then
   fifos="$fifos $fifo"
   log="$logs/pre.log"
   extra=""
-  if [ "$dog" ]; then
-    extra="$extra -i $dog -r:v 25 -filter_complex overlay=40:40"
-  fi
   if [ "$deinterlace" ]; then
     extra="$extra -filter:v yadif"
   fi
+#  if [ "$dog" ]; then
+#    extra="$extra -i $dog -r:v 25 -filter_complex overlay=40:40"
+#  fi
   # Make it 16x9
   pad="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
-  pixfmt="-pix_fmt yuv420p "
+  pixfmt="-pix_fmt yuv420p"
   pipefmt="avi"
   mkfifo $fifo
   {
     set -x
     ffmpeg -vsync cfr  -y -i "$source" -r:v 25 -r:a 48000 \
       -s 1920x1080 -vf "$pad" $extra \
+      -map 0:0 -map 0:1 \
+      -acodec pcm_s16le -vcodec rawvideo \
+      $pixfmt -f $pipefmt "$fifo"
+  } > "$log" 2>&1 &
+  tokill="$! $tokill"
+  source="$fifo"
+fi
+
+if [ "$dog" ]; then
+  echo "Burning in dog: $dog"
+  fifo="$work/dog.fifo"
+  fifos="$fifos $fifo"
+  log="$logs/dog.log"
+  mkfifo $fifo
+  {
+    set -x
+    ffmpeg -vsync cfr -f $pipefmt -y -i "$source" -r:v 25 -r:a 48000 \
+      -i "$dog" -r:v 25 -filter_complex overlay=40:40 \
       -map 0:0 -map 0:1 \
       -acodec pcm_s16le -vcodec rawvideo \
       $pixfmt -f $pipefmt "$fifo"
