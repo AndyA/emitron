@@ -124,7 +124,7 @@ if [ "$preprocess" ]; then
   log="$logs/pre.log"
   extra=""
   if [ "$dog" ]; then
-    extra="$extra -i $dog -r:v 25 -filter_complex overlay=120:40"
+    extra="$extra -i $dog -r:v 25 -filter_complex overlay=40:40"
   fi
   if [ "$deinterlace" ]; then
     extra="$extra -filter:v yadif"
