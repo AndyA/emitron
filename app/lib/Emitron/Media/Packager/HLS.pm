@@ -17,6 +17,13 @@ with 'Emitron::Media::Roles::Forker';
 has webroot => ( isa => 'Str', is => 'ro', required => 1 );
 has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );
 
+has [ 'vod', 'ignore_duration' ] => (
+  isa      => 'Bool',
+  is       => 'ro',
+  required => 1,
+  default  => 0
+);
+
 has _inotify => (
   isa     => 'Linux::Inotify2',
   is      => 'ro',
@@ -181,12 +188,14 @@ sub _make_streams {
       $dstd->mkpath;
       my $m3u8 = Harmless::M3U8->new;
       $m3u8->read( $mf ) if -e $mf;
+      $m3u8->closed( $self->vod );
       # TODO: sanity check / merge existing pl
       $m3u8->meta(
         {
           EXT_X_TARGETDURATION => $self->globals->gop,
           EXT_X_VERSION        => 3,
-          EXT_X_MEDIA_SEQUENCE => 0
+          EXT_X_MEDIA_SEQUENCE => 0,
+          EXT_X_PLAYLIST_TYPE  => $self->vod ? 'VOD' : 'EVENT',
         }
       );
       $m3u8->push_discontinuity;
@@ -195,11 +204,14 @@ sub _make_streams {
         $br->{dir},
         IN_CLOSE_WRITE,
         sub {
-          my $evt = shift;
-          my $src = $evt->fullname;
-          my $inf = $tsd->scan( $src );
-          warning "Can't find h264 stream in $src" unless $inf;
-          my $duration = $inf ? $inf->{len} : $self->globals->gop;
+          my $evt      = shift;
+          my $src      = $evt->fullname;
+          my $duration = $self->globals->gop;
+          unless ( $self->ignore_duration ) {
+            my $inf = $tsd->scan( $src );
+            if ( $inf ) { $duration = $inf->{len} }
+            else        { warning "Can't find h264 stream in $src" }
+          }
           my $segn = sprintf '%s.%08d.ts', $tok, ++$next;
           my $uri = join '/', $name, $segn;
           my $dst = file( $dstd, $segn );
