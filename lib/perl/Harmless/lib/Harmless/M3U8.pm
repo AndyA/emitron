@@ -56,7 +56,7 @@ sub write {
 
 sub cleanup {
   my ( $self, $segs ) = @_;
-  my @runs = @{ $self->{_pl}{seg} };
+  my @runs = @{ $self->seg };
   my @out  = ();
   while ( $segs > 0 && @runs ) {
     my $run = pop @runs;
@@ -64,14 +64,14 @@ sub cleanup {
     splice @$run, 0, -$segs if $segs < 0;
     unshift @out, $run;
   }
-  $self->{_pl}{seg} = \@out;
+  $self->seg( \@out );
   $self;
 }
 
 sub segment_count {
   my $self  = shift;
   my $count = 0;
-  for my $run ( @{ $self->{_pl}{seg} } ) {
+  for my $run ( @{ $self->seg } ) {
     $count += @$run;
   }
   return $count;
@@ -79,19 +79,19 @@ sub segment_count {
 
 sub push_segment {
   my ( $self, @seg ) = @_;
-  push @{ $self->{_pl}{seg}[-1] }, @seg;
+  push @{ $self->seg->[-1] }, @seg;
   $self;
 }
 
 sub push_discontinuity {
   my $self = shift;
-  my $seg  = $self->{_pl}{seg};
+  my $seg  = $self->seg;
   push @$seg, [] if @{ $seg->[-1] };
   $self;
 }
 
 BEGIN {
-  my @attr = qw( meta vpl closed );
+  my @attr = qw( meta vpl closed seg );
   for my $attr ( @attr ) {
     no strict 'refs';
     *$attr = sub {
