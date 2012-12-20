@@ -59,10 +59,22 @@ sub _munge_streams {
   my ( $self, $data ) = @_;
   my $out = {};
   for my $app ( keys %$data ) {
+    unless ( length $app ) {
+      error "Rejecting unnamed app";
+      next;
+    }
     my $by_type = $data->{$app}{streams} || {};
     for my $type ( keys %$by_type ) {
+      unless ( length $type ) {
+        error "Rejecting empty type";
+        next;
+      }
       my $by_name = $by_type->{$type};
       for my $name ( keys %$by_name ) {
+        unless ( length $name ) {
+          error "Rejecting unnamed stream";
+          next;
+        }
         my $rec = $by_name->{$name};
         $rec->{rtmp} = $rec->{preview} = $self->_rtmp_url( $name );
         $rec->{rtsp} = $self->_rtsp_url( $name );
