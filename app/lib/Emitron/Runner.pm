@@ -131,7 +131,7 @@ sub recycle {
   info "Recyling $pid";
   if ( my $ar = delete $self->_active->{$pid} ) {
     $self->_rds->remove( $ar->{wrk}->reader );
-    debug "Regenerating ", $ar->{handler};
+    debug "Regenerating ", ref $ar->{handler};
     $self->_w_put( $ar->{handler} );
     if ( my $msg = delete $ar->{msg} ) {
       $self->_requeue( $msg );
