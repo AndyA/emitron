@@ -24,6 +24,8 @@ BUGS
     Video from The Space started stalling every segment after a
     few hours.
 
+  Check dog scaling - needs to be applied /after/ resize.
+
 Push fragments to S3.
 
 Make encoders run in (NTP) sync: DTS/PTS/GoP
