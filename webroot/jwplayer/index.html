@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>HLS</title>
+    <script src="/jwplayer/jwplayer.js"></script>
+    <script>jwplayer.key="2AHTbWlp3ERfmYStCG2V5+1YzHv2bSawVu07CPzQBto="</script>
+  </head>
+  <body>
+    <div id='video'></div>
+    <script type='text/javascript'>
+      jwplayer('video').setup({
+        //file: 'http://newstream.fenkle/live/roh-hls/dw-titles/dw-titles.m3u8',
+        file: 'http://media.thespace.org/v0001gwq/dw-titles.m3u8',
+        width: '1280',
+        height: '720'
+      });
+    </script>
+  </body>
+</html>
+
