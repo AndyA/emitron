@@ -1,0 +1,21 @@
+-l=73
+-i=2
+-vmll
+-syn
+-ci=1
+-bar
+-nsbl
+-pt=1
+-vt=2 
+-vtc=0
+-sbt=2
+-sot
+-schb
+-bt=1
+-nsfs
+-nolq
+-otr
+-ole=unix
+-nola
+-nbbc
+-wbb="% + - * / x != == >= <= =~ !~ < > | & >= < = **= += *= &= <<= &&= -= /= |= >>= ||= .= %= ^= x="
