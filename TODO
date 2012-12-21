@@ -15,6 +15,11 @@ BUGS
   event of packager failure. Ideally with contiguous timestamps but
   discontunities better than nothing.
 
+  What happens if we have to restart with junk in the model? Currently
+  best to delete the model but leave the work directories - which
+  implies that, at least, we should be able to recover and continue
+  based exclusively on the contents of the work directory.
+
 Make ForkPipe commit infanticide reliably.
 
 Wire up ForkPipe and use it to get async notifications from packager.
@@ -38,6 +43,8 @@ More verbs in Emitron::Core
   For ROH:
     Live -> VOD  
     Live -> Prerecord -> VOD
+
+Moosify Harmless.
 
 Make encoders run in (NTP) sync: DTS/PTS/GoP
 
