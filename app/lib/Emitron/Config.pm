@@ -33,8 +33,8 @@ default model.
 
 sub config {
   my $class = shift;
-  my $fqdn  = $class->_map_fqdn( hostfqdn );
-  my $home  = dir( $FindBin::Bin )->parent->parent;
+  my $fqdn  = $class->_map_fqdn(hostfqdn);
+  my $home  = dir($FindBin::Bin)->parent->parent;
   my $tmp   = dir( $home, 'tmp' );
   $tmp->mkpath;
   my $dog = file( $home, 'art', 'thespace-dog.png' );
@@ -53,15 +53,15 @@ sub config {
         config => {
           thumbnail => { encodes => ['t10'] },
           pc        => {
-            encodes => [ 'p50', 'p30', 'p40', 'p60', 'p70' ],
+            encodes => ['p50', 'p30', 'p40', 'p60', 'p70'],
             dog     => "$dog"
           },
           pc_hd => {
-            encodes => [ 'p50', 'p30', 'p40', 'p60', 'p70', 'p80' ],
+            encodes => ['p50', 'p30', 'p40', 'p60', 'p70', 'p80'],
             dog     => "$dog"
           },
           pc_hd_lite => {
-            encodes => [ 'p60', 'p40', 'p80' ],
+            encodes => ['p60', 'p40', 'p80'],
             dog     => "$dog"
           },
         },

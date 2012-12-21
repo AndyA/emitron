@@ -101,15 +101,13 @@ sub toker {
     if ( $tok->{t} eq 'str' ) {
       return {
         t => 'str',
-        m => [ $tok->{m}[0], $pp_str->( $tok->{m}[1] ) ]
-      };
+        m => [$tok->{m}[0], $pp_str->( $tok->{m}[1] )] };
     }
 
     if ( $tok->{t} eq 'slice' ) {
       return {
         t => 'slice',
-        m => [ $tok->{m}[0], map $_ * 1, split /:/, $tok->{m}[0] ]
-      };
+        m => [$tok->{m}[0], map $_ * 1, split /:/, $tok->{m}[0]] };
     }
 
     return $tok;
@@ -119,14 +117,14 @@ sub toker {
 sub new {
   my $class = shift;
   my $self = bless {}, $class;
-  $self->parse( @_ ) if @_;
+  $self->parse(@_) if @_;
   return $self;
 }
 
 sub upgrade {
   my ( $class, $obj ) = @_;
-  return $obj if UNIVERSAL::can( $obj, 'isa' ) && $obj->isa( $class );
-  return $class->new( $obj );
+  return $obj if UNIVERSAL::can( $obj, 'isa' ) && $obj->isa($class);
+  return $class->new($obj);
 }
 
 sub _mk_list_iter {
@@ -162,8 +160,8 @@ sub _mk_literal {
   my $tok = shift;
   my $vv  = $tok->{m}[1];
   return {
-    match => sub { return $_[0] eq $vv },
-    iter => sub { _mk_list_iter( $vv ) },
+    match   => sub { return $_[0] eq $vv },
+    iter    => sub { _mk_list_iter($vv) },
     capture => 0
   };
 }
@@ -185,13 +183,13 @@ sub _mk_any {
 sub _mk_multi_iter {
   my ( $obj, @pp ) = @_;
   my $ipos = 0;
-  my $ii   = $pp[ $ipos++ ]{iter}( $obj );
+  my $ii   = $pp[$ipos++]{iter}($obj);
   return sub {
     while () {
       my $vv = $ii->();
       return $vv if defined $vv;
       return if $ipos >= @pp;
-      $ii = $pp[ $ipos++ ]{iter}( $obj );
+      $ii = $pp[$ipos++]{iter}($obj);
     }
   };
 }
@@ -203,7 +201,7 @@ sub _mk_multi {
   return {
     match => sub {
       my $key = shift;
-      for my $p ( @pp ) { return 1 if $p->{match}( $key ) }
+      for my $p (@pp) { return 1 if $p->{match}($key) }
       return;
     },
     iter    => sub { _mk_multi_iter( $_[0], @pp ) },
@@ -224,9 +222,9 @@ sub _parse_brackets {
   );
 
   my $tok = $tokr->();
-  while ( $tok ) {
+  while ($tok) {
     my $th = $TOKH{ $tok->{t} } or croak "Syntax error: ", $tok->{m}[0];
-    push @pp, $th->( $tok );
+    push @pp, $th->($tok);
     $tok = $tokr->();
     croak "Missing ]" unless $tok;
     last if $tok->{t} eq 'rb';
@@ -238,21 +236,21 @@ sub _parse_brackets {
 
 sub _parse {
   my ( $class, $path ) = @_;
-  my $tokr = $class->toker( $path );
+  my $tokr = $class->toker($path);
   my @pp   = ();
 
   my %TOKH = (
     lit  => \&_mk_literal,
     star => \&_mk_any,
     dot  => sub { },
-    lb   => sub { _mk_multi( $class->_parse_brackets( $tokr ) ) },
+    lb   => sub { _mk_multi( $class->_parse_brackets($tokr) ) },
   );
 
   my $tok = $tokr->();
   croak "Empty path" unless defined $tok;
-  while ( $tok ) {
+  while ($tok) {
     my $th = $TOKH{ $tok->{t} } or croak "Syntax error: ", $tok->{m}[0];
-    push @pp, $th->( $tok );
+    push @pp, $th->($tok);
     $tok = $tokr->();
   }
   return \@pp;
@@ -261,8 +259,8 @@ sub _parse {
 sub parse {
   my ( $self, $path ) = @_;
   my $cl = ref $self;
-  return $self->{path} = $cl->_parse( $path ) if $cl;
-  return $self->_parse( $path );
+  return $self->{path} = $cl->_parse($path) if $cl;
+  return $self->_parse($path);
 }
 
 sub _split_simple {
@@ -275,7 +273,7 @@ sub path { @{ shift->{path} || [] } }
 
 sub match {
   my ( $self, $path ) = @_;
-  my @mp = $self->_split_simple( $path );
+  my @mp = $self->_split_simple($path);
   my @pp = $self->path;
   while ( @pp && @mp ) {
     return unless ( shift @pp )->{match}( shift @mp );
@@ -286,7 +284,7 @@ sub match {
 
 sub capture {
   my ( $self, $path ) = @_;
-  my @mp  = $self->_split_simple( $path );
+  my @mp  = $self->_split_simple($path);
   my @pp  = $self->path;
   my @cap = ();
   while ( @pp && @mp ) {

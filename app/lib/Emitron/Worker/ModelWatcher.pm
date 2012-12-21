@@ -31,13 +31,13 @@ sub run {
   my $model = $self->em->model;
 
   my $rev = $model->revision;
-  $self->_trigger->data( $model->checkout( $rev ) );
+  $self->_trigger->data( $model->checkout($rev) );
 
   while () {
     my $nrev = $model->wait( $rev, 10 );
     if ( $nrev ne $rev ) {
       debug "Model updated to $nrev";
-      $self->_revision( $nrev );
+      $self->_revision($nrev);
       $self->_trigger->data( $model->checkout( $rev = $nrev ) );
     }
   }
@@ -59,7 +59,7 @@ sub listen {
       debug "Firing $sig for change to $p (matches $path)";
       $self->post_message(
         type => $sig,
-        msg  => [ $self->_revision, @_ ]
+        msg  => [$self->_revision, @_]
       );
     }
   );

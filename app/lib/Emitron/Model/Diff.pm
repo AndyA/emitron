@@ -14,9 +14,9 @@ Emitron::Model::Diff - Add diff support to model
 
 sub diff {
   my ( $self, $ra, $rb ) = @_;
-  my $da = $self->checkout( $ra );
+  my $da = $self->checkout($ra);
   return unless defined $da;
-  my $db = $self->checkout( $rb );
+  my $db = $self->checkout($rb);
   return unless defined $db;
   return json_diff( $da, $db );
 }

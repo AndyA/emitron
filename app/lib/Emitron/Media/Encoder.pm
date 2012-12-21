@@ -15,7 +15,7 @@ with 'Emitron::Media::Roles::Forker';
 has source => ( isa => 'Str',               is => 'ro', required => 1 );
 has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );
 has burnin => ( isa => 'Bool',              is => 'ro', default  => 0 );
-has dog => ( isa => 'Str', is => 'ro' );
+has dog    => ( isa => 'Str',               is => 'ro' );
 
 =head1 NAME
 
@@ -33,7 +33,7 @@ sub start {
   my $self = shift;
   my @cmd  = $self->_build_cmds;
   $self->_stash( 'commands', @cmd );
-  $self->bash( $_ ) for @cmd;
+  $self->bash($_) for @cmd;
 }
 
 sub _stash {
@@ -52,7 +52,7 @@ sub stop { shift->kill_all }
 
 sub _log {
   my $self = shift;
-  return ' > ' . shell_quote( $self->_mk_log( @_ ) ) . ' 2>&1';
+  return ' > ' . shell_quote( $self->_mk_log(@_) ) . ' 2>&1';
 }
 
 sub _build_cmds {
@@ -165,7 +165,7 @@ sub _ff_encoder {
   my $keyint = $self->globals->gop * $profile->{v}{rate};
   my $sz     = join 'x', $profile->{v}{width}, $profile->{v}{height};
 
-  my @burn = $args{burnin} ? ( -vf => $self->_burnin( $profile ) ) : ();
+  my @burn = $args{burnin} ? ( -vf => $self->_burnin($profile) ) : ();
 
   my @cmd = (
     $self->globals->ffmpeg,
@@ -182,7 +182,7 @@ sub _ff_encoder {
     '-profile:v'  => $profile->{v}{profile},
     -preset       => 'veryfast',
     -sc_threshold => 0,
-    -g            => int( $keyint ),
+    -g            => int($keyint),
     -keyint_min   => int( $keyint / 2 ),
     '-r:v'        => $profile->{v}{rate},
     '-b:v'        => _to_k( $profile->{v}{bitrate} ),
@@ -202,10 +202,10 @@ sub _gst_pipe {
   my ( $self, %args ) = @_;
   return (
     $self->globals->gst_launch,    #
-    'mpegtsmux', 'name=muxer', '!', 'filesink', "location=$args{dst}", #
-    'rtspsrc', "location=$args{src}", 'name=src',                      #
-    'src.', '!', 'rtpmp4gdepay', '!', 'queue', '!', 'muxer.',          #
-    'src.', '!', 'rtph264depay', '!', 'queue', '!', 'muxer.'           #
+    'mpegtsmux', 'name=muxer', '!', 'filesink', "location=$args{dst}",    #
+    'rtspsrc', "location=$args{src}", 'name=src',                         #
+    'src.', '!', 'rtpmp4gdepay', '!', 'queue', '!', 'muxer.',             #
+    'src.', '!', 'rtph264depay', '!', 'queue', '!', 'muxer.'              #
   );
 }
 

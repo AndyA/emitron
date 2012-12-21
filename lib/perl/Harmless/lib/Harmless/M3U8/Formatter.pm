@@ -41,7 +41,7 @@ sub _make_tag_formatter {
       return $val;
     }
     my $f = $fs{$type} || die "No formatter: $type";
-    return $f->( $val );
+    return $f->($val);
   };
 
   my $stminf = {
@@ -57,18 +57,18 @@ sub _make_tag_formatter {
     EXT_X_MEDIA_SEQUENCE => 'i',
     EXT_X_TARGETDURATION => 'i',
     EXT_X_VERSION        => 'i',
-    EXT_X_PLAYLIST_TYPE  => [ 'EVENT', 'VOD' ],
+    EXT_X_PLAYLIST_TYPE  => ['EVENT', 'VOD'],
     EXT_X_MEDIA          => {
       require => {},
       allow   => {
         URI      => 'zqs',
-        TYPE     => [ 'AUDIO', 'VIDEO', 'SUBTITLES' ],
+        TYPE     => ['AUDIO', 'VIDEO', 'SUBTITLES'],
         GROUP_ID => 'zqs',
         LANGUAGE => 'zqs',
         NAME     => 'zqs',
-        DEFAULT         => [ 'YES', 'NO' ],
-        AUTOSELECT      => [ 'YES', 'NO' ],
-        FORCED          => [ 'YES', 'NO' ],
+        DEFAULT         => ['YES', 'NO'],
+        AUTOSELECT      => ['YES', 'NO'],
+        FORCED          => ['YES', 'NO'],
         CHARACTERISTICS => 'zqs',
       },
     },
@@ -114,9 +114,9 @@ sub _make_tag_formatter {
     my @ko = sort { $all{$a} cmp $all{$b} || $a cmp $b } keys %all;
 
     my @out = ();
-    for my $k ( @ko ) {
+    for my $k (@ko) {
       my $vv = delete $v{$k};
-      push @out, join '=', _from_name( $k ), $fmtv->( $all{$k}, $vv )
+      push @out, join '=', _from_name($k), $fmtv->( $all{$k}, $vv )
        if defined $vv;
     }
     my @extra = sort keys %v;
@@ -126,14 +126,14 @@ sub _make_tag_formatter {
 
   my $fmt1 = sub {
     my ( $tag, $val ) = @_;
-    my @out = ( '#', _from_name( $tag ) );
+    my @out = ( '#', _from_name($tag) );
     my $sp = $spec{$tag} || die "Unknown tag: $tag";
     if ( ref $sp ) {
       if ( 'HASH' eq ref $sp ) {
         push @out, ':', $fmt->( $tag, $sp, $val );
       }
       elsif ( 'CODE' eq ref $sp ) {
-        push @out, ':', $sp->( $val );
+        push @out, ':', $sp->($val);
       }
       elsif ( 'ARRAY' eq ref $sp ) {
         # Empty array: no value, tag is flag
@@ -155,7 +155,7 @@ sub _make_tag_formatter {
     my ( $tag, $val ) = @_;
     return
      map { $fmt1->( $tag, $_ ) }
-     ( ( 'ARRAY' eq ref $val ) ? @$val : ( $val ) );
+     ( ( 'ARRAY' eq ref $val ) ? @$val : ($val) );
   };
 }
 
@@ -184,20 +184,20 @@ sub _norm_seg {
 
 sub format {
   my ( $self, $pl ) = @_;
-  my @out = ( '#EXTM3U' );
+  my @out = ('#EXTM3U');
 
   my $tf = $self->_make_tag_formatter;
-  my $rf = $self->_make_rec_formatter( $tf );
+  my $rf = $self->_make_rec_formatter($tf);
 
   push @out, $rf->( $pl->{meta} || {} );
 
   for my $vpl ( @{ $pl->{vpl} || [] } ) {
-    push @out, $rf->( $vpl );
+    push @out, $rf->($vpl);
   }
 
   for my $run ( @{ $pl->{seg} || [] } ) {
-    for my $seg ( @$run ) {
-      push @out, $rf->( _norm_seg( $seg ) );
+    for my $seg (@$run) {
+      push @out, $rf->( _norm_seg($seg) );
     }
     push @out, '#EXT-X-DISCONTINUITY';
   }

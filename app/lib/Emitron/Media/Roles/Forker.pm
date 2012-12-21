@@ -31,8 +31,8 @@ sub _fork {
 
 sub fork {
   my $self = shift;
-  my $pid  = $self->_fork( @_ );
-  $self->add_child( $pid );
+  my $pid  = $self->_fork(@_);
+  $self->add_child($pid);
   return $pid;
 }
 
@@ -57,10 +57,10 @@ sub kill_all {
 
   my @pids = sort { $a <=> $b } splice @{ $self->_kids };
   my $sig = kill -9, @pids;
-  warning "Signalled only $sig of ", scalar( @pids ), "\n"
+  warning "Signalled only $sig of ", scalar(@pids), "\n"
    unless @pids == $sig;
   my @st = ();
-  for my $pid ( @pids ) {
+  for my $pid (@pids) {
     my $got = waitpid $pid, WNOHANG;
     push @st, $? if $got >= 0;
   }

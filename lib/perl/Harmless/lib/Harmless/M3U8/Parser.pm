@@ -37,8 +37,7 @@ sub _parse_attr {
   my @at    = ();
   my $id    = qr{[A-Z]+(?:-[A-Z]+)*};
   my $value = qr{"(?:\\.|[^"])*"|[^,]*};
-  push @at, _to_name( $1 ), _str( $2 )
-   while $attr =~ m{($id)=($value),?}g;
+  push @at, _to_name($1), _str($2) while $attr =~ m{($id)=($value),?}g;
   return @at;
 }
 
@@ -53,7 +52,7 @@ sub make_parser {
   my $rv = {
     meta   => {},
     vpl    => [],
-    seg    => [ [] ],
+    seg    => [[]],
     closed => 0,
   };
 
@@ -87,7 +86,7 @@ sub make_parser {
       $state = 'IGNORE';
     },
     EXT_X_STREAM_INF => sub {
-      $cseg->( 'HLSPL' )->{ $_[0] } = { _parse_attr( $_[1] ) };
+      $cseg->('HLSPL')->{ $_[0] } = { _parse_attr( $_[1] ) };
     },
     EXT_X_DISCONTINUITY => sub {
       push @{ $rv->{seg} }, [] if @{ $rv->{seg}[-1] };
@@ -97,7 +96,7 @@ sub make_parser {
   my %de_hls_seg = (
     EXTINF => sub {
       my ( $dur, $tit ) = split /,/, $_[1], 2;
-      $cseg->( 'HLSSEG' );
+      $cseg->('HLSSEG');
       $tit = '' unless defined $tit;
       $tit =~ s/\s+$//;
       $seg->{title}    = $tit;
@@ -106,24 +105,24 @@ sub make_parser {
     },
     EXT_X_PROGRAM_DATE_TIME => sub {
       my $dt = DateTime::Format::ISO8601->parse_datetime( $_[1] );
-      $cseg->( 'HLSSEG' )->{ $_[0] }
+      $cseg->('HLSSEG')->{ $_[0] }
        = $dt->epoch + $dt->microsecond / 1_000_000;
     },
     EXT_X_BYTERANGE => sub {
       my ( $tag, $arg ) = @_;
       my ( $len, $ofs ) = split /\@/, $arg, 2;
       unless ( defined $ofs ) {
-        my $prev = $pseg->() || die "Need previous segment";
-        my $pbr = $prev->{$tag} || die "Previous segment not byterange";
+        my $prev = $pseg->()     || die "Need previous segment";
+        my $pbr  = $prev->{$tag} || die "Previous segment not byterange";
         $ofs = $pbr->{offset} + $pbr->{length};
       }
-      $cseg->( 'HLSSEG' )->{$tag} = {
+      $cseg->('HLSSEG')->{$tag} = {
         length => 1 * $len,
         offset => 1 * $ofs
       };
     },
     uri => sub {
-      $cseg->( 'HLSSEG' )->{uri} = $_[1];
+      $cseg->('HLSSEG')->{uri} = $_[1];
       push @{ $rv->{seg}[-1] }, $seg;
       undef $seg;
       $state = 'HLS';
@@ -132,7 +131,7 @@ sub make_parser {
 
   my %de_hls_pl = (
     uri => sub {
-      $cseg->( 'HLSPL' )->{uri} = $_[1];
+      $cseg->('HLSPL')->{uri} = $_[1];
       push @{ $rv->{vpl} }, $seg;
       undef $seg;
       $state = 'HLS';
@@ -152,7 +151,7 @@ sub make_parser {
 
   my $despatch = sub {
     my ( $dir, @a ) = @_;
-    my $tag = _to_name( $dir );
+    my $tag = _to_name($dir);
     my $hd  = $decode{$state}{$tag};
     $hd->( $tag, @a ) if $hd;
   };
@@ -163,7 +162,7 @@ sub make_parser {
     return if $ln =~ /^\s*$/;
     if ( $ln =~ /^#(EXT.*)/ ) {
       my $ext = $1;
-      $despatch->( $ext =~ /^(.+?):(.*)/ ? ( $1, $2 ) : ( $ext ) );
+      $despatch->( $ext =~ /^(.+?):(.*)/ ? ( $1, $2 ) : ($ext) );
       return;
     }
     return if $ln =~ /^#/;
@@ -181,7 +180,7 @@ sub parse_file {
 
   while ( defined( my $ln = <$fh> ) ) {
     chomp $ln;
-    $p->( $ln );
+    $p->($ln);
   }
 
   return $p->();
@@ -193,7 +192,7 @@ sub parse {
   my $p = $self->make_parser;
 
   for my $ln ( split /\n/, $m3u8 ) {
-    $p->( $ln );
+    $p->($ln);
   }
 
   return $p->();

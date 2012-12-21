@@ -18,8 +18,7 @@ use Data::JSONPatch;
 
 {
   my $p = Data::JSONPatch->new;
-  is $p->patch_path( { path => '$.foo' } ), '$.foo',
-   'patch_path: $.foo';
+  is $p->patch_path( { path => '$.foo' } ), '$.foo', 'patch_path: $.foo';
   is $p->patch_path( { element => '$.foo' } ),
    '$.foo',
    'patch_path: $.foo';

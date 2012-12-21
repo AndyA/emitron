@@ -27,9 +27,8 @@ sub on {
   my ( $self, $name, $handler, $group ) = @_;
   defined $group or $group = 'global';
   push @{ $self->{md_h} },
-   {
-    name    => "$name",
-    match   => $self->_wild_to_re( $name ),
+   {name    => "$name",
+    match   => $self->_wild_to_re($name),
     handler => $handler,
     group   => $group
    };
@@ -38,7 +37,7 @@ sub on {
 
 sub _match {
   my ( $self, $h, $like ) = @_;
-  return if defined $like->{name}  && $like->{name}  ne $h->{name};
+  return if defined $like->{name}  && $like->{name} ne $h->{name};
   return if defined $like->{group} && $like->{group} ne $h->{group};
   return 1;
 }
@@ -59,7 +58,7 @@ sub _map_message {
   for my $h ( @{ $self->{md_h} } ) {
     my @cap = ();
     my $ma  = $h->{match};
-    push @hh, [ $h, @cap ]
+    push @hh, [$h, @cap]
      if ( 'Regexp' eq ref $ma && ( @cap = $name =~ $ma ) )
      || $ma eq $name;
   }
@@ -68,7 +67,7 @@ sub _map_message {
 
 sub _bind_message {
   my ( $self, $name ) = @_;
-  return @{ $self->{md_c}{$name} ||= $self->_map_message( $name ) };
+  return @{ $self->{md_c}{$name} ||= $self->_map_message($name) };
 }
 
 sub despatch {
@@ -76,7 +75,7 @@ sub despatch {
   debug "Despatching: ", $msg->type;
   my @hh = $self->_bind_message( $msg->type );
   info "Unhandled message: ", $msg->type unless @hh;
-  for my $hh ( @hh ) {
+  for my $hh (@hh) {
     my ( $h, @a ) = @$hh;
     $h->{handler}( $msg, @a );
   }

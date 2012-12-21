@@ -24,11 +24,10 @@ use Data::JSONTrigger;
   is $jt->has_trigger, 3, 'has_trigger == 3';
 
   my $fire = sub {
-    $jt->fire( '$.foo.0', "Hello, World" )
-     ->fire( '$.bar.boffle', 1, 2, 3 );
-    $jt->fire( '$.baz.bink' );
-    $jt->fire( '$.baz.nomatch' );
-    $jt->fire( '*$.bar.bink' );
+    $jt->fire( '$.foo.0', "Hello, World" )->fire( '$.bar.boffle', 1, 2, 3 );
+    $jt->fire('$.baz.bink');
+    $jt->fire('$.baz.nomatch');
+    $jt->fire('*$.bar.bink');
   };
 
   $fire->();
@@ -36,8 +35,8 @@ use Data::JSONTrigger;
   {
     my $want = [
       # Comment to foil perltidy
-      [ '$.foo.0', "Hello, World" ],
-      [ '$.bar.boffle', 1, 2, 3 ],
+      ['$.foo.0', "Hello, World"],
+      ['$.bar.boffle', 1, 2, 3],
       ['$.baz.bink'],
       ['$.bar.bink'],
       ['$.bar.bink'],
@@ -52,7 +51,7 @@ use Data::JSONTrigger;
   {
     my $want = [
       # Comment to foil perltidy
-      [ '$.bar.boffle', 1, 2, 3 ],
+      ['$.bar.boffle', 1, 2, 3],
       ['$.bar.bink'],
     ];
     eq_or_diff $rec->log, $want, "fire";

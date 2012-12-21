@@ -17,8 +17,8 @@ use Emitron::Model;
   isa_ok $model, 'Emitron::Model';
   my $model2 = $model->init;
   my $model3 = $model->init;
-  is refaddr( $model ), refaddr( $model2 ), 'init returns model';
-  is refaddr( $model ), refaddr( $model3 ), 'second init returns model';
+  is refaddr($model), refaddr($model2), 'init returns model';
+  is refaddr($model), refaddr($model3), 'second init returns model';
 }
 
 with_model(
@@ -27,10 +27,10 @@ with_model(
     my @rmap = ();
     for my $rev ( 1 .. 10 ) {
       my $rec = { r => $rev };
-      my $ver = $model->commit( $rec );
-      push @rmap, [ $ver, $rec ];
+      my $ver = $model->commit($rec);
+      push @rmap, [$ver, $rec];
     }
-    for my $rm ( @rmap ) {
+    for my $rm (@rmap) {
       my $rec = $model->checkout( $rm->[0] );
       is_deeply $rec, $rm->[1], "r$rm->[0]";
     }
@@ -78,7 +78,7 @@ with_model(
     );
     is $fail, 3, 'failed 3 times';
     ok defined $nrev, 'nrev valid';
-    is_deeply $model->checkout( $nrev ), { rev => $fail }, "commit OK";
+    is_deeply $model->checkout($nrev), { rev => $fail }, "commit OK";
   }
 );
 
@@ -88,8 +88,7 @@ with_model(
     my $got = $model->checkout( $model->revision );
     is_deeply $got, { foo => 1, bar => 2 }, "init with data";
   },
-  {
-    foo => 1,
+  { foo => 1,
     bar => 2,
   }
 );
@@ -99,7 +98,7 @@ sub with_model {
   my $data  = shift;
   my $dir   = File::Temp->newdir;
   my $model = Emitron::Model->new( root => $dir, prune => 50 );
-  $model->init( $data );
+  $model->init($data);
   $cb->( $model, $dir );
 }
 

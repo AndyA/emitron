@@ -17,7 +17,7 @@ has _opid => ( isa => 'Num', is => 'ro', default => sub { $$ } );
 has 'engine' => (
   isa     => 'ForkPipe::Engine::Base',
   is      => 'rw',
-  handles => [ 'send', 'peek', 'poll', 'on', 'stats' ]
+  handles => ['send', 'peek', 'poll', 'on', 'stats']
 );
 
 has listener => ( isa => 'ForkPipe::Listener', is => 'ro' );
@@ -65,13 +65,13 @@ sub _attr {
 sub fork {
   my $self = shift;
 
-  my @p = $self->_make_pipes( 4 );
+  my @p = $self->_make_pipes(4);
 
   my $pid = fork;
   croak "Fork failed: $!" unless defined $pid;
 
-  unless ( $pid ) {
-    close $_ for @p[ 0, 3, 4, 7 ];
+  unless ($pid) {
+    close $_ for @p[0, 3, 4, 7];
 
     $self->engine(
       ForkPipe::Engine::Child->new(
@@ -87,7 +87,7 @@ sub fork {
   }
 
   # Parent
-  close $_ for @p[ 1, 2, 5, 6 ];
+  close $_ for @p[1, 2, 5, 6];
 
   $self->engine(
     ForkPipe::Engine::Parent->new(
@@ -106,7 +106,7 @@ sub fork {
 sub log {
   my $self = shift;
   my $msg = join '', @_;
-  $self->_log( $_ ) for split /\n/, $msg;
+  $self->_log($_) for split /\n/, $msg;
 }
 
 1;

@@ -26,15 +26,15 @@ sub run {
   my $backoff = Emitron::BackOff->new( base => 1, max => 10 );
 
   while () {
-    my $streams = eval { $srv->api( 'listStreams' ) };
+    my $streams = eval { $srv->api('listStreams') };
     if ( my $err = $@ ) {
       error $err;
       sleep $backoff->bad;
     }
-    elsif ( $streams ) {
+    elsif ($streams) {
       my $next = encode_json $streams;
       unless ( defined $prev && $prev eq $next ) {
-        $self->_handle_listStreams( $streams );
+        $self->_handle_listStreams($streams);
         $prev = $next;
       }
       sleep $backoff->good;
@@ -49,7 +49,7 @@ sub _handle_listStreams {
   $self->em->model->transaction(
     sub {
       my ( $model, $rev ) = @_;
-      $model->{streams} = $self->_munge_streams( $data );
+      $model->{streams} = $self->_munge_streams($data);
       return $model;
     }
   );
@@ -76,8 +76,8 @@ sub _munge_streams {
           next;
         }
         my $rec = $by_name->{$name};
-        $rec->{rtmp} = $rec->{preview} = $self->_rtmp_url( $name );
-        $rec->{rtsp} = $self->_rtsp_url( $name );
+        $rec->{rtmp} = $rec->{preview} = $self->_rtmp_url($name);
+        $rec->{rtsp} = $self->_rtsp_url($name);
         $out->{$name}{$type}{$app} = $rec;
       }
     }

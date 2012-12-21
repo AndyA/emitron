@@ -26,13 +26,13 @@ sub run {
     my $nrev = $queue->revision;
     if ( defined $rev ) {
       for my $r ( $rev + 1 .. $nrev ) {
-        my $msg = $queue->checkout( $r );
-#        $self->post_message(
-#          type    => 'message',
-#          msg     => $msg,
-#          source  => 'api',
-#          cleanup => $r
-#        ) if defined $msg;
+        my $msg = $queue->checkout($r);
+        #        $self->post_message(
+        #          type    => 'message',
+        #          msg     => $msg,
+        #          source  => 'api',
+        #          cleanup => $r
+        #        ) if defined $msg;
       }
     }
     $rev = $nrev;

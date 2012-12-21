@@ -27,13 +27,13 @@ my @case = (
 
 plan tests => 2 * @case;
 
-for my $tc ( @case ) {
+for my $tc (@case) {
   my $name = $tc->{source};
   my $src  = file( REF, $tc->{source} );
-  my $orig = Harmless::M3U8::Parser->new->parse_file( $src );
+  my $orig = Harmless::M3U8::Parser->new->parse_file($src);
   my $tmp  = dclone $orig;
   my $tf   = File::Temp->new;
-  my $m3u8 = Harmless::M3U8::Formatter->new->format( $tmp );
+  my $m3u8 = Harmless::M3U8::Formatter->new->format($tmp);
   eq_or_diff $tmp, $orig, "$name: unmodified";
   print { file( $tf->filename )->openw } $m3u8;
   my $new = Harmless::M3U8::Parser->new->parse_file( $tf->filename );

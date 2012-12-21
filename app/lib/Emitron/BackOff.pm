@@ -28,7 +28,7 @@ sub bad {
   my $next = $self->current * $self->rise;
   my $max  = $self->max;
   $next = $max if defined $max && $next > $max;
-  return $self->current( $next );
+  return $self->current($next);
 }
 
 1;

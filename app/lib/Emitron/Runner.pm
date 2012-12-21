@@ -76,12 +76,12 @@ sub run {
         handler => $handler,
         wrk     => $wrk,
       };
-      $rds->add( [ $wrk->reader, $wrk->pid ] );
+      $rds->add( [$wrk->reader, $wrk->pid] );
     }
 
-    my @rdy = $rds->can_read( 60 );
+    my @rdy = $rds->can_read(60);
 
-    for my $rd ( @rdy ) {
+    for my $rd (@rdy) {
       my $ar = $active->{ $rd->[1] };
       die unless defined $ar;
       my $wrk = $ar->{wrk};
@@ -93,14 +93,14 @@ sub run {
       }
 
       if ( $msg->type eq 'signal.state' ) {
-        $wrk->signal( $msg );
+        $wrk->signal($msg);
         if ( $wrk->is_ready && defined( my $m = delete $ar->{msg} ) ) {
-          $self->cleanup->( $m );
+          $self->cleanup->($m);
         }
       }
       else {
         #        debug "Sending message: ", $msg;
-        $self->enqueue( $msg );
+        $self->enqueue($msg);
       }
     }
 
@@ -115,13 +115,13 @@ sub run {
       my $ar  = shift @ready;
       $ar->{msg} = $msg;
       debug "Delivering ", $msg->type, " to ", $ar->{wrk}{pid};
-      $ar->{wrk}->send( $msg );
+      $ar->{wrk}->send($msg);
     }
 
     while () {
       my $pid = waitpid -1, WNOHANG;
       last unless defined $pid && $pid > 0;
-      $self->recycle( $pid );
+      $self->recycle($pid);
     }
   }
 }
@@ -134,7 +134,7 @@ sub recycle {
     debug "Regenerating ", ref $ar->{handler};
     $self->_w_put( $ar->{handler} );
     if ( my $msg = delete $ar->{msg} ) {
-      $self->_requeue( $msg );
+      $self->_requeue($msg);
     }
   }
 }

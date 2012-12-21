@@ -15,7 +15,7 @@ Emitron::Model::Watched - A model with an associated global event
 
 =cut
 
-sub _evfile { shift->_obj_name( 'event' ) }
+sub _evfile { shift->_obj_name('event') }
 
 sub _signal {
   my ( $self, $rev ) = @_;
@@ -42,7 +42,7 @@ sub fileno {
 sub _make_watch {
   my $self = shift;
   my $evf  = $self->_evfile;
-  my $dir  = file( $evf )->parent;
+  my $dir  = file($evf)->parent;
 
   $self->{_watch}->cancel if $self->{_watch};
 
@@ -78,7 +78,7 @@ sub _install_watch {
 override commit => sub {
   my $self = shift;
   my $rev  = super();
-  $self->_signal( $rev ) if defined $rev;
+  $self->_signal($rev) if defined $rev;
   return $rev;
 };
 
@@ -92,9 +92,9 @@ sub _read_ev {
 sub _drain {
   my $self = shift;
   my $in   = $self->_inotify;
-  $in->blocking( 0 );
+  $in->blocking(0);
   $in->poll;
-  $in->blocking( 1 );
+  $in->blocking(1);
 }
 
 sub poll {

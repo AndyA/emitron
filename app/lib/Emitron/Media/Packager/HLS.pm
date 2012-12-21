@@ -17,7 +17,7 @@ with 'Emitron::Media::Roles::Forker';
 has webroot => ( isa => 'Str', is => 'ro', required => 1 );
 has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );
 
-has [ 'vod', 'dynamic_duration' ] => (
+has ['vod', 'dynamic_duration'] => (
   isa      => 'Bool',
   is       => 'ro',
   required => 1,
@@ -145,14 +145,11 @@ sub _make_manifest {
     sub {
       my $br = shift;
       push @vpl,
-       {
-        EXT_X_STREAM_INF => {
+       {EXT_X_STREAM_INF => {
           PROGRAM_ID => 1,
-          BANDWIDTH  => $br->{profile}{a}{bitrate}
-           + $br->{profile}{v}{bitrate}
+          BANDWIDTH  => $br->{profile}{a}{bitrate} + $br->{profile}{v}{bitrate}
         },
-        uri => $self->_manifest( $br->{name} )
-       };
+        uri => $self->_manifest( $br->{name} ) };
     }
   );
 
@@ -161,15 +158,15 @@ sub _make_manifest {
   my $mf = file( $self->webroot, $self->_manifest );
   $mf->parent->mkpath;
   debug "Writing $mf";
-  $m3u8->write( $mf );
+  $m3u8->write($mf);
 }
 
 sub _with_config {
   my ( $self, $cb ) = @_;
-  $cb->( $_ ) for @{ $self->config };
+  $cb->($_) for @{ $self->config };
 }
 
-sub _token { join '.', $$, int( time ) }
+sub _token { join '.', $$, int(time) }
 
 sub _make_streams {
   my $self = shift;
@@ -182,17 +179,16 @@ sub _make_streams {
       my $id   = $br->{name};
       my $tok  = $self->_token;
       my $next = 0;
-      my $mf   = file( $self->webroot, $self->_manifest( $id ) );
+      my $mf   = file( $self->webroot, $self->_manifest($id) );
       my $name = join '_', $self->name, $id;
       my $dstd = dir( $self->webroot, $name );
       $dstd->mkpath;
       my $m3u8 = Harmless::M3U8->new;
-      $m3u8->read( $mf ) if -e $mf;
+      $m3u8->read($mf) if -e $mf;
       $m3u8->closed( $self->vod );
       # TODO: sanity check / merge existing pl
       $m3u8->meta(
-        {
-          EXT_X_TARGETDURATION => $self->globals->gop,
+        { EXT_X_TARGETDURATION => $self->globals->gop,
           EXT_X_VERSION        => 3,
           EXT_X_MEDIA_SEQUENCE => 0,
           EXT_X_PLAYLIST_TYPE  => $self->vod ? 'VOD' : 'EVENT',
@@ -208,9 +204,9 @@ sub _make_streams {
           my $src      = $evt->fullname;
           my $duration = $self->globals->gop;
           if ( $self->dynamic_duration ) {
-            my $inf = $tsd->scan( $src );
-            if ( $inf ) { $duration = $inf->{len} }
-            else        { warning "Can't find h264 stream in $src" }
+            my $inf = $tsd->scan($src);
+            if ($inf) { $duration = $inf->{len} }
+            else      { warning "Can't find h264 stream in $src" }
           }
           my $segn = sprintf '%s.%08d.ts', $tok, ++$next;
           my $uri = join '/', $name, $segn;
@@ -224,7 +220,7 @@ sub _make_streams {
             )
           );
           debug "Updating $mf to include $uri";
-          $m3u8->write( $mf );
+          $m3u8->write($mf);
         }
       );
     }
@@ -239,7 +235,7 @@ sub _streams {
 
 sub _with_streams {
   my ( $self, $cb ) = @_;
-  $cb->( $_ ) for $self->_streams;
+  $cb->($_) for $self->_streams;
 }
 
 1;

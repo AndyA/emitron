@@ -15,13 +15,13 @@ sub resolve_path {
   my @p = split /\./, $path;
   my $ds = { '$' => $data };
   my ( $pds, $key );
-  while ( @p ) {
+  while (@p) {
     $pds = $ds;
     $key = shift @p;
     $ds  = 'ARRAY' eq ref $ds ? $ds->[$key] : $ds->{$key};
   }
   $key *= 1 if 'ARRAY' eq ref $pds;
-  return [ $path, $ds, $pds, $key ];
+  return [$path, $ds, $pds, $key];
 }
 
 ddt(

@@ -41,7 +41,7 @@ has aspect_ratio => (
   traits  => ['Array'],
   isa     => 'ArrayRef[Int]',
   is      => 'ro',
-  default => sub { [ 16, 9 ] },
+  default => sub { [16, 9] },
   handles => { aspect_ratio_str => 'join' }
 );
 

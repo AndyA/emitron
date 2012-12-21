@@ -49,12 +49,12 @@ sub testcard {
 
     {
       my @ft = ( $fg, $a{font}, $a{fontsize}, 0, 0, 0, $tc );
-      my ( $lx, $ty, $rx, $by ) = bbox( GD::Image->stringFT( @ft ) );
+      my ( $lx, $ty, $rx, $by ) = bbox( GD::Image->stringFT(@ft) );
       my $w = $rx - $lx;
       my $h = $by - $ty;
       $ft[-3] = ( $a{width} - $w ) / 2;
       $ft[-2] = ( $a{height} - $h ) / 2 + $h;
-      $img->stringFT( @ft );
+      $img->stringFT(@ft);
     }
 
     {
@@ -70,8 +70,7 @@ sub testcard {
       }
     }
 
-    file( $out, sprintf $a{template}, $frr )
-     ->openw->print( $img->jpeg( 90 ) );
+    file( $out, sprintf $a{template}, $frr )->openw->print( $img->jpeg(90) );
   }
   print "\n";
 }
@@ -79,10 +78,10 @@ sub testcard {
 sub bbox {
   my @bb = @_;
   return (
-    min( @bb[ 0, 2, 4, 6 ] ),
-    min( @bb[ 1, 3, 5, 7 ] ),
-    max( @bb[ 0, 2, 4, 6 ] ),
-    max( @bb[ 1, 3, 5, 7 ] ),
+    min( @bb[0, 2, 4, 6] ),
+    min( @bb[1, 3, 5, 7] ),
+    max( @bb[0, 2, 4, 6] ),
+    max( @bb[1, 3, 5, 7] ),
   );
 }
 
@@ -94,7 +93,7 @@ sub tc {
     unshift @part, $fr % $d;
     $fr = int( $fr / $d );
   }
-  return sprintf join( ':', ( '%02d' ) x @part ), @part;
+  return sprintf join( ':', ('%02d') x @part ), @part;
 }
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl

@@ -71,7 +71,7 @@ sub _set_bit {
     sub {
       my ( undef, undef, $ctx, $key ) = @_;
       if    ( 'ARRAY' eq ref $ctx ) { $ctx->[$key] |= $bit }
-      elsif ( 'HASH'  eq ref $ctx ) { $ctx->{$key} |= $bit }
+      elsif ( 'HASH' eq ref $ctx )  { $ctx->{$key} |= $bit }
     },
     1
   );
@@ -82,11 +82,10 @@ sub change_set {
   my $list = Data::JSONVisitor->new( {} );
   my $orig = Data::JSONVisitor->new( dclone $self->data );
 
-  for my $pp ( @$jp ) {
-    my $path = $self->patch_path( $pp );
+  for my $pp (@$jp) {
+    my $path = $self->patch_path($pp);
     if ( $pp->{op} eq 'add' ) {
-      _visit( $pp->{value}, sub { _set_bit( $list, $_[0], 2 ) },
-        $path );
+      _visit( $pp->{value}, sub { _set_bit( $list, $_[0], 2 ) }, $path );
     }
     elsif ( $pp->{op} eq 'remove' ) {
       $self->{p}->each(
@@ -103,7 +102,7 @@ sub change_set {
 
 sub _is_like {
   my ( $h, $like ) = @_;
-  for my $prop ( qw( path group ) ) {
+  for my $prop (qw( path group )) {
     return 1 if exists $like->{$prop} && $like->{$prop} eq $h->{$prop};
   }
   return;
@@ -123,8 +122,7 @@ sub _cook_handler {
 sub on {
   my ( $self, $path, $cb, $group ) = @_;
   my $h = _cook_handler(
-    {
-      path  => $path,
+    { path  => $path,
       cb    => $cb,
       group => $group || 'global',
     }
@@ -137,7 +135,7 @@ sub on {
 sub off {
   my ( $self, %like ) = @_;
   my $lk = _cook_handler( \%like );
-  my $hh = [ grep { !_is_like( $_, $lk ) } @{ $self->{handler} } ];
+  my $hh = [grep { !_is_like( $_, $lk ) } @{ $self->{handler} }];
   $self->{handler} = $hh;
   $self;
 }
@@ -160,11 +158,11 @@ sub trigger_set {
         my ( $p, $v, $c, $k ) = @_;
         my $flags = 0;
         _visit( $v, sub { $flags |= $_[1] } );
-        if ( $flags ) {
-          my $b = $cs->{orig}->get( $p );
-          my $a = $self->{p}->get( $p );
+        if ($flags) {
+          my $b = $cs->{orig}->get($p);
+          my $a = $self->{p}->get($p);
           use Data::Dumper;
-          $h->{cb}->( $p, $b, $a, @{ $h->{pp}->capture( $p ) } )
+          $h->{cb}->( $p, $b, $a, @{ $h->{pp}->capture($p) } )
            if ( $h->{limit} eq '+' && ( !defined $b && defined $a ) )
            || ( $h->{limit} eq '-' && ( defined $b && !defined $a ) )
            || ( $h->{limit} eq '*' && ( defined $b || defined $a ) );
@@ -177,15 +175,15 @@ sub trigger_set {
 
 sub patch {
   my ( $self, $jp ) = @_;
-  my $cs = $self->change_set( $jp );
-  $self->SUPER::patch( $jp );
-  $self->trigger_set( $cs );
+  my $cs = $self->change_set($jp);
+  $self->SUPER::patch($jp);
+  $self->trigger_set($cs);
   $self;
 }
 
 sub sneak {
   my $self = shift;
-  $self->SUPER::data( @_ );
+  $self->SUPER::data(@_);
 }
 
 sub data {
@@ -193,15 +191,15 @@ sub data {
   return $self->SUPER::data unless @_;
   my $data = shift;
   my $diff = json_diff $self->SUPER::data, $data;
-  my $cs   = $self->change_set( $diff );
-  $self->SUPER::data( $data );
-  $self->trigger_set( $cs );
+  my $cs   = $self->change_set($diff);
+  $self->SUPER::data($data);
+  $self->trigger_set($cs);
   $self;
 }
 
 sub trigger {
   my ( $self, $jp ) = @_;
-  $self->trigger_set( $self->change_set( $jp ) );
+  $self->trigger_set( $self->change_set($jp) );
   $self;
 }
 

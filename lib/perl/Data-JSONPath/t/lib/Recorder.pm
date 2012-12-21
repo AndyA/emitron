@@ -16,7 +16,7 @@ sub callback {
   sub { push @$self, [@_] }
 }
 
-sub log { [ splice @{ $_[0] } ] }
+sub log { [splice @{ $_[0] }] }
 
 1;
 

@@ -15,7 +15,7 @@ sub test_cleanup {
     $pl->push_segment( $sf->() );
     $want++;
     $pl->push_discontinuity if rand() < 0.2;
-    $pl->cleanup( 11 );
+    $pl->cleanup(11);
     $want = 11 if $want > 11;
   }
 }
@@ -35,8 +35,7 @@ sub seg_factory {
 
 sub dd {
   use Data::Dumper;
-  Data::Dumper->new( @_ )->Indent( 2 )->Quotekeys( 0 )->Useqq( 1 )
-   ->Dump;
+  Data::Dumper->new(@_)->Indent(2)->Quotekeys(0)->Useqq(1)->Dump;
 }
 
 # vim:ts=2:sw=2:et:ft=perl

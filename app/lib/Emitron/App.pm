@@ -24,7 +24,7 @@ has root => ( isa => 'Str', is => 'ro', default => '/tmp/emitron' );
 has worker => (
   isa     => 'Emitron::Worker::Base',
   is      => 'rw',
-  handles => [ 'post_message', 'handle_messages' ]
+  handles => ['post_message', 'handle_messages']
 );
 
 has _context => (
@@ -32,7 +32,7 @@ has _context => (
   is      => 'ro',
   lazy    => 1,
   default => sub { Emitron::Context->new( root => shift->root ) },
-  handles => [ 'model', 'queue', 'event', 'despatcher' ]
+  handles => ['model', 'queue', 'event', 'despatcher']
 );
 
 has _watcher => (
@@ -81,11 +81,11 @@ Emitron::App - The Emitron app.
 =cut
 
 {
-  my ( $EMITRON );
+  my ($EMITRON);
 
   sub import {
     my $class = shift;
-    $EMITRON ||= $class->new( @_ );
+    $EMITRON ||= $class->new(@_);
     {
       my $pkg = caller;
       no strict 'refs';
@@ -106,14 +106,14 @@ sub run {
 }
 
 sub make_workers {
-  my ( $self ) = @_;
+  my ($self) = @_;
   my @w = ();
 
   #  push @w, Emitron::Worker::EventWatcher->new;
 
   push @w, (
     Emitron::Worker::CRTMPServerWatcher->new(
-      uri => $self->uri( 'crtmpserver' )
+      uri => $self->uri('crtmpserver')
     ),
     #    Emitron::Worker::Tickler->new,
     $self->_watcher
@@ -151,7 +151,7 @@ sub _wrap_handler {
   return sub {
     local $UID = $uid || $self->_make_uid;
     debug "Running handler in $UID";
-    $handler->( @_ );
+    $handler->(@_);
   };
 }
 
@@ -159,16 +159,15 @@ sub handle_events {
   my $self  = shift;
   my $event = $self->event;
   # FIXME sometimes rev is undef at startup. Race?
-  my $rev   = $event->revision;
+  my $rev = $event->revision;
   $self->add_listener(
     $event->fileno,
     sub {
       my $fn   = shift;
       my $nrev = $event->poll;
       for my $r ( $rev + 1 .. $nrev ) {
-        my $ev = $event->checkout( $r );
-        $self->despatcher->despatch(
-          Emitron::Message->from_raw( $ev ) );
+        my $ev = $event->checkout($r);
+        $self->despatcher->despatch( Emitron::Message->from_raw($ev) );
       }
       $rev = $nrev;
     }
@@ -187,8 +186,8 @@ sub _add_model_to_listener {
       my $fn   = shift;
       my $nrev = $model->poll;
       if ( $nrev ne $self->_revision ) {
-        $self->_revision( $nrev );
-        $trig->data( $model->checkout( $nrev ) );
+        $self->_revision($nrev);
+        $trig->data( $model->checkout($nrev) );
       }
     }
   );
@@ -204,26 +203,26 @@ sub _on_path {
   my $self = shift;
   my $trig = $self->_trigger;
   $self->_add_model_to_listener unless $trig->has_trigger;
-  $trig->on( @_ );
+  $trig->on(@_);
 }
 
 sub _off_path {
   my ( $self, %like ) = @_;
   my $trig = $self->_trigger;
-  $trig->off( %like );
+  $trig->off(%like);
   $self->_remove_model_from_listener unless $trig->has_trigger;
 }
 
 sub _on_path_msg {
   my ( $self, $name, $handler, $group ) = @_;
   $self->despatcher->on(
-    $self->_watcher->listen( $name ),
+    $self->_watcher->listen($name),
     sub {
       my $msg = shift;
       my ( $rev, @args ) = @{ $msg->msg };
       if ( defined $rev ) {
-        $self->_revision( $rev );
-        $handler->( @args );
+        $self->_revision($rev);
+        $handler->(@args);
       }
       else {
         error "Received model update message with no revision: ", $msg;
@@ -249,7 +248,7 @@ sub on {
   my ( $self, $name, $handler, $group ) = @_;
   $group = uid unless defined $group;
   debug "on '$name', group: ", $group;
-  my $hh = $self->_wrap_handler( $handler );
+  my $hh = $self->_wrap_handler($handler);
   for my $n ( 'ARRAY' eq ref $name ? @$name : $name ) {
     $self->_on( $n, $hh, $group );
   }
@@ -260,20 +259,20 @@ sub off {
   my ( $self, %like ) = @_;
 
   if ( exists $like{path} ) {
-    $self->_off_path( %like );
+    $self->_off_path(%like);
   }
   elsif ( exists $like{name} ) {
-    $self->despatcher->off( %like );
+    $self->despatcher->off(%like);
   }
   else {
-    $self->_off_path( %like );
-    $self->despatcher->off( %like );
+    $self->_off_path(%like);
+    $self->despatcher->off(%like);
   }
 }
 
 sub off_all {
   my $self = shift;
-  if ( $UID ) {
+  if ($UID) {
     debug "Removing handlers for $UID";
     $self->off( group => $UID );
   }
@@ -285,8 +284,7 @@ sub off_all {
 sub post_event {
   my ( $self, %args ) = @_;
   return $self->event->commit(
-    {
-      source => 'event',
+    { source => 'event',
       worker => $$,
       ts     => time,
       %args
@@ -298,12 +296,12 @@ sub cfg {
   my ( $self, $path, $cb ) = @_;
   my $v;
   $cb ||= sub { $v = shift };
-  my $jp = Data::JSONPath->upgrade( $path );
+  my $jp = Data::JSONPath->upgrade($path);
   Data::JSONVisitor->new( $self->_trigger->data->{config} )->each(
     $jp,
     sub {
       my ( $p, $v ) = @_;
-      my @arg = @{ $jp->capture( $p ) };
+      my @arg = @{ $jp->capture($p) };
       $cb->( $v, @arg );
     }
   );
@@ -312,7 +310,7 @@ sub cfg {
 
 sub uri {
   my ( $self, $base, @args ) = @_;
-  my $uri = $self->cfg( "\$.uri.$base" );
+  my $uri = $self->cfg("\$.uri.$base");
   die "No uri defined for $base" unless defined $uri;
   return sprintf $uri, @args;
 }
@@ -320,7 +318,7 @@ sub uri {
 sub work_dir {
   my ( $self, @args ) = @_;
   my $nm = join '.', 'job', @args, $$, sprintf '%.3f', time;
-  my $dir = dir( $self->cfg( '$.paths.tmp' ), $nm );
+  my $dir = dir( $self->cfg('$.paths.tmp'), $nm );
   $dir->mkpath;
   return "$dir";
 }

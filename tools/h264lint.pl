@@ -12,7 +12,7 @@ use constant FFMPEG => 'ffmpeg';
 
 GetOptions() or die;
 
-lint( @ARGV );
+lint(@ARGV);
 
 sub is_media {
   my $f = shift;
@@ -31,7 +31,7 @@ sub lint {
   find {
     wanted => sub {
       return unless -f;
-      check_file( $_ ) if is_media( $_ );
+      check_file($_) if is_media($_);
     },
     no_chdir => 1
   }, @obj;
@@ -44,7 +44,7 @@ sub run(@) {
 
 sub extract_frames {
   my ( $in, $out, $log ) = @_;
-  dir( $out )->mkpath;
+  dir($out)->mkpath;
   run FFMPEG
    . " -i '$in' -r 25 -s 400x224 -f image2 '$out/f%06d.jpeg'"
    . " >> '$log' 2>&1";
@@ -52,9 +52,7 @@ sub extract_frames {
 
 sub extract_bitstream {
   my ( $in, $out, $log ) = @_;
-  run FFMPEG
-   . " -y -i '$in' -vcodec copy -an '$out'"
-   . " >> '$log' 2>&1";
+  run FFMPEG . " -y -i '$in' -vcodec copy -an '$out'" . " >> '$log' 2>&1";
 }
 
 sub check_file {

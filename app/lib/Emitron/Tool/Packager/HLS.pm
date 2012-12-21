@@ -19,7 +19,7 @@ has packager => (
   is      => 'ro',
   lazy    => 1,
   builder => '_mk_packager',
-  handles => [ 'start', 'stop' ]
+  handles => ['start', 'stop']
 );
 
 has stream => ( isa => 'HashRef', is => 'ro', required => 1 );
@@ -35,7 +35,7 @@ sub _mk_packager {
      keys %$stm
   );
 
-  for my $pro ( @pro ) {
+  for my $pro (@pro) {
     push @cnf, { name => $pro, %{ $stm->{$pro} } };
   }
 
@@ -47,19 +47,17 @@ sub _mk_packager {
     webroot => $cfg->{webroot}
   );
 
-  return Emitron::Media::Packager::HLS->new( %arg );
+  return Emitron::Media::Packager::HLS->new(%arg);
 }
 
 before start => sub {
   my $self = shift;
-  debug "Start HLS packager ", $self->name, " with config ",
-   $self->config;
+  debug "Start HLS packager ", $self->name, " with config ", $self->config;
 };
 
 before stop => sub {
   my $self = shift;
-  debug "Stop HLS packager ", $self->name, " with config ",
-   $self->config;
+  debug "Stop HLS packager ", $self->name, " with config ", $self->config;
 };
 
 1;

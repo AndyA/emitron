@@ -20,7 +20,7 @@ sub new {
   return bless {
     @_,
     _pl => {
-      seg => [ [] ],
+      seg    => [[]],
       meta   => {},
       vpl    => [],
       closed => 0
@@ -35,13 +35,13 @@ sub format {
 
 sub parse {
   my ( $self, $m3u8 ) = @_;
-  $self->{_pl} = Harmless::M3U8::Parser->new->parse( $m3u8 );
+  $self->{_pl} = Harmless::M3U8::Parser->new->parse($m3u8);
   $self;
 }
 
 sub read {
   my ( $self, $file ) = @_;
-  $self->{_pl} = Harmless::M3U8::Parser->new->parse_file( $file );
+  $self->{_pl} = Harmless::M3U8::Parser->new->parse_file($file);
   $self;
 }
 
@@ -49,7 +49,7 @@ sub write {
   my ( $self, $file ) = @_;
   my $m3u8 = Harmless::M3U8::Formatter->new->format( $self->{_pl} );
   my $tmp  = "$file.tmp";
-  print { file( $tmp )->openw } $m3u8;
+  print { file($tmp)->openw } $m3u8;
   rename $tmp, $file or croak "Can't rename $tmp as $file: $!";
   $self;
 }
@@ -92,7 +92,7 @@ sub push_discontinuity {
 
 BEGIN {
   my @attr = qw( meta vpl closed seg );
-  for my $attr ( @attr ) {
+  for my $attr (@attr) {
     no strict 'refs';
     *$attr = sub {
       my $self = shift;

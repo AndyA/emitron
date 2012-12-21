@@ -43,8 +43,8 @@ our $VERSION = '0.01';
 
 sub json_patch {
   my ( $orig, $patch ) = @_;
-  my $jp = Data::JSONPatch->new( $orig );
-  $jp->patch( $patch );
+  my $jp = Data::JSONPatch->new($orig);
+  $jp->patch($patch);
   return $jp->data;
 }
 
@@ -61,19 +61,19 @@ sub _clone {
 
 sub json_patched {
   my ( $orig, $patch ) = @_;
-  return json_patch( _clone( $orig ), $patch );
+  return json_patch( _clone($orig), $patch );
 }
 
 sub new {
   my $self = bless {}, shift;
-  $self->data( @_ ) if @_;
+  $self->data(@_) if @_;
   $self;
 }
 
 sub data {
   my $self = shift;
   return $self->{p}->data unless @_;
-  $self->{p} = Data::JSONVisitor->new( @_ );
+  $self->{p} = Data::JSONVisitor->new(@_);
   $self;
 }
 
@@ -86,8 +86,8 @@ sub patch_path {
 
 sub patch {
   my ( $self, $jp ) = @_;
-  for my $pp ( @$jp ) {
-    my $path = $self->patch_path( $pp );
+  for my $pp (@$jp) {
+    my $path = $self->patch_path($pp);
     if ( $pp->{op} eq 'add' ) {
       my $v = $pp->{value};
       $self->{p}->each(

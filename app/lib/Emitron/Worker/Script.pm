@@ -14,7 +14,7 @@ sub run {
   my $self = shift;
   $self->handle_messages;
   $self->handle_events;
-  $self->poll( 10 ) while 1;
+  $self->poll(10) while 1;
 }
 
 1;

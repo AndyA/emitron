@@ -21,12 +21,12 @@ my $ps = $evo->pull_stream(
   uri              => SOURCE,
   emulateUserAgent => 'flash',
 );
-print Dumper( $ps );
+print Dumper($ps);
 
 sub id_from_name {
   my ( $resp, $name ) = @_;
   return map { $_->{configId} }
-   grep { $_->{localStreamName} eq $name } @{ $resp->{data}{pull} };
+   grep      { $_->{localStreamName} eq $name } @{ $resp->{data}{pull} };
 }
 
 sub purge_stream {

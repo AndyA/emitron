@@ -1,4 +1,4 @@
-package Emitron;
+ackage Emitron;
 use Dancer ':syntax';
 use Emitron::Model::Watched;
 
@@ -23,22 +23,22 @@ sub model_message {
    if $diff;
   return {
     name   => 'model',
-    data   => $model->checkout( $now ),
+    data   => $model->checkout($now),
     serial => $now
   };
 }
 
 get '/api/ping' => sub {
   my $msg = { type => 'ping' };
-  $queue->commit( $msg );
+  $queue->commit($msg);
   return $msg;
 };
 
 get '/api/ev/:serial?' => sub {
-  my $sn = param( 'serial' ) || 0;
-  { my $msg = model_message( $sn ); return $msg if $msg }
+  my $sn = param('serial') || 0;
+  { my $msg = model_message($sn); return $msg if $msg }
   my $next = $model->wait( $sn, 10 );
-  { my $msg = model_message( $sn ); return $msg if $msg }
+  { my $msg = model_message($sn); return $msg if $msg }
   return { name => 'keepalive' };
 };
 

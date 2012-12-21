@@ -39,7 +39,7 @@ sub handle_control {
 sub is_ready { shift->_state eq 'READY' }
 
 sub _fetch_up { shift->upstream->() }
-sub _busy     { shift->_state( 'BUSY' ) }
+sub _busy     { shift->_state('BUSY') }
 
 sub send_pending {
   my $self = shift;
@@ -55,7 +55,7 @@ sub send_pending {
 
   # ...then upstream queue
   if ( defined( my $msg = $self->_fetch_up ) ) {
-    $self->msg->send( $msg );
+    $self->msg->send($msg);
     $self->_busy;
     return 1;
   }
@@ -65,7 +65,7 @@ sub send_pending {
 
 sub send {
   my ( $self, $msg ) = @_;
-  $self->_m_put( $msg );
+  $self->_m_put($msg);
   $self->send_pending;
 }
 

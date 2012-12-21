@@ -22,7 +22,7 @@ has _on => (
 sub _trigger {
   my ( $self, @a ) = @_;
   for my $hh ( $self->_handlers ) {
-    $hh->( @a );
+    $hh->(@a);
   }
 }
 

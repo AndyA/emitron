@@ -19,8 +19,8 @@ Emitron::CRTMPServer - CRTMPServer API
 sub api {
   my ( $self, $verb, $args ) = @_;
   my $uri = join '/', $self->uri, $verb,
-   map { uri_escape( $_ ) } %{ $args || {} };
-  my $resp = $self->ua->get( $uri );
+   map { uri_escape($_) } %{ $args || {} };
+  my $resp = $self->ua->get($uri);
   die $resp->status_line if $resp->is_error;
   return decode_json $resp->content;
 }

@@ -12,7 +12,7 @@ my $cmd = join ' | ',
 my %by_proc = ();
 {
   open my $fh, '-|', $cmd or die "Can't run $cmd: $!";
-  while ( <$fh> ) {
+  while (<$fh>) {
     next unless m{^/proc/(\d+)/};
     $by_proc{$1}++;
   }
@@ -27,7 +27,7 @@ print "INUSE\n";
   my @pids = sort { $by_proc{$a} <=> $by_proc{$b} || $a <=> $b }
    keys %by_proc;
 
-  for my $pid ( @pids ) {
+  for my $pid (@pids) {
     chomp( my $ps = `ps hu $pid` );
     printf "%s [%5d] %s\n", $ts, $by_proc{$pid}, $ps;
     $tot += $by_proc{$pid};

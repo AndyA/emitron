@@ -17,15 +17,13 @@ has em => (
     Emitron::App->em;
   },
   handles => [
-    'model',        'queue',
-    'event',        'despatcher',
-    'peek',         'poll',
-    'post_event',   'handle_events',
+    'model',        'queue', 'event',      'despatcher',
+    'peek',         'poll',  'post_event', 'handle_events',
     'add_listener', 'remove_listener'
   ]
 );
 
-has [ '_reader', '_writer' ] => ( isa => 'IO::Handle', is => 'rw' );
+has ['_reader', '_writer'] => ( isa => 'IO::Handle', is => 'rw' );
 
 =head1 NAME
 
@@ -35,8 +33,8 @@ Emitron::Worker::Base - A worker
 
 sub start {
   my ( $self, $rdr, $wtr ) = @_;
-  $self->_reader( $rdr );
-  $self->_writer( $wtr );
+  $self->_reader($rdr);
+  $self->_writer($wtr);
   $self->run;
 }
 
@@ -52,10 +50,10 @@ sub handle_messages {
     $self->_reader,
     sub {
       my $fn  = shift;
-      my $msg = Emitron::Message->recv( $fn );
+      my $msg = Emitron::Message->recv($fn);
       if ( defined $msg ) {
         debug "Handling msg ", $msg->type;
-        $self->despatcher->despatch( $msg );
+        $self->despatcher->despatch($msg);
       }
       else {
         warning "Undefined msg";
@@ -68,7 +66,7 @@ sub handle_messages {
 
 sub post_message {
   my ( $self, @msg ) = @_;
-  Emitron::Message->new( @msg )->send( $self->_writer );
+  Emitron::Message->new(@msg)->send( $self->_writer );
 }
 
 1;

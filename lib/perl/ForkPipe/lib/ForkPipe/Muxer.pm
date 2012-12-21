@@ -46,14 +46,14 @@ sub context {
 
 sub send {
   my ( $self, $msg ) = @_;
-  $self->_m_put( $msg );
+  $self->_m_put($msg);
   $_->engine->send_pending for $self->workers;
 }
 
 sub broadcast {
   my ( $self, $msg ) = @_;
   for my $fp ( $self->workers ) {
-    $fp->send( $msg );
+    $fp->send($msg);
   }
 }
 

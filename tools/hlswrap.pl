@@ -29,7 +29,7 @@ GetOptions(
 my $dir = shift
  || die "Please name the directory containing the fragment directories";
 
-my @stm = stm->find_streams( $dir );
+my @stm = stm->find_streams($dir);
 die "No streams found" unless @stm;
 
 if ( $O{live} ) { run_live( $dir, @stm ) }
@@ -37,11 +37,11 @@ else            { run_vod( $dir, @stm ) }
 
 sub run_live {
   my ( $dir, @stm ) = @_;
-  my @on_ready = ( sub { write_root( $dir, @stm ); state( 'live' ); } );
+  my @on_ready = ( sub { write_root( $dir, @stm ); state('live'); } );
 
   $SIG{INT} = sub {
     print "Closing stream\n";
-    for my $stm ( @stm ) {
+    for my $stm (@stm) {
       $stm->close;
       $stm->write_list;
     }
@@ -51,11 +51,11 @@ sub run_live {
   while () {
     my $got = 0;
     $got += $_->find_frags for @stm;
-    if ( @on_ready && lwm( @stm ) > 1 ) {
+    if ( @on_ready && lwm(@stm) > 1 ) {
       $_->() for splice @on_ready;
     }
     sleep $O{gop};
-    if ( $got ) {
+    if ($got) {
       $_->write_list for @stm;
     }
   }
@@ -63,7 +63,7 @@ sub run_live {
 
 sub run_vod {
   my ( $dir, @stm ) = @_;
-  for my $stm ( @stm ) {
+  for my $stm (@stm) {
     $stm->find_frags;
     $stm->close;
     $stm->write_list;
@@ -74,14 +74,14 @@ sub run_vod {
 sub write_root {
   my ( $dir, @stm ) = @_;
   write_master( $dir, @stm );
-  write_index( $dir ) if $O{index};
+  write_index($dir) if $O{index};
 }
 
 sub all_frags {
   return map { scalar @{ $_->frags } } @_;
 }
 
-sub lwm { min( all_frags( @_ ) ) }
+sub lwm { min( all_frags(@_) ) }
 
 sub write_index {
   my $dir   = shift;
@@ -103,7 +103,7 @@ sub write_master {
     open my $fh, '>', $tmp or die "Can't write $tmp: $!\n";
     print $fh "#EXTM3U\n";
     my %pl = ();
-    for my $stm ( @stm ) {
+    for my $stm (@stm) {
       my $sd = $stm->dir;
       die unless $sd =~ /(\d+)$/;
       my $idx = $1;
@@ -155,7 +155,7 @@ sub stm::find_frags {
   my $got  = 0;
   while () {
     my $frag = sprintf FRAG, $self->next;
-    last unless -f $self->frag_file( $frag );
+    last unless -f $self->frag_file($frag);
     $got++;
     $self->{next}++;
     push @{ $self->frags }, join '/', $self->dir, $frag;
@@ -195,8 +195,7 @@ sub stm::write_list {
      '#EXT-X-PLAYLIST-TYPE:EVENT',
      '#EXT-X-MEDIA-SEQUENCE:1', '';
     for my $frag ( @{ $self->frags } ) {
-      print $fh join "\n", "#EXTINF:" . join( ',', $O{gop}, '' ),
-       $frag, '';
+      print $fh join "\n", "#EXTINF:" . join( ',', $O{gop}, '' ), $frag, '';
     }
     print $fh "#EXT-X-ENDLIST\n" if $self->{closed};
   }
@@ -224,7 +223,7 @@ sub get_info {
    = $xpc->findnodes( "/Mediainfo/File/track[\@type='General']", $doc );
 
   my %r = ();
-  for my $gen ( @gen ) {
+  for my $gen (@gen) {
     while ( my ( $k, $spec ) = each %find ) {
       for my $nd ( $xpc->findnodes( $spec->{name}, $gen ) ) {
         my $nv = $nd->textContent;

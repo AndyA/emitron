@@ -15,23 +15,23 @@ use ForkPipe;
   isa_ok $mux, 'ForkPipe::Muxer';
 
   my @fp = map { ForkPipe->new( $mux->context ) } ( 1 .. $workers );
-  $mux->add( @fp );
+  $mux->add(@fp);
   is scalar $mux->workers, $workers, "$workers workers";
 
   my $id  = 0;
   my @pid = ();
-  for my $fp ( @fp ) {
+  for my $fp (@fp) {
     my $pid = $fp->fork;
-    unless ( $pid ) {
+    unless ($pid) {
       $fp->on(
         sub {
           my $msg = shift;
           $msg->{pid} = $$;
-          $fp->send( $msg );
+          $fp->send($msg);
           exit if $msg->{done};
         }
       );
-      $fp->poll( 0.1 ) while 1;
+      $fp->poll(0.1) while 1;
     }
 
     push @pid, $pid;
@@ -57,7 +57,7 @@ use ForkPipe;
   );
 
   #  $mux->broadcast( { done => 1 } );
-  $mux->poll( 1 );
+  $mux->poll(1);
   print Dumper( \@to_mux );
 }
 

@@ -10,14 +10,14 @@ use DataDrivenTest;
 use Data::JSONPath;
 
 {
-  my $jp1 = Data::JSONPath->new( '$.a.b.c' );
+  my $jp1 = Data::JSONPath->new('$.a.b.c');
   isa_ok $jp1, 'Data::JSONPath';
 }
 
 {
-  my $jp1 = Data::JSONPath->upgrade( '$.a.b.c' );
+  my $jp1 = Data::JSONPath->upgrade('$.a.b.c');
   isa_ok $jp1, 'Data::JSONPath';
-  my $jp2 = Data::JSONPath->upgrade( $jp1 );
+  my $jp2 = Data::JSONPath->upgrade($jp1);
   isa_ok $jp2, 'Data::JSONPath';
 }
 
@@ -43,8 +43,7 @@ ddt(
     my $tc  = shift;
     my $jp  = Data::JSONPath->new( $tc->{path} );
     my $got = $jp->match( $tc->{test} );
-    eq_or_diff $got, $tc->{want},
-     "$tc->{name}: $tc->{path} ?= $tc->{test}";
+    eq_or_diff $got, $tc->{want}, "$tc->{name}: $tc->{path} ?= $tc->{test}";
   },
   readOnly => 1
 );

@@ -9,8 +9,7 @@ use Emitron::Media::Encoder;
 use Path::Class;
 
 my $CONFIG = [
-  {
-    name        => 'p30',
+  { name        => 'p30',
     destination => 'testenc/p30/f%08d.ts',
     profile     => {
       v => {
@@ -28,8 +27,7 @@ my $CONFIG = [
       }
     },
   },
-  {
-    name        => 'p50',
+  { name        => 'p50',
     destination => 'testenc/p50/f%08d.ts',
     profile     => {
       v => {
@@ -50,7 +48,7 @@ my $CONFIG = [
 ];
 
 my $TMP = 'testenc/tmp';
-dir( $TMP )->mkpath;
+dir($TMP)->mkpath;
 
 my $DOG = "$FindBin::Bin/../../art/thespace-dog.png";
 

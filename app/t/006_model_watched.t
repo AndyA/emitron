@@ -21,8 +21,8 @@ use Emitron::Model::Watched;
   isa_ok $model, 'Emitron::Model::Watched';
   my $model2 = $model->init;
   my $model3 = $model->init;
-  is refaddr( $model ), refaddr( $model2 ), 'init returns model';
-  is refaddr( $model ), refaddr( $model3 ), 'second init returns model';
+  is refaddr($model), refaddr($model2), 'init returns model';
+  is refaddr($model), refaddr($model3), 'second init returns model';
 }
 
 forked_test(
@@ -51,7 +51,7 @@ sub forked_test {
 
   my $pid = fork;
   defined $pid or die "Fork failed: $!";
-  unless ( $pid ) {
+  unless ($pid) {
     # child
     sleep 1;
     $model->init;
@@ -76,7 +76,7 @@ sub forked_test {
       }
     );
 
-    _exit( 0 );
+    _exit(0);
   }
 
   my $rev  = 1;

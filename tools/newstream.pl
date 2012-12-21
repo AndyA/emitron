@@ -22,8 +22,7 @@ use constant {
 };
 
 my @LOGCOLOUR
- = ( undef, 'red on_white', 'red on_white', 'yellow', 'cyan',
-  'green', );
+ = ( undef, 'red on_white', 'red on_white', 'yellow', 'cyan', 'green', );
 
 our $LOGLEVEL = DEBUG;
 
@@ -31,7 +30,7 @@ my $Streams = {};    # by id
 
 sub ts {
   my $now = shift // Time::HiRes::time;
-  return join '.', ( strftime '%Y/%m/%d %H:%M:%S', gmtime( $now ) ),
+  return join '.', ( strftime '%Y/%m/%d %H:%M:%S', gmtime($now) ),
    sprintf( '%06d', $now * 1_000_000 % 1_000_000 );
 }
 
@@ -60,7 +59,7 @@ sub run {
   my $evo = NewStream::EvoStream->new( host => 'localhost' );
   while () {
     mention DEBUG, "Polling";
-    print Dumper( list_streams( $evo ) );
+    print Dumper( list_streams($evo) );
     sleep 1;
   }
 }

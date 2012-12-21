@@ -17,8 +17,8 @@ Emitron::Message - A message
 
 sub from_raw {
   my ( $class, $raw ) = @_;
-  return $raw if UNIVERSAL::can( $raw, 'isa' ) && $raw->isa( $class );
-  return $class->new( %$raw );
+  return $raw if UNIVERSAL::can( $raw, 'isa' ) && $raw->isa($class);
+  return $class->new(%$raw);
 }
 
 sub raw_read {
@@ -43,17 +43,17 @@ sub msg_get_raw {
 
 sub msg_get {
   my $rdr = shift;
-  my $msg = msg_get_raw( $rdr );
+  my $msg = msg_get_raw($rdr);
   return unless defined $msg;
-  return thaw( $msg )->[0];
+  return thaw($msg)->[0];
 }
 
 sub msg_put_raw {
   my ( $wtr, $msg ) = @_;
-  my $len  = pack 'N', length( $msg );
+  my $len  = pack 'N', length($msg);
   my $data = $len . $msg;
   my $rc   = syswrite $wtr, $data;
-  die "syswrite failed" unless defined $rc && $rc == length( $data );
+  die "syswrite failed" unless defined $rc && $rc == length($data);
 }
 
 sub msg_put {
@@ -70,7 +70,7 @@ sub send {
 
 sub recv {
   my ( $class, $fh ) = @_;
-  my $msg = msg_get( $fh );
+  my $msg = msg_get($fh);
   return unless defined $msg;
   return bless $msg, $class;
 }

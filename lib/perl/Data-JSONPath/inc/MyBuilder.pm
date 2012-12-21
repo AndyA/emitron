@@ -5,21 +5,21 @@ use base qw( Module::Build );
 sub create_build_script {
   my ( $self, @args ) = @_;
   $self->_auto_mm;
-  return $self->SUPER::create_build_script( @args );
+  return $self->SUPER::create_build_script(@args);
 }
 
 sub _auto_mm {
   my $self = shift;
   my $mm   = $self->meta_merge;
   my @meta = qw( homepage bugtracker MailingList repository );
-  for my $meta ( @meta ) {
+  for my $meta (@meta) {
     next if exists $mm->{resources}{$meta};
     my $auto = "_auto_$meta";
-    next unless $self->can( $auto );
+    next unless $self->can($auto);
     my $av = $self->$auto();
     $mm->{resources}{$meta} = $av if defined $av;
   }
-  $self->meta_merge( $mm );
+  $self->meta_merge($mm);
 }
 
 sub _auto_repository {
@@ -45,13 +45,13 @@ sub _auto_bugtracker {
 
 sub ACTION_disttest {
   my $self = shift;
-  $self->depends_on( 'testauthor' );
-  $self->SUPER::ACTION_disttest( @_ );
+  $self->depends_on('testauthor');
+  $self->SUPER::ACTION_disttest(@_);
 }
 
 sub ACTION_testauthor {
   my $self = shift;
-  $self->test_files( 'xt/author' );
+  $self->test_files('xt/author');
   $self->ACTION_test;
 }
 
@@ -60,8 +60,7 @@ sub ACTION_critic {
 }
 
 sub ACTION_tags {
-  exec(
-    qw(
+  exec( qw(
      ctags -f tags --recurse --totals
      --exclude=blib
      --exclude=.svn
@@ -84,10 +83,10 @@ sub ACTION_tidy {
    $self->_find_file_by_type( 'pm', 'xt' ),
    $self->_find_file_by_type( 't',  'xt' );
 
-  my @files = ( keys %found_files,
-    map { $self->localize_file_path( $_ ) } @extra );
+  my @files
+   = ( keys %found_files, map { $self->localize_file_path($_) } @extra );
 
-  for my $file ( @files ) {
+  for my $file (@files) {
     system 'perltidy', '-b', $file;
     unlink "$file.bak" if $? == 0;
   }

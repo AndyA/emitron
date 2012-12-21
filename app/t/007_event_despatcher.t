@@ -17,7 +17,7 @@ sub rec::cb {
   sub { push @$self, \@_ }
 }
 
-sub rec::log { [ splice @{ $_[0] } ] }
+sub rec::log { [splice @{ $_[0] }] }
 
 sub msg::new { my $c = shift; bless {@_}, $c }
 sub msg::type { shift->{type} }
@@ -57,42 +57,35 @@ sub msg::type { shift->{type} }
   $md->despatch( msg->new( type => 'foo.0.0.bar.0' ) );
 
   eq_or_diff $rec1->log,
-   [
-    [ bless { type => 'foo' }, 'msg' ],
-    [ bless { type => 'bar' }, 'msg' ],
-    [ bless { type => 'bar' }, 'msg' ]
+   [[bless { type => 'foo' }, 'msg'],
+    [bless { type => 'bar' }, 'msg'],
+    [bless { type => 'bar' }, 'msg']
    ],
    "messages to rec1";
 
   eq_or_diff $rec2->log,
-   [ [ bless { type => 'foo' }, 'msg' ], ],
+   [[bless { type => 'foo' }, 'msg'],],
    "messages to rec2";
 
   eq_or_diff $rec3->log,
-   [ [ bless( { type => 'foo' }, 'msg' ), 'foo' ], ],
+   [[bless( { type => 'foo' }, 'msg' ), 'foo'],],
    "messages to rec3";
 
   eq_or_diff $rec4->log,
-   [
-    [ bless( { type => 'foo' }, 'msg' ), 'foo' ],
-    [ bless( { type => 'bar' }, 'msg' ), 'bar' ],
+   [[bless( { type => 'foo' }, 'msg' ), 'foo'],
+    [bless( { type => 'bar' }, 'msg' ), 'bar'],
    ],
    "messages to rec4";
 
   eq_or_diff $rec5->log,
-   [
-    [ bless( { type => 'foo' }, 'msg' ), 'foo' ],
-    [ bless( { type => 'bar' }, 'msg' ), 'bar' ],
+   [[bless( { type => 'foo' }, 'msg' ), 'foo'],
+    [bless( { type => 'bar' }, 'msg' ), 'bar'],
    ],
    "messages to rec5";
 
   eq_or_diff $rec6->log,
-   [
-    [
-      bless( { type => 'foo.hello.bar.world' }, 'msg' ), 'hello',
-      'world'
-    ],
-    [ bless( { type => 'foo.0.bar.0' }, 'msg' ), '0', '0' ],
+   [[bless( { type => 'foo.hello.bar.world' }, 'msg' ), 'hello', 'world'],
+    [bless( { type => 'foo.0.bar.0' },         'msg' ), '0',     '0'],
    ],
    "messages to rec6";
 
@@ -103,11 +96,10 @@ sub msg::type { shift->{type} }
   $md->despatch( msg->new( type => 'bar' ) );
 
   eq_or_diff $rec1->log,
-   [
-    [ bless { type => 'bar' }, 'msg' ],
-    [ bless { type => 'bar' }, 'msg' ],
-    [ bless { type => 'bar' }, 'msg' ],
-    [ bless { type => 'bar' }, 'msg' ],
+   [[bless { type => 'bar' }, 'msg'],
+    [bless { type => 'bar' }, 'msg'],
+    [bless { type => 'bar' }, 'msg'],
+    [bless { type => 'bar' }, 'msg'],
    ],
    "messages to rec1 after off foo";
 
@@ -119,10 +111,7 @@ sub msg::type { shift->{type} }
   $md->despatch( msg->new( type => 'baz' ) );
 
   eq_or_diff $rec1->log,
-   [
-    [ bless { type => 'bar' }, 'msg' ],
-    [ bless { type => 'baz' }, 'msg' ],
-   ],
+   [[bless { type => 'bar' }, 'msg'], [bless { type => 'baz' }, 'msg'],],
    "messages to rec1 after off backup bar";
 }
 

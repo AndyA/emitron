@@ -19,9 +19,9 @@ Emitron::Model - versioned model
 =cut
 
 sub _obj_name { file( shift->root, @_ ) }
-sub _index    { shift->_obj_name( 'index' ) }
-sub _stash    { shift->_obj_name( "r$_[0].json" ) }
-sub _current  { shift->_obj_name( 'current.json' ) }
+sub _index    { shift->_obj_name('index') }
+sub _stash    { shift->_obj_name("r$_[0].json") }
+sub _current  { shift->_obj_name('current.json') }
 
 sub init {
   my $self = shift;
@@ -30,7 +30,7 @@ sub init {
   return $self if -f $idx;
   dir( $self->root )->mkpath;
   print { $idx->openw } "0\n";
-  $self->commit( $data );
+  $self->commit($data);
   return $self;
 }
 
@@ -39,7 +39,7 @@ sub _with_write_lock {
   my $idx = $self->_index;
   open my $fh, '+<', $idx or croak "Can't write $idx: $!\n";
   flock $fh, 2 or croak "Can't lock $idx: $!\n";    # Exclusive
-  my $rc = eval { $cb->( $fh ) };
+  my $rc = eval { $cb->($fh) };
   my $err = $@;
   close $fh;
   croak $err if $err;
@@ -77,7 +77,7 @@ sub earliest {
 sub _store {
   my ( $self, $file, $data ) = @_;
   open my $fh, '>', $file or croak "Failed to write $file: $!";
-  print $fh encode_json( $data );
+  print $fh encode_json($data);
 }
 
 sub _retrieve {
@@ -115,7 +115,7 @@ sub commit {
     }
   );
   if ( defined $rev ) {
-    $self->gc( $rev );
+    $self->gc($rev);
     debug "Committed change $rev";
   }
   #  $self->_bt;
@@ -124,7 +124,7 @@ sub commit {
 
 sub _save {
   my ( $self, $data, $rev ) = @_;
-  my $stash   = $self->_stash( $rev );
+  my $stash   = $self->_stash($rev);
   my $current = $self->_current;
   my $temp    = "$current.tmp";
   $self->_store( $stash, $data );
@@ -139,9 +139,9 @@ sub checkout {
   my ( $self, $rev ) = @_;
   my $now = $self->revision;
   return if $rev <= 0 || $rev > $now;
-  my $stash = $self->_stash( $rev );
+  my $stash = $self->_stash($rev);
   return unless -f $stash;
-  return $self->_retrieve( $stash );
+  return $self->_retrieve($stash);
 }
 
 sub revision {
@@ -155,14 +155,14 @@ sub revision {
 
 sub remove {
   my ( $self, @revs ) = @_;
-  unlink map { $self->_stash( $_ ) } @revs;
+  unlink map { $self->_stash($_) } @revs;
 }
 
 sub transaction {
   my ( $self, $cb ) = @_;
   while () {
     my $rev  = $self->revision;
-    my $data = $self->checkout( $rev );
+    my $data = $self->checkout($rev);
     debug "Starting transaction";
     my $ndata = $cb->( $data, $rev );
     my $nrev = $self->commit( $ndata, $rev );

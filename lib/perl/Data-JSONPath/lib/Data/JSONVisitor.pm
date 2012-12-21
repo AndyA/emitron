@@ -39,27 +39,27 @@ sub data { shift->{data}{'$'} }
 
 sub upgrade {
   my ( $class, $obj ) = @_;
-  return $obj if UNIVERSAL::can( $obj, 'isa' ) && $obj->isa( $class );
-  return $class->new( $obj );
+  return $obj if UNIVERSAL::can( $obj, 'isa' ) && $obj->isa($class);
+  return $class->new($obj);
 }
 
 sub _set {
   my ( $obj, $k, $v ) = @_;
   if    ( 'ARRAY' eq ref $obj ) { $obj->[$k] = $v }
-  elsif ( 'HASH'  eq ref $obj ) { $obj->{$k} = $v }
+  elsif ( 'HASH' eq ref $obj )  { $obj->{$k} = $v }
   else                          { die }
 }
 
 sub _get {
   my ( $obj, $k ) = @_;
   return $obj->[$k] if 'ARRAY' eq ref $obj;
-  return $obj->{$k} if 'HASH'  eq ref $obj;
+  return $obj->{$k} if 'HASH' eq ref $obj;
   return;
 }
 
 sub iter {
   my ( $self, $path, $autoviv ) = @_;
-  my @p  = Data::JSONPath->upgrade( $path )->path;
+  my @p  = Data::JSONPath->upgrade($path)->path;
   my @pi = ();
   my @pk = ();
   my @pd = ( $self->{data} );
@@ -74,20 +74,15 @@ sub iter {
       }
       if ( defined( $k = $pi[$vpos]->() ) ) {
         return if !defined $pd[$vpos];
-        $pk[ $vpos++ ] = $k;
-        my $pdo = $pd[ $vpos - 1 ];
+        $pk[$vpos++] = $k;
+        my $pdo = $pd[$vpos - 1];
         $pd[$vpos] = _get( $pdo, $k );
         if ( $autoviv && !defined $pd[$vpos] ) {
-          if ( $k =~ /^\d+$/ && 'HASH' eq ref $pdo && 0 == keys %$pdo )
-          {
+          if ( $k =~ /^\d+$/ && 'HASH' eq ref $pdo && 0 == keys %$pdo ) {
             # Convert empty parent to array
-            _set(
-              $pd[ $vpos - 2 ],
-              $pk[ $vpos - 2 ],
-              $pd[ $vpos - 1 ] = []
-            );
+            _set( $pd[$vpos - 2], $pk[$vpos - 2], $pd[$vpos - 1] = [] );
           }
-          _set( $pd[ $vpos - 1 ], $k, $pd[$vpos] = {} ) if $vpos < @p;
+          _set( $pd[$vpos - 1], $k, $pd[$vpos] = {} ) if $vpos < @p;
         }
       }
       else {
@@ -95,10 +90,10 @@ sub iter {
         $ipos = $vpos--;
       }
     }
-    my $key = $pk[ $vpos - 1 ];
-    my $ctx = $pd[ $vpos - 1 ];
+    my $key = $pk[$vpos - 1];
+    my $ctx = $pd[$vpos - 1];
     $key *= 1 if 'ARRAY' eq ref $ctx;
-    my $rv = [ join( '.', @pk ), $pd[$vpos], $ctx, $key ];
+    my $rv = [join( '.', @pk ), $pd[$vpos], $ctx, $key];
     $vpos--;
     return $rv;
   };
@@ -108,7 +103,7 @@ sub each {
   my ( $self, $path, $cb, $autoviv ) = @_;
   my $ii = $self->iter( $path, $autoviv );
   while ( my $i = $ii->() ) {
-    $cb->( @$i );
+    $cb->(@$i);
   }
 }
 

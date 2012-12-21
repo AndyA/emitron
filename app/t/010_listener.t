@@ -52,45 +52,45 @@ sub test_it(&) {
   $li->add( $r1, $cb, 'r1' );
   $li->add( $r2, $cb, 'r2' );
 
-  $poller->( $li );
+  $poller->($li);
 
   eq_or_diff $cl, {}, "no callbacks";
 
-  $w1->syswrite( "Boo!" );
+  $w1->syswrite("Boo!");
   $w1->flush;
 
-  $poller->( $li );
+  $poller->($li);
 
   eq_or_diff $cl, { r1 => 1 }, "r1 callback";
 
-  $poller->( $li );
+  $poller->($li);
 
   eq_or_diff $cl, { r1 => 1 }, "no callbacks";
 
-  $w1->syswrite( "Boo!" );
+  $w1->syswrite("Boo!");
   $w1->flush;
-  $w2->syswrite( "Boo!" );
+  $w2->syswrite("Boo!");
   $w2->flush;
 
-  $poller->( $li );
+  $poller->($li);
 
   eq_or_diff $cl, { r1 => 2, r2 => 1 }, "r1, r2 callback";
 
-  $li->remove( $r1 );
+  $li->remove($r1);
 
-  $w1->syswrite( "Boo!" );
+  $w1->syswrite("Boo!");
   $w1->flush;
-  $w2->syswrite( "Boo!" );
+  $w2->syswrite("Boo!");
   $w2->flush;
 
-  $poller->( $li );
+  $poller->($li);
 
   eq_or_diff $cl, { r1 => 2, r2 => 2 }, "r2 callback";
 }
 
 test_it {
   my $li = shift;
-  my $tm = elapsed { $li->poll( 0.5 ) };
+  my $tm = elapsed { $li->poll(0.5) };
   ok $tm >= 0.4 && $tm <= 2, "timeout";
 };
 

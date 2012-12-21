@@ -50,8 +50,7 @@ sub json_diff {
         my $v   = pop @path;
         my $elt = pop @path;
         push @diff,
-         {
-          op => 'add',
+         {op => 'add',
           ( @path ? ( path => join( '.', @path ) ) : () ),
           element => $elt,
           value   => $v
@@ -59,8 +58,7 @@ sub json_diff {
       }
       elsif ( $verb eq 'remove' ) {
         push @diff,
-         {
-          op   => 'remove',
+         {op   => 'remove',
           path => join( '.', @path ),
          };
       }
@@ -83,7 +81,7 @@ sub _diff {
   if ( $ra && $rb && $ra eq $rb ) {
     if ( 'HASH' eq $ra ) {
       my @k = _uniq( keys %$da, keys %$db );
-      for my $k ( @k ) {
+      for my $k (@k) {
         if ( exists $da->{$k} ) {
           if ( exists $db->{$k} ) {
             _diff( $da->{$k}, $db->{$k}, $cb, @path, $k );
@@ -115,7 +113,7 @@ sub _diff {
       return;
     }
 
-    confess( "I don't know how to handle a $ra" );
+    confess("I don't know how to handle a $ra");
   }
 
   return if !defined $da && !defined $db;

@@ -26,13 +26,13 @@ sub add {
 
 sub _poll {
   my ( $self, @args ) = @_;
-  for my $rdy ( $self->_sel->can_read( @args ) ) {
+  for my $rdy ( $self->_sel->can_read(@args) ) {
     my ( $fh, $cb, @args ) = @$rdy;
     $cb->( $fh, @args );
   }
 }
 
-sub peek { shift->_poll( 0 ) }
+sub peek { shift->_poll(0) }
 
 sub poll {
   my ( $self, $timeout ) = @_;

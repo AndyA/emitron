@@ -7,8 +7,7 @@ use Test::More;
 use Emitron::Media::Encoder;
 
 my $CONFIG = [
-  {
-    name        => 'p30',
+  { name        => 'p30',
     destination => '/tmp/p30/f%08d.ts',
     profile     => {
       v => {
@@ -26,8 +25,7 @@ my $CONFIG = [
       }
     },
   },
-  {
-    name        => 'p50',
+  { name        => 'p50',
     destination => '/tmp/p50/f%08d.ts',
     profile     => {
       v => {
@@ -57,7 +55,7 @@ my $CONFIG = [
    'new';
   isa_ok $enc, 'Emitron::Media::Encoder';
   is $enc->globals->ffmpeg, 'ffmpeg', 'ffmpeg';
-  is $enc->globals->aspect_ratio_str( ':' ), '16:9', 'aspect_ratio_str';
+  is $enc->globals->aspect_ratio_str(':'), '16:9', 'aspect_ratio_str';
 }
 
 done_testing();

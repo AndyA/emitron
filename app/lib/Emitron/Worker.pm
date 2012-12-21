@@ -63,10 +63,10 @@ sub BUILD {
   # Parent
   close $_ for $child_rdr, $child_wtr;
 
-  $self->_pid( $pid );
-  $self->_reader( $my_rdr );
-  $self->_writer( $my_wtr );
-  $self->state( 'PENDING' );
+  $self->_pid($pid);
+  $self->_reader($my_rdr);
+  $self->_writer($my_wtr);
+  $self->state('PENDING');
 }
 
 sub is_ready { 'READY' eq shift->state }
@@ -74,7 +74,7 @@ sub is_ready { 'READY' eq shift->state }
 sub send {
   my ( $self, $msg ) = @_;
   $msg->send( $self->writer );
-  $self->state( 'BUSY' );
+  $self->state('BUSY');
 }
 
 sub signal {

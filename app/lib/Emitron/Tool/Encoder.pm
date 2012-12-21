@@ -14,7 +14,7 @@ has encoder => (
   is      => 'ro',
   lazy    => 1,
   builder => '_mk_encoder',
-  handles => [ 'start', 'stop' ]
+  handles => ['start', 'stop']
 );
 
 has stream => ( isa => 'HashRef', is => 'ro', required => 1 );
@@ -47,7 +47,7 @@ sub _mk_encoder {
         next if $seen{$enc}++;
         my $odir = dir( $dir, $enc );
         $odir->mkpath;
-        my $pro = em->cfg( "\$.profiles.encodes.$enc" );
+        my $pro = em->cfg("\$.profiles.encodes.$enc");
         unless ( defined $pro ) {
           error "Can't find profile: $enc";
           next;
@@ -59,8 +59,7 @@ sub _mk_encoder {
           order   => ++$seq
         };
         push @conf,
-         {
-          name        => $enc,
+         {name        => $enc,
           destination => "$odir/%08d.ts",
           profile     => $pro
          };
@@ -77,9 +76,9 @@ sub _mk_encoder {
   );
   $arg{dog} = $dog if defined $dog;
 
-  $self->_model( $model );
+  $self->_model($model);
 
-  return Emitron::Media::Encoder->new( %arg );
+  return Emitron::Media::Encoder->new(%arg);
 }
 
 before start => sub {

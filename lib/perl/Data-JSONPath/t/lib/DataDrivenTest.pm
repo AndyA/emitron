@@ -20,24 +20,24 @@ DataDrivenTest - Data driven testing
 
 sub ddt {
   my ( $name, $url, $cb, %opt ) = @_;
-  my ( $fn, $frag ) = ( $url =~ /^(.*)#(.*)$/ ? ( $1, $2 ) : ( $url ) );
+  my ( $fn, $frag ) = ( $url =~ /^(.*)#(.*)$/ ? ( $1, $2 ) : ($url) );
 
-  my $td = decode_json file( $fn )->slurp;
+  my $td = decode_json file($fn)->slurp;
   $td = $td->{$frag} if defined $frag;
 
   if ( $opt{readOnly} ) {
     my $ocb = $cb;
     $cb = sub {
       my $tc  = shift;
-      my $cln = dclone( $tc );
-      $ocb->( $cln );
+      my $cln = dclone($tc);
+      $ocb->($cln);
       eq_or_diff $cln, $tc, "data unchanged";
     };
   }
 
-  for my $tc ( @$td ) {
+  for my $tc (@$td) {
     next if $tc->{disabled};
-    $cb->( $tc );
+    $cb->($tc);
   }
 }
 

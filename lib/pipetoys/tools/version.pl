@@ -33,8 +33,8 @@ my %h = (
   }
 );
 
-while ( <DATA> ) {
-  if ( /^\.(\w+)(?:\s+(.*))?$/ ) {
+while (<DATA>) {
+  if (/^\.(\w+)(?:\s+(.*))?$/) {
     my ( $inc, $arg ) = ( $1, $2 );
     ( $h{$inc} || die "$inc?\n" )->( split ' ', $arg );
     next;

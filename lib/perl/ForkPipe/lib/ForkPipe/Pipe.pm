@@ -15,7 +15,7 @@ ForkPipe::Pipe - A message pipe between two proesses
 
 with 'ForkPipe::Role::Stats';
 
-has [ 'rd', 'wr' ] => (
+has ['rd', 'wr'] => (
   isa      => 'IO::Handle',
   is       => 'ro',
   required => 1
@@ -36,12 +36,12 @@ sub _raw_read {
 
 sub _raw_write {
   my ( $self, $msg ) = @_;
-  my $len  = pack 'N', length( $msg );
+  my $len  = pack 'N', length($msg);
   my $data = $len . $msg;
   my $rc   = syswrite $self->wr, $data;
   croak "Communication error: $!"
-   unless defined $rc && $rc == length( $data );
-  $self->count( write => length( $data ), send => 1 );
+   unless defined $rc && $rc == length($data);
+  $self->count( write => length($data), send => 1 );
 }
 
 sub _msg_read {
@@ -49,7 +49,7 @@ sub _msg_read {
   my $len = $self->_raw_read( length pack 'N', 0 );
   return unless defined $len;
   my $data = $self->_raw_read( unpack 'N', $len );
-  $self->count( read => length( $data ), receive => 1 );
+  $self->count( read => length($data), receive => 1 );
   return $data;
 }
 
@@ -57,7 +57,7 @@ sub receive {
   my $self = shift;
   my $msg  = $self->_msg_read;
   return unless defined $msg;
-  return thaw( $msg )->[0];
+  return thaw($msg)->[0];
 }
 
 sub send {

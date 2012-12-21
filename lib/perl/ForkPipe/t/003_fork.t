@@ -28,11 +28,11 @@ use ForkPipe;
 
         push @got, $msg->{sn};
         $msg->{sn} *= 2;
-        $fp->send( $msg );
+        $fp->send($msg);
       }
     );
     $fp->send( { sn => 1 } );
-    $fp->poll( 0.1 ) while $running;
+    $fp->poll(0.1) while $running;
     waitpid $pid, 0;
   }
   else {
@@ -43,13 +43,13 @@ use ForkPipe;
           $msg->{done} = 1;
           $running = 0;
         }
-        $fp->send( $msg );
+        $fp->send($msg);
       }
     );
-    $fp->poll( 0.1 ) while $running;
+    $fp->poll(0.1) while $running;
     exit;
   }
-  eq_or_diff \@got, [ 2, 5, 11, 23, 47, 95, 191, 383 ], 'messages';
+  eq_or_diff \@got, [2, 5, 11, 23, 47, 95, 191, 383], 'messages';
 }
 
 {
@@ -63,7 +63,7 @@ use ForkPipe;
 
   my $child = sub {
     my $msg = shift;
-    return if length( $msg ) > 1_000_000;
+    return if length($msg) > 1_000_000;
     ( my $ext = $msg ) =~ tr/A-Za-z/ZzA-Ya-y/;
     my $out = join ' ', $msg, $ext;
     return $out;
@@ -77,10 +77,9 @@ use ForkPipe;
   # use 'ok': don't want to print huge value on failure
   ok $got eq $want, 'long message';
 
-  # Fragile 
+  # Fragile
   eq_or_diff $fp->stats,
-   {
-    'msg' => {
+   {'msg' => {
       'receive' => 17,
       'send'    => 17,
       'read'    => 3146076,
@@ -99,9 +98,9 @@ done_testing();
 sub run_them {
   my ( $parent, $child, $msg ) = @_;
   for ( ;; ) {
-    my $nm = $child->( $msg );
+    my $nm = $child->($msg);
     return $msg unless defined $nm;
-    $msg = $parent->( $nm );
+    $msg = $parent->($nm);
   }
 }
 
@@ -109,17 +108,17 @@ sub fork_them {
   my ( $parent, $child, $msg, $fp ) = @_;
 
   my $pid = $fp->fork;
-  unless ( $pid ) {
+  unless ($pid) {
     $fp->on(
       sub {
         my $msg = shift;
-        my $nm  = $child->( $msg );
-        $fp->send( $nm );
+        my $nm  = $child->($msg);
+        $fp->send($nm);
         exit 0 unless defined $nm;
       }
     );
 
-    $fp->poll( 0.1 ) while 1;
+    $fp->poll(0.1) while 1;
   }
 
   my ( $out, $done );
@@ -128,15 +127,15 @@ sub fork_them {
     sub {
       my $msg = shift;
       if ( defined $msg ) {
-        $fp->send( $out = $parent->( $msg ) );
+        $fp->send( $out = $parent->($msg) );
         return;
       }
       $done++;
     }
   );
 
-  $fp->send( $msg );
-  $fp->poll( 0.1 ) until $done;
+  $fp->send($msg);
+  $fp->poll(0.1) until $done;
 
   return $out;
 }

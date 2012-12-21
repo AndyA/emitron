@@ -17,7 +17,7 @@ sub f0rk(&) {
 sub murder(@) {
   my @pid = @_;
   my $got = kill -2 => @pid;
-  print "Signalled $got processe(s) out of ", scalar( @pid ), "\n";
+  print "Signalled $got processe(s) out of ", scalar(@pid), "\n";
 }
 
 sub loiter(@) {

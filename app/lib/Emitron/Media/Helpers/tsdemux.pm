@@ -39,7 +39,7 @@ sub scan {
 
   open my $fh, '-|', $self->globals->bash, -c => "$cmd 2>&1"
    or die "Can't run $cmd: $!\n";
-  while ( <$fh> ) {
+  while (<$fh>) {
     chomp( my $ln = $_ );
     next if /^TS\b/;
     next unless $ln =~ /^ .+?=.+? (?: , \s* .+?=.+ )* $/x;
@@ -47,8 +47,7 @@ sub scan {
     for my $fld ( split /\s*,\s*/, $ln ) {
       my ( $k, $v ) = split /=/, $fld, 2;
       next
-       unless ( my $vv )
-       = $v =~ /^((?:0x[0-9a-f]+)|(-?\d+(?:\.\d+)?))/i;
+       unless ( my $vv ) = $v =~ /^((?:0x[0-9a-f]+)|(-?\d+(?:\.\d+)?))/i;
       $vv = oct $vv if $vv =~ /^0/;
       $rec->{$k} = $vv;
     }

@@ -12,7 +12,7 @@ ForkPipe::Engine::Child - Child engine
 
 sub _ready {
   my $self = shift;
-  $self->ctl->send( 'READY' );
+  $self->ctl->send('READY');
 }
 
 before poll => sub { shift->_ready };
@@ -23,7 +23,7 @@ sub is_ready { 1 }
 
 sub send {
   my $self = shift;
-  $self->msg->send( @_ );
+  $self->msg->send(@_);
 }
 
 1;

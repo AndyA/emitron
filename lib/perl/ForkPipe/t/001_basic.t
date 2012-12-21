@@ -20,7 +20,7 @@ sub frok(&) {
 
 sub ork(&@) {
   my ( $cb, $desc ) = @_;
-  waitpid &frok( $cb ), 0;
+  waitpid &frok($cb), 0;
   is $?, 256, $desc;
 }
 

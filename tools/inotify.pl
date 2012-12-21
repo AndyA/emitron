@@ -23,7 +23,7 @@ use Linux::Inotify2;
 
   my %map = ();
 
-  for my $f ( @f ) {
+  for my $f (@f) {
     no strict 'refs';
     my $v = &{$f}();
     $map{$v} = $f;

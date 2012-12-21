@@ -12,7 +12,7 @@ ForkPipe::Engine::Base - Base class for engines
 
 with 'ForkPipe::Role::Listener', 'ForkPipe::Role::Handler';
 
-has [ 'msg', 'ctl' ] => (
+has ['msg', 'ctl'] => (
   isa      => 'ForkPipe::Pipe',
   is       => 'ro',
   required => 1
@@ -38,7 +38,7 @@ sub DEMOLISH {
   $li->remove( $self->ctl->rd );
 }
 
-sub handle_message { my $self = shift; $self->_trigger( @_ ) }
+sub handle_message { my $self = shift; $self->_trigger(@_) }
 
 sub handle_control {
   my ( $self, $msg ) = @_;
