@@ -205,7 +205,7 @@ sub _make_streams {
           my $duration = $self->globals->gop;
           if ( $self->dynamic_duration ) {
             my $inf = $tsd->scan($src);
-            if ($inf) { $duration = $inf->{len} }
+            if ($inf) { $duration = $inf->{len} / 1000 }
             else      { warning "Can't find h264 stream in $src" }
           }
           my $segn = sprintf '%s.%08d.ts', $tok, ++$next;
@@ -215,7 +215,7 @@ sub _make_streams {
           $m3u8->push_segment(
             Harmless::Segment->new(
               title    => '',
-              duration => $duration / 1000,
+              duration => $duration,
               uri      => $uri
             )
           );
