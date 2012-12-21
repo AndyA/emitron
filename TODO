@@ -21,7 +21,17 @@ BUGS
 
 Push fragments to S3.
 
+Log to file as well as console.
+
+Make ForkPipe commit infanticide reliably.
+
+Wire up ForkPipe and use it to get async notifications from packager.
+
 Integrate switcher / router.
+
+Fix up DTS/PTS in router: global clock.
+
+What happens when an m3u8 transitions from EVENT -> VOD during playback?
 
 More verbs in Emitron::Core
   Stream switching
