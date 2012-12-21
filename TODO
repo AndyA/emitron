@@ -11,11 +11,6 @@ BUGS
   Maybe making PipeFork cleanly stackable - so INT/TERM propagate to all
   children is the way forward.
 
-  Encoding artefacts:
-
-    Where are the coming from? Don't look like B-frame related problems
-    - the ordering is OK.
-
   Playback:
 
     Even from the h264 webcam playback starts to freeze after a while
@@ -24,25 +19,22 @@ BUGS
     Video from The Space started stalling every segment after a
     few hours.
 
-  Check dog scaling - needs to be applied /after/ resize.
-
 Push fragments to S3.
 
-Make encoders run in (NTP) sync: DTS/PTS/GoP
+Integrate switcher / router.
 
 More verbs in Emitron::Core
   Stream switching
     Slate / preroll / multiple sources
 
+Make encoders run in (NTP) sync: DTS/PTS/GoP
+
 VOD capture?
   Logging?
-
-Make webapp run under Apache.
-
-SSL for web app.
 
 Authentication / authorisation
   How do we handle that for incoming RTMP?
 
+SSL for web app.
 
-
+Make webapp run under Apache.
