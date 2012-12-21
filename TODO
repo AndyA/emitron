@@ -11,31 +11,33 @@ BUGS
   Maybe making PipeFork cleanly stackable - so INT/TERM propagate to all
   children is the way forward.
 
-  Playback:
-
-    Even from the h264 webcam playback starts to freeze after a while
-    (double check).
-
-    Video from The Space started stalling every segment after a
-    few hours.
-
-Push fragments to S3.
-
-Log to file as well as console.
+  Died during live streaming. What happened? Need auto-restart in the
+  event of packager failure. Ideally with contiguous timestamps but
+  discontunities better than nothing.
 
 Make ForkPipe commit infanticide reliably.
 
 Wire up ForkPipe and use it to get async notifications from packager.
 
+What happens when an m3u8 transitions from EVENT -> VOD during playback?
+
+Push fragments/manifests to S3.
+
+Log to file as well as console.
+
 Integrate switcher / router.
 
 Fix up DTS/PTS in router: global clock.
 
-What happens when an m3u8 transitions from EVENT -> VOD during playback?
+Test RTSP from Wirecast. Simulated / actual network conditions.
 
 More verbs in Emitron::Core
   Stream switching
     Slate / preroll / multiple sources
+  Stream lifecycle: L->V
+  For ROH:
+    Live -> VOD  
+    Live -> Prerecord -> VOD
 
 Make encoders run in (NTP) sync: DTS/PTS/GoP
 
