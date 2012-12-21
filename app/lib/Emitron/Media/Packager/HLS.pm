@@ -17,7 +17,7 @@ with 'Emitron::Media::Roles::Forker';
 has webroot => ( isa => 'Str', is => 'ro', required => 1 );
 has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );
 
-has [ 'vod', 'ignore_duration' ] => (
+has [ 'vod', 'dynamic_duration' ] => (
   isa      => 'Bool',
   is       => 'ro',
   required => 1,
@@ -207,7 +207,7 @@ sub _make_streams {
           my $evt      = shift;
           my $src      = $evt->fullname;
           my $duration = $self->globals->gop;
-          unless ( $self->ignore_duration ) {
+          if ( $self->dynamic_duration ) {
             my $inf = $tsd->scan( $src );
             if ( $inf ) { $duration = $inf->{len} }
             else        { warning "Can't find h264 stream in $src" }
