@@ -1,0 +1,30 @@
+s3cmd --configure
+s3cmd sync s3://thespace-media-live/v0001aw2 s3/clock
+s3cmd sync -v s3://thespace-media-live/v0001aw2 s3/clock
+s3cmd sync -v s3/clock s3://thespace-media-live/v0001aw2
+s3cmd sync -v s3/clock s3://thespace-media-live/v0001aw2/
+s3cmd del s3://thespace-media-live/v0001aw2/
+s3cmd del --recursive s3://thespace-media-live/v0001aw2/clock/
+s3cmd sync -v s3/v0001aw2 s3://thespace-media-live/
+s3cmd sync --progress s3/v0001aw2 s3://thespace-media-live/
+man s3cmd
+s3cmd info s3://thespace-media-live/v0001aw2/
+s3cmd info s3://thespace-media-live/v0001aw2
+s3cmd setacl s3://thespace-media-live/v0001aw2
+s3cmd du s3://thespace-media-live/v0001aw2
+s3cmd info s3://thespace-media-live
+s3cmd info s3://thespace-media-live/v0001aw2
+s3cmd info s3://thespace-media-live/v0001aw22
+s3cmd info s3://thespace-media-live/v0001aw
+s3cmd info s3://thespace-media-live/v0001aw2
+s3cmd info s3://thespace-media-live/v0001aw2/$ ll /opt/newstream/webroot/s3/v0001aw2/v0001aw2.m3u8 
+s3cmd info s3://thespace-media-live/v0001aw2/v0001aw2.m3u8 
+s3cmd info s3://thespace-media-live/v0001aw2/v0001aw2.f4m
+s3cmd setacl -P -r s3://thespace-media-live/v0001aw2
+s3cmd setacl -v -P -r s3://thespace-media-live/v0001aw2
+s3cmd setacl -v -P -r s3://thespace-media-live/v0001aw2/v$ ll /opt/newstream/webroot/s3/v0001aw2/v0001aw2.m3u8 
+s3cmd setacl -v -P -r s3://thespace-media-live/v0001aw2/v0001aw2.m3u8
+s3cmd info s3://thespace-media-live/v0001aw2/v0001aw2.m3u8
+s3cmd setacl -v -P -r s3://thespace-media-live/v0001aw2
+s3cmd setacl -v -P -r s3://thespace-media-live/v0001aw2/v0001aw2-2.m3u8
+s3cmd info s3://thespace-media-live/v0001aw2/v0001aw2-2.m3u8
