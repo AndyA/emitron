@@ -12,12 +12,16 @@ use Net::Amazon::S3;
 use Path::Class;
 
 use constant BUCKET => 'thespace-media-live';
-use constant DIR    => 'x_emitron_test';
-use constant INDEX  => 'index.html';
+use constant DIR    => 'v0001gwq';
+use constant INDEX  => 'v0001gwq.m3u8';
 
 my %O = ( config => glob('~/.s3cfg') );
 
 GetOptions( 'config:s' => \$O{config}, ) or die;
+
+my $mode = shift;
+die "switch.pl live|pre"
+ unless defined $mode && ( $mode eq 'live' || $mode eq 'pre' );
 
 my $cfg = Config::Tiny->read( $O{config} ) or die Config::Tiny->errstr;
 
@@ -36,7 +40,7 @@ my $key = join '/', DIR, INDEX;
 {
   my $now = DateTime->now;
   my $exp = $now->clone;
-  $exp->add( seconds => 4 );
+  $exp->add( seconds => 60 );
   print "$now, $exp\n";
   my $idx = $bucket->object(
     key           => $key,
@@ -45,15 +49,16 @@ my $key = join '/', DIR, INDEX;
     last_modified => $now,
     expires       => $exp,
   );
-  $idx->put_filename( file( DIR, INDEX ) );
+  my $dir = join '.', DIR, $mode;
+  $idx->put_filename( file( $dir, INDEX ) );
   print "URI: ", $idx->uri;
 }
 
-{
-  my $idx = $bucket->object( key => $key );
-  my $v = $idx->get;
-  print Dumper($v);
-}
+#{
+#  my $idx = $bucket->object( key => $key );
+#  my $v = $idx->get;
+#  print Dumper($v);
+#}
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl
 
