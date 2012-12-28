@@ -1,4 +1,4 @@
-ackage Emitron;
+package Emitron;
 use Dancer ':syntax';
 use Emitron::Model::Watched;
 
