@@ -1,0 +1,7 @@
+#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=1296000,PROGRAM-ID=1
+http://newstream.hexten.net/live/hls/thespace_pc_hd_lite_p60.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=496000,PROGRAM-ID=1
+http://newstream.hexten.net/live/hls/thespace_pc_hd_lite_p40.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=3500000,PROGRAM-ID=1
+http://newstream.hexten.net/live/hls/thespace_pc_hd_lite_p80.m3u8
