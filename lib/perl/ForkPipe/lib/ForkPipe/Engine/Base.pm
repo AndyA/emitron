@@ -46,10 +46,7 @@ sub handle_message { my $self = shift; $self->trigger( msg => @_ ) }
 
 sub handle_control {
   my ( $self, $msg ) = @_;
-  unless ( defined $msg ) {
-    carp "Control channel closed";
-    return;
-  }
+  exit unless defined $msg;
   confess "Wasn't expecting a control message";
 }
 
