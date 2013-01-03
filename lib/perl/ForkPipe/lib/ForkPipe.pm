@@ -4,6 +4,7 @@ use Moose;
 
 use Carp qw( croak );
 use IO::Handle;
+use POSIX ":sys_wait_h";
 
 use ForkPipe::Engine::Child;
 use ForkPipe::Engine::Parent;
@@ -14,10 +15,16 @@ our $VERSION = '0.01';
 
 has _opid => ( isa => 'Num', is => 'ro', default => sub { $$ } );
 
+has other_pid => (
+  isa    => 'Num',
+  is     => 'rw',
+  writer => '_set_other_pid'
+);
+
 has 'engine' => (
-  isa     => 'ForkPipe::Engine::Base',
+  isa     => 'ForkPipe::Engine::Base|Undef',
   is      => 'rw',
-  handles => ['send', 'peek', 'poll', 'on', 'stats']
+  handles => ['send', 'peek', 'poll', 'on', 'stats', 'trigger']
 );
 
 has listener => ( isa => 'ForkPipe::Listener', is => 'ro' );
@@ -62,11 +69,30 @@ sub _attr {
   map { $_ => $a{$_} } grep { defined $a{$_} } keys %a;
 }
 
+sub _reap {
+  my $self = shift;
+  while () {
+    my $kid = waitpid -1, WNOHANG;
+    last if $kid <= 0;
+    $self->obituary($?) if $kid == $self->other_pid;
+  }
+}
+
+before peek => sub { shift->_reap };
+
+sub obituary {
+  my ( $self, $status ) = @_;
+  $self->trigger( child => { status => $? } );
+  $self->engine->unhook;
+  $self->engine(undef);
+}
+
 sub fork {
   my $self = shift;
 
   my @p = $self->_make_pipes(4);
 
+  $self->_set_other_pid($$);    # inherited by child, overwritten in parent
   my $pid = fork;
   croak "Fork failed: $!" unless defined $pid;
 
@@ -90,6 +116,7 @@ sub fork {
 
   # Parent
   close $_ for @p[1, 2, 5, 6];
+  $self->_set_other_pid($pid);
 
   $self->engine(
     ForkPipe::Engine::Parent->new(
@@ -103,6 +130,14 @@ sub fork {
   );
 
   return $pid;
+}
+
+sub spawn {
+  my ( $self, $cb, @args ) = @_;
+  my $pid = $self->fork;
+  return $pid if $pid;
+  $cb->(@args);
+  exit;
 }
 
 sub log {

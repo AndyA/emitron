@@ -3,8 +3,7 @@
 use strict;
 use warnings;
 
-use Data::Dumper;
-use Test::More;    # skip_all => 'Not ready';
+use Test::More;
 
 use ForkPipe::Muxer;
 use ForkPipe;
@@ -14,7 +13,7 @@ use Time::HiRes qw( sleep );
 sub child($$) {
   my ( $fp, $id ) = @_;
   $fp->on(
-    sub {
+    msg => sub {
       my $msg = shift;
       $msg->{kid} = $id;
       $fp->send($msg);
@@ -56,7 +55,7 @@ sub child($$) {
   my @to_mux = ();
   my $done   = 0;
   $mux->on(
-    sub {
+    msg => sub {
       my $msg = shift;
       return unless defined $msg;    # TODO
       if ( $msg->{done} ) {

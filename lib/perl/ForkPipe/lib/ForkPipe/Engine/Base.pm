@@ -10,7 +10,9 @@ ForkPipe::Engine::Base - Base class for engines
 
 =cut
 
-with 'ForkPipe::Role::Listener', 'ForkPipe::Role::Handler';
+with 'ForkPipe::Role::Handler';
+with 'ForkPipe::Role::Listener';
+with 'ForkPipe::Role::Poller';
 
 has ['msg', 'ctl'] => (
   isa      => 'ForkPipe::Pipe',
@@ -29,7 +31,9 @@ sub BUILD {
     sub { $self->handle_control( $self->ctl->receive ) } );
 }
 
-sub DEMOLISH {
+sub DEMOLISH { shift->unhook }
+
+sub unhook {
   my $self = shift;
 
   my $li = $self->listener;
@@ -38,7 +42,7 @@ sub DEMOLISH {
   $li->remove( $self->ctl->rd );
 }
 
-sub handle_message { my $self = shift; $self->_trigger(@_) }
+sub handle_message { my $self = shift; $self->trigger( msg => @_ ) }
 
 sub handle_control {
   my ( $self, $msg ) = @_;

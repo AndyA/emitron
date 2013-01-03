@@ -2,29 +2,34 @@ package ForkPipe::Muxer;
 
 use Moose;
 
+use POSIX ":sys_wait_h";
+use ForkPipe::Util::Bag;
+
 =head1 NAME
 
 ForkPipe::Muxer - A multiplexer for multiple ForkPipe instances
 
 =cut
 
-with 'ForkPipe::Role::Queue', 'ForkPipe::Role::Listener';
+with 'ForkPipe::Role::Queue';
+with 'ForkPipe::Role::Listener';
+with 'ForkPipe::Role::Poller';
 
 has _workers => (
-  traits  => ['Array'],
-  isa     => 'ArrayRef[ForkPipe]',
-  is      => 'rw',
-  default => sub { [] },
+  isa     => 'ForkPipe::Util::Bag',
+  is      => 'ro',
+  default => sub { ForkPipe::Util::Bag->new },
   handles => {
-    add     => 'push',
-    workers => 'elements'
+    add     => 'add',
+    remove  => 'remove',
+    workers => 'elements',
   }
 );
 
 sub on {
-  my ( $self, $cb ) = @_;
+  my ( $self, $verb, $cb ) = @_;
   for my $fp ( $self->workers ) {
-    $fp->on( sub { $cb->( $_[0], $fp ) } );
+    $fp->on( $verb, $cb );
   }
 }
 
@@ -35,6 +40,31 @@ sub _make_upstream {
     return $self->_m_get;
   };
 }
+
+sub _worker_for_pid {
+  my ( $self, $pid ) = @_;
+  # TODO build a map if O(N) bothers you
+  for my $fp ( $self->workers ) {
+    return $fp if $fp->other_pid == $pid;
+  }
+  return;
+}
+
+sub _reap {
+  my $self = shift;
+  while () {
+    my $kid = waitpid -1, WNOHANG;
+    last if $kid <= 0;
+    my $st = $?;
+    # got kid
+    if ( my $fp = $self->_worker_for_pid($kid) ) {
+      $self->remove($fp);
+      $fp->obituary($st);
+    }
+  }
+}
+
+before peek => sub { shift->_reap };
 
 sub context {
   my $self = shift;

@@ -90,11 +90,13 @@ sub test_it(&) {
   eq_or_diff $li->stats, { handled => 4 }, 'stats';
 }
 
-test_it {
-  my $li = shift;
-  my $tm = elapsed { $li->poll(0.5) };
-  ok $tm >= 0.4 && $tm <= 2, "timeout";
-};
+# TODO poll doesn't live in listener any more
+#
+#test_it {
+#  my $li = shift;
+#  my $tm = elapsed { $li->poll(0.5) };
+#  ok $tm >= 0.4 && $tm <= 2, "timeout";
+#};
 
 test_it { shift->peek };
 

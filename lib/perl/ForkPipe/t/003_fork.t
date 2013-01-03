@@ -19,7 +19,7 @@ use ForkPipe;
   my @got     = ();
   if ( my $pid = $fp->fork ) {
     $fp->on(
-      sub {
+      msg => sub {
         my $msg = shift;
         if ( $msg->{done} ) {
           $running = 0;
@@ -37,7 +37,7 @@ use ForkPipe;
   }
   else {
     $fp->on(
-      sub {
+      msg => sub {
         my $msg = shift;
         if ( $msg->{sn}++ > 500 ) {
           $msg->{done} = 1;
@@ -110,7 +110,7 @@ sub fork_them {
   my $pid = $fp->fork;
   unless ($pid) {
     $fp->on(
-      sub {
+      msg => sub {
         my $msg = shift;
         my $nm  = $child->($msg);
         $fp->send($nm);
@@ -124,7 +124,7 @@ sub fork_them {
   my ( $out, $done );
 
   $fp->on(
-    sub {
+    msg => sub {
       my $msg = shift;
       if ( defined $msg ) {
         $fp->send( $out = $parent->($msg) );

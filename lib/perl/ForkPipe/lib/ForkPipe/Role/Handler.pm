@@ -8,20 +8,22 @@ ForkPipe::Role::Handler - Register handlers
 
 =cut
 
-has _on => (
-  traits  => ['Array'],
-  isa     => 'ArrayRef[CodeRef]',
+has _handlers => (
+  isa     => 'HashRef[ArrayRef]',
   is      => 'ro',
-  default => sub { [] },
-  handles => {
-    on        => 'push',
-    _handlers => 'elements'
-  }
+  default => sub { {} },
 );
 
-sub _trigger {
-  my ( $self, @a ) = @_;
-  for my $hh ( $self->_handlers ) {
+sub on {
+  my ( $self, $verb, $cb ) = @_;
+  my $h = $self->_handlers;
+  push @{ $h->{$verb} }, $cb;
+}
+
+sub trigger {
+  my ( $self, $verb, @a ) = @_;
+  my $h = $self->_handlers;
+  for my $hh ( @{ $h->{$verb} || [] } ) {
     $hh->(@a);
   }
 }
