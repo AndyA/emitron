@@ -43,11 +43,17 @@ my @pid = ();
 
 mention "Parent is $$";
 
+sub work() {
+  mention "Running ffmpeg";
+  exec ffmpeg => -y => -i => '../../media/coast.ts',
+   -acodec    => 'libfaac',
+   -vcodec    => 'libx264',
+   'coast.mp4';
+}
+
 push @pid, f0rk {
-  setpgrp( 0, 0 );
   my $cpid = f0rk {
-    mention "Running child script";
-    exec 'bash', 'child.sh';
+    work;
   };
 
   while () {
@@ -72,8 +78,8 @@ local $SIG{INT} = sub {
   exit;
 };
 
-sleep 4;
-murder @pid;
+#sleep 4;
+#murder @pid;
 loiter @pid;
 mention "Done";
 
