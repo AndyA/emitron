@@ -69,7 +69,7 @@ sub child($$) {
 
   $mux->poll(0.5);
   $mux->broadcast( { done => 1 } );
-  $mux->poll(1);
+  $mux->poll(2);
 
   is $id, $workers * $messages + $messages, 'messages sent as expected';
   is $done, $workers, 'all workers accounted for';

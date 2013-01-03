@@ -94,7 +94,8 @@ sub fork {
 
   my @p = $self->_make_pipes(4);
 
-  $self->_set_other_pid($$);    # inherited by child, overwritten in parent
+  # inherited by child, overwritten in parent
+  $self->_set_other_pid( $self->_opid );
   my $pid = fork;
   croak "Fork failed: $!" unless defined $pid;
 
