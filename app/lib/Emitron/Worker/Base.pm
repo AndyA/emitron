@@ -3,6 +3,7 @@ package Emitron::Worker::Base;
 use Moose;
 
 use Emitron::App;
+use Emitron::Logger;
 use Emitron::Message;
 
 has em => (
@@ -13,9 +14,9 @@ has em => (
     Emitron::App->em;
   },
   handles => [
-    'model',        'queue', 'event',      'despatcher',
-    'peek',         'poll',  'post_event', 'handle_events',
-    'add_listener', 'remove_listener'
+    'model',        'queue',           'event',      'despatcher',
+    'peek',         'poll',            'post_event', 'handle_events',
+    'add_listener', 'remove_listener', 'send'
   ]
 );
 
@@ -27,7 +28,9 @@ Emitron::Worker::Base - A worker
 
 sub post_message {
   my ( $self, @msg ) = @_;
-  $self->send( Emitron::Message->new(@msg)->get_raw );
+  my $msg = Emitron::Message->new(@msg)->get_raw;
+  debug "sending: ", $msg;
+  $self->send($msg);
 }
 
 1;

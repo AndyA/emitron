@@ -71,9 +71,14 @@ has _muxer => (
 );
 
 has _forkpipe => (
-  isa     => 'ForkPipe',
+  isa => 'ForkPipe',
+  is  => 'rw',
+);
+
+has _delegate => (
+  isa     => 'ForkPipe|ForkPipe::Muxer',
   is      => 'rw',
-  handles => ['send', 'peek', 'poll'],
+  handles => ['send', 'peek', 'poll', 'state'],
 );
 
 =head1 NAME
@@ -106,19 +111,24 @@ sub run {
 
   for my $ww ( $self->make_workers ) {
     my $fp = ForkPipe->new( $mux->context );
+    $mux->add($fp);
     $fp->spawn(
       sub {
         $self->_forkpipe($fp);
+        $self->_delegate($fp);
         $self->worker($ww);
         $ww->run($fp);
       }
     );
   }
 
+  $self->_delegate($mux);
+
   $mux->on(
     msg => sub {
       my $msg = shift;
-      $self->send($msg);
+      debug "received: ", $msg;
+      $self->send($msg) if defined $msg;
     }
   );
 
@@ -129,9 +139,18 @@ sub run {
   );
 
   while () {
+    info "WATCHDOG: ", $self->_worker_info;
     $mux->poll(10);
-    info "Ping";
   }
+}
+
+sub _worker_info {
+  my $self = shift;
+  my @desc = ();
+  for my $fp ( $self->_muxer->workers ) {
+    push @desc, sprintf "%d (%s)", $fp->other_pid, $fp->state;
+  }
+  return join ', ', @desc;
 }
 
 sub make_workers {
@@ -153,19 +172,6 @@ sub make_workers {
   }
 
   return @w;
-}
-
-# TODO this shouldn't be here.
-
-sub _make_cleanup {
-  my $self  = shift;
-  my $queue = $self->queue;
-  return sub {
-    my $msg = shift;
-    if ( $msg->source eq 'api' ) {
-      $queue->remove( $msg->{cleanup} );
-    }
-  };
 }
 
 our $UID;

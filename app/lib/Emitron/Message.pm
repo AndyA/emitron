@@ -2,6 +2,7 @@ package Emitron::Message;
 
 use Moose;
 
+use Emitron::Logger;
 use Storable qw( store_fd fd_retrieve freeze thaw );
 
 has msg    => ( is  => 'ro',  required => 1 );
@@ -22,7 +23,10 @@ sub from_raw {
 }
 
 sub get_raw {
-  { %{ $_[0] } }
+  my $self = shift;
+  my $raw  = {%$self};
+  debug "raw message is ", $raw;
+  return $raw;
 }
 
 sub raw_read {
