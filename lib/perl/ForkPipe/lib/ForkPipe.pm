@@ -17,7 +17,7 @@ with 'ForkPipe::Role::Reaper';
 has _opid => ( isa => 'Num', is => 'ro', default => sub { $$ } );
 
 has other_pid => (
-  isa    => 'Num',
+  isa    => 'Num|Undef',
   is     => 'rw',
   writer => '_set_other_pid'
 );
@@ -87,6 +87,7 @@ sub obituary {
   $self->trigger( child => { status => $? } );
   $self->engine->unhook;
   $self->engine(undef);
+  $self->_set_other_pid(undef);
 }
 
 sub fork {
