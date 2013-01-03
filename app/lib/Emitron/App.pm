@@ -9,13 +9,14 @@ use Emitron::Config;
 use Emitron::Context;
 use Emitron::Logger;
 use Emitron::Message;
-use Emitron::Runner;
 use Emitron::Worker::Base;
 use Emitron::Worker::CRTMPServerWatcher;
 use Emitron::Worker::EventWatcher;
 use Emitron::Worker::ModelWatcher;
 use Emitron::Worker::Script;
 use Emitron::Worker::Tickler;
+use ForkPipe::Muxer;
+use ForkPipe;
 use Path::Class;
 use Time::HiRes qw( sleep time );
 
@@ -24,7 +25,7 @@ has root => ( isa => 'Str', is => 'ro', default => '/tmp/emitron' );
 has worker => (
   isa     => 'Emitron::Worker::Base',
   is      => 'rw',
-  handles => ['post_message', 'handle_messages']
+  handles => ['post_message']
 );
 
 has _context => (
@@ -54,24 +55,25 @@ has _trigger => (
   }
 );
 
-has _listener => (
-  isa     => 'Emitron::Listener',
-  is      => 'ro',
-  lazy    => 1,
-  default => sub { Emitron::Listener->new },
-  handles => {
-    peek            => 'peek',
-    poll            => 'poll',
-    add_listener    => 'add',
-    remove_listener => 'remove'
-  }
-);
-
 has _revision => (
   isa     => 'Num',
   is      => 'rw',
   lazy    => 1,
   default => sub { shift->model->revision }
+);
+
+has _muxer => (
+  isa      => 'ForkPipe::Muxer',
+  is       => 'rw',
+  required => 1,
+  lazy     => 1,
+  default  => sub { ForkPipe::Muxer->new },
+);
+
+has _forkpipe => (
+  isa     => 'ForkPipe',
+  is      => 'rw',
+  handles => ['send', 'peek', 'poll'],
 );
 
 =head1 NAME
@@ -99,10 +101,37 @@ Emitron::App - The Emitron app.
 
 sub run {
   my $self = shift;
-  Emitron::Runner->new(
-    workers => $self->make_workers,
-    cleanup => $self->_make_cleanup
-  )->run;
+
+  my $mux = $self->_muxer;
+
+  for my $ww ( $self->make_workers ) {
+    my $fp = ForkPipe->new( $mux->context );
+    $fp->spawn(
+      sub {
+        $self->_forkpipe($fp);
+        $self->worker($ww);
+        $ww->run($fp);
+      }
+    );
+  }
+
+  $mux->on(
+    msg => sub {
+      my $msg = shift;
+      $self->send($msg);
+    }
+  );
+
+  $mux->on(
+    child => sub {
+      confess "Worker died!\n";
+    }
+  );
+
+  while () {
+    $mux->poll(10);
+    info "Ping";
+  }
 }
 
 sub make_workers {
@@ -123,7 +152,7 @@ sub make_workers {
     push @w, Emitron::Worker::Script->new;
   }
 
-  return \@w;
+  return @w;
 }
 
 # TODO this shouldn't be here.
@@ -153,6 +182,16 @@ sub _wrap_handler {
     debug "Running handler in $UID";
     $handler->(@_);
   };
+}
+
+sub add_listener {
+  my ( $self, $fn, $cb ) = @_;
+  $self->_muxer->listener->add( $fn, $cb );
+}
+
+sub remove_listener {
+  my ( $self, $fn ) = @_;
+  $self->_muxer->listener->remove($fn);
 }
 
 sub handle_events {

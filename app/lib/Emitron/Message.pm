@@ -21,6 +21,10 @@ sub from_raw {
   return $class->new(%$raw);
 }
 
+sub get_raw {
+  { %{ $_[0] } }
+}
+
 sub raw_read {
   my ( $fd, $len ) = @_;
   my $buf = '';

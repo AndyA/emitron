@@ -19,7 +19,7 @@ Emitron::Worker::CRTMPServerWatcher - Poll crtmpserver
 =cut
 
 sub run {
-  my $self = shift;
+  my ( $self, $fp ) = @_;
 
   my $prev    = undef;
   my $srv     = Emitron::CRTMPServer->new( uri => $self->uri );

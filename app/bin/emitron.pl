@@ -5,8 +5,9 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-use lib "$FindBin::Bin/../../perl/lib/Data-JSONPath/lib";
-use lib "$FindBin::Bin/../../perl/lib/Harmless/lib";
+use lib "$FindBin::Bin/../../lib/perl/Data-JSONPath/lib";
+use lib "$FindBin::Bin/../../lib/perl/Harmless/lib";
+use lib "$FindBin::Bin/../../lib/perl/ForkPipe/lib";
 
 use Carp qw( verbose );
 use Emitron::App root => '/tmp/emitron';
