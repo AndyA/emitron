@@ -11,10 +11,11 @@ enum 'WorkerState' => [qw( PENDING READY BUSY DONE )];
 
 with 'ForkPipe::Role::Queue';
 
-has _state => (
+has state => (
   isa     => 'WorkerState',
   is      => 'rw',
-  default => 'PENDING'
+  default => 'PENDING',
+  writer  => '_set_state',
 );
 
 has upstream => (
@@ -34,14 +35,14 @@ ForkPipe::Engine::Parent - Parent engine
 
 sub handle_control {
   my ( $self, $msg ) = @_;
-  $self->_state( defined $msg ? $msg : 'DONE' );
+  $self->_set_state( defined $msg ? $msg : 'DONE' );
   $self->send_pending;
 }
 
-sub is_ready { shift->_state eq 'READY' }
+sub is_ready { shift->state eq 'READY' }
 
 sub _fetch_up { shift->upstream->() }
-sub _busy     { shift->_state('BUSY') }
+sub _busy     { shift->_set_state('BUSY') }
 
 sub send_pending {
   my $self = shift;

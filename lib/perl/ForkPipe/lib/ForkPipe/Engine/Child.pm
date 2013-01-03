@@ -17,7 +17,8 @@ sub _ready {
   $self->ctl->send('READY') if $self->accept_messages;
 }
 
-sub is_ready { shift->accept_messages }
+sub is_ready { 1 }
+sub state    { 'READY' }
 
 after on => sub {
   my ( $self, $verb, $cb ) = @_;

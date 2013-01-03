@@ -25,7 +25,7 @@ has other_pid => (
 has 'engine' => (
   isa     => 'ForkPipe::Engine::Base|Undef',
   is      => 'rw',
-  handles => ['send', 'peek', 'poll', 'on', 'stats', 'trigger']
+  handles => ['send', 'peek', 'poll', 'on', 'stats', 'trigger', 'state']
 );
 
 has listener => ( isa => 'ForkPipe::Listener', is => 'ro' );
