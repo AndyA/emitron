@@ -4,7 +4,6 @@ use Moose;
 
 use Carp qw( croak );
 use IO::Handle;
-use POSIX ":sys_wait_h";
 
 use ForkPipe::Engine::Child;
 use ForkPipe::Engine::Parent;
@@ -12,6 +11,8 @@ use ForkPipe::Pipe;
 use ForkPipe::Pipe;
 
 our $VERSION = '0.01';
+
+with 'ForkPipe::Role::Reaper';
 
 has _opid => ( isa => 'Num', is => 'ro', default => sub { $$ } );
 
@@ -71,11 +72,12 @@ sub _attr {
 
 sub _reap {
   my $self = shift;
-  while () {
-    my $kid = waitpid -1, WNOHANG;
-    last if $kid <= 0;
-    $self->obituary($?) if $kid == $self->other_pid;
-  }
+  $self->reap(
+    sub {
+      my ( $pid, $st ) = @_;
+      $self->obituary($st) if $pid == $self->other_pid;
+    }
+  );
 }
 
 before peek => sub { shift->_reap };

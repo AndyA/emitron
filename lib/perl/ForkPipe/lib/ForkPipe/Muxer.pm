@@ -14,6 +14,7 @@ ForkPipe::Muxer - A multiplexer for multiple ForkPipe instances
 with 'ForkPipe::Role::Queue';
 with 'ForkPipe::Role::Listener';
 with 'ForkPipe::Role::Poller';
+with 'ForkPipe::Role::Reaper';
 
 has _workers => (
   isa     => 'ForkPipe::Util::Bag',
@@ -52,16 +53,15 @@ sub _worker_for_pid {
 
 sub _reap {
   my $self = shift;
-  while () {
-    my $kid = waitpid -1, WNOHANG;
-    last if $kid <= 0;
-    my $st = $?;
-    # got kid
-    if ( my $fp = $self->_worker_for_pid($kid) ) {
-      $self->remove($fp);
-      $fp->obituary($st);
+  $self->reap(
+    sub {
+      my ( $pid, $st ) = @_;
+      if ( my $fp = $self->_worker_for_pid($pid) ) {
+        $self->remove($fp);
+        $fp->obituary($st);
+      }
     }
-  }
+  );
 }
 
 before peek => sub { shift->_reap };
