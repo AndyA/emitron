@@ -3,6 +3,8 @@ package ForkPipe::Engine::Parent;
 use Moose;
 use Moose::Util::TypeConstraints;
 
+use POSIX ":sys_wait_h";
+
 extends 'ForkPipe::Engine::Base';
 
 enum 'WorkerState' => [qw( PENDING READY BUSY DONE )];

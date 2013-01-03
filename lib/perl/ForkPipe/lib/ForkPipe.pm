@@ -73,6 +73,8 @@ sub fork {
   unless ($pid) {
     close $_ for @p[0, 3, 4, 7];
 
+    # We don't pass our listener to the child. If we have an explicit
+    # listener it's intended for parent use only.
     $self->engine(
       ForkPipe::Engine::Child->new(
         ctl => ForkPipe::Pipe->new( wr => $p[1], rd => $p[2] ),
@@ -96,7 +98,7 @@ sub fork {
         upstream => $self->upstream
       ),
       ctl => ForkPipe::Pipe->new( wr => $p[3], rd => $p[0] ),
-      msg => ForkPipe::Pipe->new( wr => $p[7], rd => $p[4] )
+      msg => ForkPipe::Pipe->new( wr => $p[7], rd => $p[4] ),
     )
   );
 
