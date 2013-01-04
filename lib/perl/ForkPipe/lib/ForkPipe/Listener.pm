@@ -21,33 +21,13 @@ has _sel => (
   handles => ['remove']
 );
 
-sub BUILD {
-  my $self = shift;
-  print "[$$] New listener: $self\n";
-}
-
-sub _get_fileno {
-  my $fh = shift;
-  return $fh->fileno if UNIVERSAL::can( $fh, 'can' ) && $fh->can('fileno');
-  return "$fh";
-}
-
-sub _handles {
-  my $self = shift;
-  return join ', ', map { _get_fileno( $_->[0] ) } $self->_sel->handles;
-}
-
 sub add {
   my $self = shift;
-  print "[$$] Adding handle to listener $self\n";
   $self->_sel->add( [@_] );
-  print "[$$] ", $self->_handles, "\n";
 }
 
 sub peek {
   my ( $self, $timeout ) = @_;
-  print "[$$] peek\n";
-  print "[$$] ", $self->_handles, "\n";
   for my $rdy ( $self->_sel->can_read( $timeout || 0 ) ) {
     my ( $fh, $cb, @args ) = @$rdy;
     $cb->( $fh, @args );
