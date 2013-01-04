@@ -28,8 +28,13 @@ has 'engine' => (
   handles => ['send', 'peek', 'poll', 'on', 'stats', 'trigger', 'state']
 );
 
-has listener => ( isa => 'ForkPipe::Listener', is => 'ro' );
-has upstream => ( isa => 'CodeRef',            is => 'ro' );
+has listener => (
+  isa    => 'ForkPipe::Listener',
+  is     => 'ro',
+  reader => '_listener',
+);
+
+has upstream => ( isa => 'CodeRef', is => 'ro' );
 
 BEGIN {
   no strict 'refs';
@@ -125,7 +130,7 @@ sub fork {
   $self->engine(
     ForkPipe::Engine::Parent->new(
       _attr(
-        listener => $self->listener,
+        listener => $self->_listener,
         upstream => $self->upstream
       ),
       ctl => ForkPipe::Pipe->new( wr => $p[3], rd => $p[0] ),

@@ -14,7 +14,11 @@ has listener => (
   required => 1,
   lazy     => 1,
   default  => sub { ForkPipe::Listener->new },
-  handles  => ['peek']
+  handles  => {
+    peek            => 'peek',
+    add_listener    => 'add',
+    remove_listener => 'remove',
+  },
 );
 
 1;
