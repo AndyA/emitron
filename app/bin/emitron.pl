@@ -91,7 +91,7 @@ em->on(
 );
 
 em->on(
-  '+$.hls.thumbnail.*' => sub {
+  '+$.hls.web.*' => sub {
     my ( $path, undef, $hls, $name ) = @_;
 
     info "Started deploying ($name)";
