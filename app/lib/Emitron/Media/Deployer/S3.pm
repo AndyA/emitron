@@ -141,14 +141,15 @@ sub _deploy_frags {
   my @todo     = ();
   while (@seg) {
     my $seg = pop @seg;
-    my $obj = $self->_object( $seg, 'video/MP2T' );
+    my $obj = $self->_object( $self->_key($seg), 'video/MP2T' );
     last if $obj->exists;
     unshift @todo, [$seg, $obj];
   }
   for my $todo (@todo) {
     my ( $seg, $obj ) = @$todo;
-    debug "Deploying segment $seg";
     $obj->put_filename( file( $mfd, $seg ) );
+    my $uri = $obj->uri;
+    debug "Deployed segment $seg as $uri";
   }
   $self->_deploy_m3u8( $mf, $key, $duration / 2 );
 }
