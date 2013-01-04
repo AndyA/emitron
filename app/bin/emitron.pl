@@ -96,6 +96,7 @@ em->on(
 
     info "Started deploying ($name)";
 
+    # v0001gwq
     my $dep = Emitron::Tool::Deployer::S3->new(
       name   => $name,
       config => '$.deployers.s3.live',
