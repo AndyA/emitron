@@ -34,11 +34,12 @@ sub _mk_deployer {
   my $self = shift;
   my $cfg  = em->cfg( $self->config );
   return Emitron::Media::Deployer::S3->new(
-    name     => $self->name,
-    path     => $self->path,
-    pid      => $self->pid,
-    manifest => $self->source->{manifest},
-    config   => $cfg,
+    name       => $self->name,
+    path       => $self->path,
+    pid        => $self->pid,
+    manifest   => $self->source->{manifest},
+    config     => $cfg,
+    make_index => 1,
   );
 }
 

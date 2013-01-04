@@ -12,6 +12,7 @@ use Linux::Inotify2;
 use Net::Amazon::S3::Client;
 use Net::Amazon::S3;
 use Path::Class;
+use Time::HiRes qw( sleep );
 
 extends 'Emitron::Media::Base';
 with 'Emitron::Media::Roles::Forker';
@@ -33,6 +34,8 @@ has ['pid', 'manifest'] => (
   is       => 'ro',
   required => 1,
 );
+
+has make_index => ( isa => 'Bool', is => 'ro', default => 0 );
 
 has path => (
   isa     => 'Str',
@@ -125,11 +128,12 @@ sub _deploy {
   debug "Deploying $file as $key ($mime)";
   my $obj = $self->_object( $key, $mime, $ttl );
   $obj->put_filename($file);
+  return $obj->uri;
 }
 
 sub _deploy_m3u8 {
   my ( $self, $file, $key, $ttl ) = @_;
-  $self->_deploy( $file, $key, 'application/x-mpegURL', $ttl );
+  return $self->_deploy( $file, $key, 'application/x-mpegURL', $ttl );
 }
 
 sub _deploy_frags {
@@ -149,19 +153,16 @@ sub _deploy_frags {
     my ( $seg, $obj ) = @$todo;
     $obj->put_filename( file( $mfd, $seg ) );
     my $uri = $obj->uri;
-    debug "Deployed segment $seg as $uri";
+    debug "Deployed segment $uri";
   }
-  $self->_deploy_m3u8( $mf, $key, $duration / 2 );
+  return $self->_deploy_m3u8( $mf, $key, $duration / 2 );
 }
 
 sub _find_dynamic_manifests {
   my $self = shift;
   my $mf   = $self->manifest;
-  # TODO: possible race here - the manifest might not yet exist.
-  # Ideally we should have some kind of inotify based callback
-  # widget to allow us to wait for files generically. In practice
-  # in this case the model propagation delay means that the race
-  # risk is fairly low.
+  # TODO: nicer, generic way of waiting for files
+  sleep 0.5 until -f $mf;
   my $m3u8 = Harmless::M3U8->new->read($mf);
   my $vpl  = $m3u8->vpl;
   return $mf unless @$vpl;
@@ -198,8 +199,24 @@ sub _key {
 
 sub _manifest_key {
   my $self = shift;
-  my $mf = join '.', $self->pid, 'm3u8';
-  return $self->_key($mf);
+  return $self->_key( join '.', $self->pid, 'm3u8' );
+}
+
+sub _index {
+  my ( $self, $media ) = @_;
+  return <<EOT;
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>HLS</title>
+  </head>
+  <body>
+    <video controls="controls" width="1280" height="720" autoplay="autoplay" >
+      <source src="$media" type="application/x-mpegURL" />
+    </video>
+  </body>
+</html>
+EOT
 }
 
 sub start {
@@ -209,7 +226,16 @@ sub start {
       my @mf = $self->_find_dynamic_manifests;
       debug "Manifests: ", join ', ', @mf;
       $self->_mk_inotify(@mf);
-      $self->_deploy_m3u8( $self->manifest, $self->_manifest_key, 60 );
+      my $media
+       = $self->_deploy_m3u8( $self->manifest, $self->_manifest_key, 60 );
+      if ( $self->make_index ) {
+        my $idx = $self->_index($media);
+        my $key = $self->_key( join '.', $self->pid, 'html' );
+        my $obj = $self->_object( $key, 'text/html', 60 );
+        $obj->put($idx);
+        my $iuri = $obj->uri;
+        debug "Created index $iuri";
+      }
       debug "Polling...";
       1 while $self->_inotify->poll;
     }
