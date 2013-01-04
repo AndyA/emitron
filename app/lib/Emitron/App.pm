@@ -70,15 +70,11 @@ has _muxer => (
   default  => sub { ForkPipe::Muxer->new },
 );
 
-has _forkpipe => (
-  isa => 'ForkPipe',
-  is  => 'rw',
-);
-
 has _delegate => (
-  isa     => 'ForkPipe|ForkPipe::Muxer',
-  is      => 'rw',
-  handles => ['send', 'peek', 'poll', 'state'],
+  isa => 'ForkPipe|ForkPipe::Muxer',
+  is  => 'rw',
+  handles =>
+   ['send', 'peek', 'poll', 'state', 'add_listener', 'remove_listener'],
 );
 
 =head1 NAME
@@ -114,7 +110,7 @@ sub run {
     $mux->add($fp);
     $fp->spawn(
       sub {
-        $self->_forkpipe($fp);
+        # TODO this looks messy as hell
         $self->_delegate($fp);
         $self->worker($ww);
         $ww->run($fp);
@@ -127,7 +123,6 @@ sub run {
   $mux->on(
     msg => sub {
       my $msg = shift;
-      debug "received: ", $msg;
       $self->send($msg) if defined $msg;
     }
   );
@@ -188,16 +183,6 @@ sub _wrap_handler {
     debug "Running handler in $UID";
     $handler->(@_);
   };
-}
-
-sub add_listener {
-  my ( $self, $fn, $cb ) = @_;
-  $self->_muxer->listener->add( $fn, $cb );
-}
-
-sub remove_listener {
-  my ( $self, $fn ) = @_;
-  $self->_muxer->listener->remove($fn);
 }
 
 sub handle_events {

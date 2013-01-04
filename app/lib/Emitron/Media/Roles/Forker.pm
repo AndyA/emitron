@@ -40,7 +40,7 @@ sub spawn {
   my ( $self, @cmd ) = @_;
   return $self->fork(
     sub {
-      setpgrp( 0, 0 );
+      #      setpgrp( 0, 0 );
       exec @cmd or die "Can't run ", join( ' ', @cmd ), ": $!";
       return 1;
     }
@@ -56,7 +56,7 @@ sub kill_all {
   my $self = shift;
 
   my @pids = sort { $a <=> $b } splice @{ $self->_kids };
-  my $sig = kill -9, @pids;
+  my $sig = kill -2, @pids;
   warning "Signalled only $sig of ", scalar(@pids), "\n"
    unless @pids == $sig;
   my @st = ();

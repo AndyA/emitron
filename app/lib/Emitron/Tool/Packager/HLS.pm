@@ -19,7 +19,7 @@ has packager => (
   is      => 'ro',
   lazy    => 1,
   builder => '_mk_packager',
-  handles => ['start', 'stop']
+  handles => ['start', 'stop', 'manifest']
 );
 
 has stream => ( isa => 'HashRef', is => 'ro', required => 1 );
@@ -55,9 +55,27 @@ before start => sub {
   debug "Start HLS packager ", $self->name, " with config ", $self->config;
 };
 
+after start => sub {
+  my $self = shift;
+  em->model->transaction(
+    sub {
+      my ( $m, $rev ) = @_;
+      $m->{hls}{ $self->name } = { manifest => $self->manifest };
+      return $m;
+    }
+  );
+};
+
 before stop => sub {
   my $self = shift;
   debug "Stop HLS packager ", $self->name, " with config ", $self->config;
+  em->model->transaction(
+    sub {
+      my ( $m, $rev ) = @_;
+      delete $m->{hls}{ $self->name };
+      return $m;
+    }
+  );
 };
 
 1;

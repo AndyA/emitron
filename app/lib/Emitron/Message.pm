@@ -24,9 +24,7 @@ sub from_raw {
 
 sub get_raw {
   my $self = shift;
-  my $raw  = {%$self};
-  debug "raw message is ", $raw;
-  return $raw;
+  return {%$self};
 }
 
 sub is_safe { shift->source eq 'internal' }

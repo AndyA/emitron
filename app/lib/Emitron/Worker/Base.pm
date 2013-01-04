@@ -29,7 +29,6 @@ Emitron::Worker::Base - A worker
 sub post_message {
   my ( $self, @msg ) = @_;
   my $msg = Emitron::Message->new(@msg)->get_raw;
-  debug "sending: ", $msg;
   $self->send($msg);
 }
 
