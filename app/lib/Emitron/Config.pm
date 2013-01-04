@@ -49,7 +49,17 @@ sub config {
         crtmpserver => 'http://localhost:6502',
       },
       packagers => { default => { webroot => 'webroot/live/hls' } },
-      profiles  => {
+      deployers => {
+        s3 => {
+          test => {},
+          live => {
+            config  => glob('~/.s3/the-space-live.ini'),
+            bucket  => 'thespace-media-live',
+            profile => 'default',
+          },
+        }
+      },
+      profiles => {
         config => {
           thumbnail => { encodes => ['t10'] },
           pc        => {

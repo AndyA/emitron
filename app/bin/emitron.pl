@@ -12,6 +12,7 @@ use lib "$FindBin::Bin/../../lib/perl/ForkPipe/lib";
 use Carp qw( verbose );
 use Emitron::App root => '/tmp/emitron';
 use Emitron::Logger;
+use Emitron::Tool::Deployer::S3;
 use Emitron::Tool::Encoder;
 use Emitron::Tool::Packager::HLS;
 
@@ -65,8 +66,8 @@ em->on(
 );
 
 em->on(
-  '+$.fragments.web.*' => sub {
-    my ( $path, undef, $frag, $name ) = @_;
+  '+$.fragments.*.*' => sub {
+    my ( $path, undef, $frag, $usage, $name ) = @_;
 
     info "Started packaging ($name)";
 
@@ -74,6 +75,7 @@ em->on(
       name   => $name,
       stream => $frag,
       config => '$.packagers.default',
+      usage  => $usage,
     );
 
     em->on(
@@ -85,6 +87,32 @@ em->on(
     );
 
     $pkgr->start;
+  }
+);
+
+em->on(
+  '+$.hls.thumbnail.*' => sub {
+    my ( $path, undef, $hls, $name ) = @_;
+
+    info "Started deploying ($name)";
+
+    my $dep = Emitron::Tool::Deployer::S3->new(
+      name   => $name,
+      config => '$.deployers.s3.live',
+      source => $hls,
+      path   => 'x_emitron_test',
+      pid    => 'x_emitron_test',
+    );
+
+    em->on(
+      "-$path" => sub {
+        info "Stopped deploying ($name)";
+        $dep->stop;
+        em->off_all;
+      }
+    );
+
+    $dep->start;
   }
 );
 

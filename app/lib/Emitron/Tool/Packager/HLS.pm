@@ -24,6 +24,7 @@ has packager => (
 
 has stream => ( isa => 'HashRef', is => 'ro', required => 1 );
 has config => ( isa => 'Str',     is => 'ro', required => 1 );
+has usage  => ( isa => 'Str',     is => 'ro', required => 1 );
 
 sub _mk_packager {
   my $self = shift;
@@ -44,6 +45,7 @@ sub _mk_packager {
 
   my %arg = (
     name    => $self->name,
+    usage   => $self->usage,
     config  => \@cnf,
     webroot => $cfg->{webroot}
   );
@@ -61,7 +63,8 @@ after start => sub {
   em->model->transaction(
     sub {
       my ( $m, $rev ) = @_;
-      $m->{hls}{ $self->name } = { manifest => $self->manifest };
+      $m->{hls}{ $self->usage }{ $self->name }
+       = { manifest => $self->manifest, };
       return $m;
     }
   );
@@ -73,7 +76,7 @@ before stop => sub {
   em->model->transaction(
     sub {
       my ( $m, $rev ) = @_;
-      delete $m->{hls}{ $self->name };
+      delete $m->{hls}{ $self->usage }{ $self->name };
       return $m;
     }
   );
