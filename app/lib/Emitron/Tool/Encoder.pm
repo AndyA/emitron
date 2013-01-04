@@ -20,6 +20,7 @@ has encoder => (
 has stream => ( isa => 'HashRef', is => 'ro', required => 1 );
 has config => ( isa => 'Str',     is => 'ro', required => 1 );
 has burnin => ( isa => 'Bool',    is => 'ro', default  => 0 );
+has usage  => ( isa => 'Str',     is => 'ro', required => 1 );
 
 has _model => ( isa => 'HashRef', is => 'rw' );
 
@@ -35,7 +36,7 @@ sub _mk_encoder {
   my @conf = ();
   my $dog;
   my $dir   = em->work_dir( $self->name );
-  my $model = {};
+  my $model = { burnin => $self->burnin, };
   my $stm   = $self->stream;
   my $seg   = '%08d.ts';
   my $seq   = 0;
@@ -52,7 +53,7 @@ sub _mk_encoder {
           error "Can't find profile: $enc";
           next;
         }
-        $model->{$enc} = {
+        $model->{encode}{$enc} = {
           dir     => "$odir",
           segment => $seg,
           profile => $pro,
@@ -73,6 +74,7 @@ sub _mk_encoder {
     config  => \@conf,
     tmp_dir => $dir,
     burnin  => $self->burnin,
+    usage   => $self->usage,
   );
   $arg{dog} = $dog if defined $dog;
 
@@ -91,7 +93,7 @@ after start => sub {
   em->model->transaction(
     sub {
       my ( $m, $rev ) = @_;
-      $m->{fragments}{ $self->name } = $self->_model;
+      $m->{fragments}{ $self->usage }{ $self->name } = $self->_model;
       return $m;
     }
   );
@@ -103,7 +105,7 @@ before stop => sub {
   em->model->transaction(
     sub {
       my ( $m, $rev ) = @_;
-      delete $m->{fragments}{ $self->name };
+      delete $m->{fragments}{ $self->usage }{ $self->name };
       return $m;
     }
   );

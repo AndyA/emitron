@@ -13,6 +13,7 @@ extends 'Emitron::Media::Base';
 with 'Emitron::Media::Roles::Forker';
 
 has source => ( isa => 'Str',               is => 'ro', required => 1 );
+has usage  => ( isa => 'Str',               is => 'ro', required => 1 );
 has config => ( isa => 'ArrayRef[HashRef]', is => 'ro', required => 1 );
 has burnin => ( isa => 'Bool',              is => 'ro', default  => 0 );
 has dog    => ( isa => 'Str',               is => 'ro' );

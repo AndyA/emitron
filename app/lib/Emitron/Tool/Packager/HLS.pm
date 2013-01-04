@@ -29,14 +29,15 @@ sub _mk_packager {
   my $self = shift;
 
   my $stm = $self->stream;
+  my $enc = $stm->{encode};
   my @cnf = ();
   my @pro = (
-    sort { $stm->{$a}{order} <=> $stm->{$b}{order} }
-     keys %$stm
+    sort { $enc->{$a}{order} <=> $enc->{$b}{order} }
+     keys %$enc
   );
 
   for my $pro (@pro) {
-    push @cnf, { name => $pro, %{ $stm->{$pro} } };
+    push @cnf, { name => $pro, %{ $enc->{$pro} } };
   }
 
   my $cfg = em->cfg( $self->config );

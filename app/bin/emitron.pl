@@ -37,13 +37,15 @@ em->on(
     my $enc_t = Emitron::Tool::Encoder->new(
       name   => "${name}_thumbnail",
       stream => $stream,
-      config => '$.profiles.config.thumbnail'
+      config => '$.profiles.config.thumbnail',
+      usage  => 'thumbnail',
     );
 
     my $enc_p = Emitron::Tool::Encoder->new(
       name   => "${name}_pc_hd_lite",
       stream => $stream,
       config => '$.profiles.config.pc_hd_lite',
+      usage  => 'web',
       burnin => 1
     );
 
@@ -63,7 +65,7 @@ em->on(
 );
 
 em->on(
-  '+$.fragments.*' => sub {
+  '+$.fragments.web.*' => sub {
     my ( $path, undef, $frag, $name ) = @_;
 
     info "Started packaging ($name)";
