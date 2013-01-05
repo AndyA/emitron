@@ -6,6 +6,10 @@ function scale(w, h, ar) {
 $(function() {
   var ww = $(window).width();
   var wh = $(window).height();
+
+  ww = 2880
+  wh = 1620;
+
   var sz = scale(ww, wh, 16 / 9);
 
   jwplayer('video').setup({
