@@ -35,17 +35,17 @@ em->on(
 
     debug "Starting encoders for $name";
 
-    my $enc_t = Emitron::Tool::Encoder->new(
-      name   => "${name}_thumbnail",
-      stream => $stream,
-      config => '$.profiles.config.thumbnail',
-      usage  => 'thumbnail',
-    );
+    #    my $enc_t = Emitron::Tool::Encoder->new(
+    #      name   => "${name}_thumbnail",
+    #      stream => $stream,
+    #      config => '$.profiles.config.thumbnail',
+    #      usage  => 'thumbnail',
+    #    );
 
     my $enc_p = Emitron::Tool::Encoder->new(
-      name   => "${name}_pc_hd_lite",
+      name   => "${name}_pc_lite",
       stream => $stream,
-      config => '$.profiles.config.pc_hd_lite',
+      config => '$.profiles.config.pc_lite',
       usage  => 'web',
       burnin => 1
     );
@@ -54,13 +54,13 @@ em->on(
       "-$path" => sub {
         my ( undef, $before, undef ) = @_;
         info "Destroyed stream ($name, $app): ", $before;
-        $enc_t->stop;
+        #        $enc_t->stop;
         $enc_p->stop;
         em->off_all;
       }
     );
 
-    $enc_t->start;
+    #    $enc_t->start;
     $enc_p->start;
   }
 );
@@ -101,8 +101,8 @@ em->on(
       name   => $name,
       config => '$.deployers.s3.live',
       source => $hls,
-      path   => 'x_emitron_test',
-      pid    => 'x_emitron_test',
+      path   => 'v0001gwq',
+      pid    => 'v0001gwq',
     );
 
     em->on(

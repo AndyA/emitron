@@ -66,6 +66,10 @@ sub config {
             encodes => ['p50', 'p30', 'p40', 'p60', 'p70'],
             dog     => "$dog"
           },
+          pc_lite => {
+            encodes => ['p50', 'p30', 'p70'],
+            dog     => "$dog"
+          },
           pc_hd => {
             encodes => ['p50', 'p30', 'p40', 'p60', 'p70', 'p80'],
             dog     => "$dog"

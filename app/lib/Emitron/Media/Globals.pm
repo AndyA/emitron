@@ -13,7 +13,7 @@ Emitron::Media::Globals - Media related globals
 has frame_rate => ( isa => 'Num', is => 'ro', default => 25 );
 has audio_rate => ( isa => 'Num', is => 'ro', default => 48000 );
 has resolution => ( isa => 'Num', is => 'ro', default => 1080 );
-has gop        => ( isa => 'Num', is => 'ro', default => 10 );
+has gop        => ( isa => 'Num', is => 'ro', default => 4 );
 has acodec     => ( isa => 'Str', is => 'ro', default => 'libfaac' );
 has vcodec     => ( isa => 'Str', is => 'ro', default => 'libx264' );
 
