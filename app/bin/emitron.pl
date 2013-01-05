@@ -18,6 +18,10 @@ use Emitron::Tool::Packager::HLS;
 
 Emitron::Logger->level( Emitron::Logger->DEBUG );
 
+use constant PID       => 'v0001gwq';
+use constant PUBLISH   => 0;
+use constant THUMBNAIL => 0;
+
 em->on(
   '$.misc' => sub {
     my ( $p, $b, $a ) = @_;
@@ -35,33 +39,37 @@ em->on(
 
     debug "Starting encoders for $name";
 
-    #    my $enc_t = Emitron::Tool::Encoder->new(
-    #      name   => "${name}_thumbnail",
-    #      stream => $stream,
-    #      config => '$.profiles.config.thumbnail',
-    #      usage  => 'thumbnail',
-    #    );
+    my @enc = ();
 
-    my $enc_p = Emitron::Tool::Encoder->new(
+    if (THUMBNAIL) {
+      push @enc,
+       Emitron::Tool::Encoder->new(
+        name   => "${name}_thumbnail",
+        stream => $stream,
+        config => '$.profiles.config.thumbnail',
+        usage  => 'thumbnail',
+       );
+    }
+
+    push @enc,
+     Emitron::Tool::Encoder->new(
       name   => "${name}_pc_lite",
       stream => $stream,
       config => '$.profiles.config.pc_lite',
       usage  => 'web',
       burnin => 1
-    );
+     );
 
     em->on(
       "-$path" => sub {
         my ( undef, $before, undef ) = @_;
         info "Destroyed stream ($name, $app): ", $before;
-        #        $enc_t->stop;
-        $enc_p->stop;
+        $_->stop for @enc;
         em->off_all;
       }
     );
 
-    #    $enc_t->start;
-    $enc_p->start;
+    $_->start for @enc;
   }
 );
 
@@ -90,32 +98,34 @@ em->on(
   }
 );
 
-em->on(
-  '+$.hls.web.*' => sub {
-    my ( $path, undef, $hls, $name ) = @_;
+if (PUBLISH) {
+  em->on(
+    '+$.hls.web.*' => sub {
+      my ( $path, undef, $hls, $name ) = @_;
 
-    info "Started deploying ($name)";
+      info "Started deploying ($name)";
 
-    # v0001gwq
-    my $dep = Emitron::Tool::Deployer::S3->new(
-      name   => $name,
-      config => '$.deployers.s3.live',
-      source => $hls,
-      path   => 'v0001gwq',
-      pid    => 'v0001gwq',
-    );
+      # v0001gwq
+      my $dep = Emitron::Tool::Deployer::S3->new(
+        name   => $name,
+        config => '$.deployers.s3.live',
+        source => $hls,
+        path   => PID,
+        pid    => PID,
+      );
 
-    em->on(
-      "-$path" => sub {
-        info "Stopped deploying ($name)";
-        $dep->stop;
-        em->off_all;
-      }
-    );
+      em->on(
+        "-$path" => sub {
+          info "Stopped deploying ($name)";
+          $dep->stop;
+          em->off_all;
+        }
+      );
 
-    $dep->start;
-  }
-);
+      $dep->start;
+    }
+  );
+}
 
 em->run;
 
