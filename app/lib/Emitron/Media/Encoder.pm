@@ -56,6 +56,13 @@ sub _log {
   return ' > ' . shell_quote( $self->_mk_log(@_) ) . ' 2>&1';
 }
 
+sub _tee {
+  my ( $self, $src, @dst ) = @_;
+  return
+   join( ' | ', shell_quote( cat => $src ), shell_quote( tee => @dst ) )
+   . ' > /dev/null';
+}
+
 sub _build_cmds {
   my $self = shift;
   my @cmds = ();
@@ -67,6 +74,10 @@ sub _build_cmds {
      shell_quote( $self->_gst_pipe( src => $src, dst => $fifo ) )
      . $self->_log( 'gst', 'pipe' );
     $src = $fifo;
+  }
+
+  if ( $src =~ m{^rtmp://} ) {
+    $src = "$src live=1";
   }
 
   my $pre_fifo = $self->_mk_fifo;
@@ -95,11 +106,7 @@ sub _build_cmds {
      ) . $self->_log( 'ffmpeg', $cfg->{name} );
   }
 
-  push @cmds,
-   join( ' | ',
-    shell_quote( cat => $pre_fifo ),
-    shell_quote( tee => @tee_fifo ) )
-   . ' > /dev/null';
+  push @cmds, $self->_tee( $pre_fifo, @tee_fifo );
 
   return @cmds;
 }
@@ -117,16 +124,15 @@ sub _ff_decoder {
   my $ar  = $self->globals->aspect_ratio;
   my @cmd = (
     $self->globals->ffmpeg,
-    -vsync => 'cfr',
-    -af    => 'asyncts=compensate=1',
-    -y     => -i => $args{src},
-    '-r:v' => $self->globals->frame_rate,
-    '-r:a' => $self->globals->audio_rate,
-    -s     => $self->globals->full_screen,
-    -vf    => "pad=ih*$ar->[0]/$ar->[1]:ih:(ow-iw)/2:(oh-ih)/2",
+    -vsync           => 'cfr',
+    -af              => 'asyncts=compensate=1',
+    -analyzeduration => 100000000,
+    -y               => -i => $args{src},
+    '-r:v'           => $self->globals->frame_rate,
+    '-r:a'           => $self->globals->audio_rate,
+    -s               => $self->globals->full_screen,
+    -vf              => "pad=ih*$ar->[0]/$ar->[1]:ih:(ow-iw)/2:(oh-ih)/2",
     @extra,
-    -map     => '0:0',
-    -map     => '0:1',
     -acodec  => 'pcm_s16le',
     -vcodec  => 'rawvideo',
     -pix_fmt => 'yuv420p',
@@ -171,8 +177,6 @@ sub _ff_encoder {
 
   my @cmd = (
     $self->globals->ffmpeg,
-    #    -vsync        => 'cfr',
-    #    -af           => 'asyncts=compensate=1',
     -f            => 'avi',
     -y            => -i => $args{src},
     -map          => '0:0',
@@ -201,6 +205,9 @@ sub _ff_encoder {
   return @cmd;
 }
 
+# Unused: seems to lose some important SPS/PPS type information from the
+# stream - or something. In any event it's the root cause of the missing
+# I frame artefacts.
 sub _gst_pipe {
   my ( $self, %args ) = @_;
   return (
