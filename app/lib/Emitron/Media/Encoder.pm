@@ -118,6 +118,7 @@ sub _ff_decoder {
   my @cmd = (
     $self->globals->ffmpeg,
     -vsync => 'cfr',
+    -af    => 'asyncts=compensate=1',
     -y     => -i => $args{src},
     '-r:v' => $self->globals->frame_rate,
     '-r:a' => $self->globals->audio_rate,
@@ -170,7 +171,8 @@ sub _ff_encoder {
 
   my @cmd = (
     $self->globals->ffmpeg,
-    -vsync        => 'cfr',
+    #    -vsync        => 'cfr',
+    #    -af           => 'asyncts=compensate=1',
     -f            => 'avi',
     -y            => -i => $args{src},
     -map          => '0:0',
