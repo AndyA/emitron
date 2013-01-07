@@ -19,8 +19,9 @@ use Emitron::Tool::Packager::HLS;
 Emitron::Logger->level( Emitron::Logger->DEBUG );
 
 use constant PID       => 'v0001gru';
-use constant PUBLISH   => 0;
+use constant PUBLISH   => 1;
 use constant THUMBNAIL => 0;
+use constant BURNIN    => 0;
 
 em->on(
   '$.misc' => sub {
@@ -57,7 +58,7 @@ em->on(
       stream => $stream,
       config => '$.profiles.config.pc_lite',
       usage  => 'web',
-      burnin => 1
+      burnin => BURNIN,
      );
 
     em->on(
