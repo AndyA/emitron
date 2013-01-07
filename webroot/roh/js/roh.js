@@ -13,7 +13,7 @@ $(function() {
   var sz = scale(ww, wh, 16 / 9);
 
   jwplayer('video').setup({
-    file: '/live/roh-hls/dw-titles/dw-titles.m3u8',
+    file: 'http://emitron.hexten.net/live/roh-hls/dw-titles/dw-titles.m3u8',
     width: sz[0],
     height: sz[1]
   });
