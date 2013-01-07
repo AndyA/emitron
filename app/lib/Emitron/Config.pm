@@ -121,7 +121,7 @@ sub config {
             a => {
               bitrate => 48_000,
               profile => 'aac_lc',
-              rate    => 44_100,
+              rate    => 48_000,
             }
           },
           p30 => {
@@ -136,7 +136,7 @@ sub config {
             a => {
               bitrate => 64_000,
               profile => 'aac_lc',
-              rate    => 44_100,
+              rate    => 48_000,
             }
           },
           p40 => {
@@ -151,7 +151,7 @@ sub config {
             a => {
               bitrate => 96_000,
               profile => 'aac_lc',
-              rate    => 44_100,
+              rate    => 48_000,
             }
           },
           p50 => {
@@ -166,7 +166,7 @@ sub config {
             a => {
               bitrate => 96_000,
               profile => 'aac_lc',
-              rate    => 44_100,
+              rate    => 48_000,
             }
           },
           p60 => {
@@ -181,7 +181,7 @@ sub config {
             a => {
               bitrate => 96_000,
               profile => 'aac_lc',
-              rate    => 44_100,
+              rate    => 48_000,
             }
           },
           p70 => {
@@ -196,7 +196,7 @@ sub config {
             a => {
               bitrate => 96_000,
               profile => 'aac_lc',
-              rate    => 44_100,
+              rate    => 48_000,
             }
           },
           p80 => {
@@ -211,7 +211,7 @@ sub config {
             a => {
               bitrate => 128_000,
               profile => 'aac_lc',
-              rate    => 44_100,
+              rate    => 48_000,
             }
           },
           p90 => {

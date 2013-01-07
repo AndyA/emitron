@@ -70,7 +70,7 @@ sub _mk_encoder {
   );
   my %arg = (
     name    => $self->name,
-    source  => $stm->{rtsp},
+    source  => $stm->{rtmp},
     config  => \@conf,
     tmp_dir => $dir,
     burnin  => $self->burnin,

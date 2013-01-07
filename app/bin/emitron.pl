@@ -18,7 +18,7 @@ use Emitron::Tool::Packager::HLS;
 
 Emitron::Logger->level( Emitron::Logger->DEBUG );
 
-use constant PID       => 'v0001gwq';
+use constant PID       => 'v0001gru';
 use constant PUBLISH   => 0;
 use constant THUMBNAIL => 0;
 
@@ -105,7 +105,6 @@ if (PUBLISH) {
 
       info "Started deploying ($name)";
 
-      # v0001gwq
       my $dep = Emitron::Tool::Deployer::S3->new(
         name   => $name,
         config => '$.deployers.s3.live',
