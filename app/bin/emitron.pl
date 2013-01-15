@@ -18,10 +18,10 @@ use Emitron::Tool::Packager::HLS;
 
 Emitron::Logger->level( Emitron::Logger->DEBUG );
 
-use constant PID       => 'v0001gru';
-use constant PUBLISH   => 1;
+use constant PID       => 'illegal value';
+use constant PUBLISH   => 0;
 use constant THUMBNAIL => 0;
-use constant BURNIN    => 0;
+use constant BURNIN    => 1;
 
 em->on(
   '$.misc' => sub {
