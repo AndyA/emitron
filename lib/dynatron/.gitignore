@@ -3,4 +3,5 @@
 /*.o
 /core
 /dynatron
+/test.*
 /version.h

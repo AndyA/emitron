@@ -1,6 +1,6 @@
-/* dynatron.c */
+/* dy_encoder.c */
 
-#include <stdio.h>
+#include "dy_encoder.h"
 
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
@@ -8,17 +8,17 @@
 #include <libavutil/opt.h>
 #include <libavutil/pixfmt.h>
 
-#include "dynatron.h"
-#include "utils.h"
+#include "jsondata.h"
 
-static void video_encode_example(const char *filename, int codec_id) {
+dy_encoder *dy_encoder_new(jd_var *options) {
   AVCodec *codec;
   AVCodecContext *c = NULL;
   int i, ret, x, y, got_output;
   FILE *f;
   AVFrame *frame;
   AVPacket pkt;
-  uint8_t endcode[] = { 0, 0, 1, 0xb7 };
+
+
 
   mention("Encode video file %s\n", filename);
 
@@ -120,12 +120,6 @@ static void video_encode_example(const char *filename, int codec_id) {
   av_freep(&frame->data[0]);
   avcodec_free_frame(&frame);
   printf("\n");
-}
-
-int main(void) {
-  avcodec_register_all();
-  video_encode_example("test.h264", AV_CODEC_ID_H264);
-  return 0;
 }
 
 /* vim:ts=2:sw=2:sts=2:et:ft=c

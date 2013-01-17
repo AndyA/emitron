@@ -6,12 +6,15 @@ PREFIX ?= /usr/local
 
 BINS=dynatron
 BINOBJS=$(addsuffix .o,$(BINS))
-MISCOBJS=
+MISCOBJS=utils.o dy_encoder.o
 OBJS=$(BINOBJS) $(MISCOBJS)
 DEPS=$(OBJS:.o=.d) 
 INST_BINS=$(PREFIX)/bin
+LIBS=../jsondata/libjsondata.a
 
 AVLIBS=libavcodec libavformat libavutil libswscale
+
+CFLAGS+=-I../jsondata
 
 CFLAGS+=$(shell pkg-config --cflags $(AVLIBS))
 LDFLAGS+=$(shell pkg-config --libs $(AVLIBS))
@@ -23,8 +26,8 @@ all: $(BINS)
 version.h: VERSION
 	perl tools/version.pl > version.h
 
-%: %.o $(MISCOBJ)
-	$(CC) -o $@ $^ $(LDFLAGS)
+%: %.o $(MISCOBJS)
+	$(CC) -o $@ $^ $(LIBS) $(LDFLAGS)
 
 %.d: %.c version.h
 	@$(SHELL) -ec '$(CC) -MM $(CFLAGS) $< \
