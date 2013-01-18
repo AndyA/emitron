@@ -1,16 +1,18 @@
 /* dy_encoder.c */
 
-#include "dy_encoder.h"
-
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
 #include <libavutil/mathematics.h>
 #include <libavutil/opt.h>
 #include <libavutil/pixfmt.h>
 
+#include "dynatron.h"
+#include "dy_encoder.h"
+#include "utils.h"
 #include "jsondata.h"
 
 dy_encoder *dy_encoder_new(jd_var *options) {
+#if 0
   AVCodec *codec;
   AVCodecContext *c = NULL;
   int i, ret, x, y, got_output;
@@ -120,6 +122,8 @@ dy_encoder *dy_encoder_new(jd_var *options) {
   av_freep(&frame->data[0]);
   avcodec_free_frame(&frame);
   printf("\n");
+#endif
+  return NULL;
 }
 
 /* vim:ts=2:sw=2:sts=2:et:ft=c
