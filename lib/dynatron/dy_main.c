@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <pthread.h>
 
 #include "jsondata.h"
 #include "dynatron.h"
@@ -45,19 +46,28 @@ static void parse_options(int *argc, char ***argv) {
 
 int main(int argc, char *argv[]) {
   int argn;
-  jd_var arg;
-
+  pthread_t dt;
+  void *rv;
   parse_options(&argc, &argv);
   dy_init();
 
+  if (pthread_create(&dt, NULL, dy_despatch_thread, NULL))
+    die("Can't create despatch thread: %m");
+
   for (argn = 0; argn < argc; argn++) {
+    jd_var arg = JD_INIT;
+    jd_var msg = JD_INIT;
     jd_set_string(&arg, argv[argn]);
-    dy_despatch_json(&arg);
+    jd_from_json(&msg, &arg);
+    dy_despatch_enqueue(&msg);
+    jd_release(&msg);
+    jd_release(&arg);
   }
 
-  jd_release(&arg);
+  pthread_join(dt, &rv);
 
   dy_destroy();
+  pthread_exit(0);
   return 0;
 }
 
