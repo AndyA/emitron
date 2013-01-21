@@ -34,6 +34,9 @@ void *dy_despatch_thread(void *tid);
 void dy_despatch_init(void);
 void dy_despatch_destroy(void);
 
+void dy_listener_init(void);
+void dy_listener_destroy(void);
+
 #endif
 
 /* vim:ts=2:sw=2:sts=2:et:ft=c

@@ -21,10 +21,14 @@ jd_var *dy_set_handler(jd_var *desp, const char *verb, jd_closure_func f) {
 }
 
 void dy_init(void) {
+  /* NOTE init order matters */
   dy_despatch_init();
+  dy_listener_init();
 }
 
 void dy_destroy(void) {
+  /* NOTE destroy order matters */
+  dy_listener_destroy();
   dy_despatch_destroy();
 }
 

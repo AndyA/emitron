@@ -6,7 +6,7 @@ PREFIX ?= /usr/local
 
 BINS=dynatron
 BINOBJS=$(addsuffix .o,$(BINS))
-MISCOBJS=utils.o dy_message.o dy_despatch.o dy_main.o dy_log.o
+MISCOBJS=utils.o dy_message.o dy_despatch.o dy_main.o dy_log.o dy_listener.o
 OBJS=$(BINOBJS) $(MISCOBJS)
 DEPS=$(OBJS:.o=.d) 
 INST_BINS=$(PREFIX)/bin
