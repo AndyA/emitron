@@ -3,9 +3,15 @@
 #ifndef __DYNATRON_H
 #define __DYNATRON_H
 
-typedef struct {
+jd_var *dy_set_handler(jd_var *desp, const char *verb, jd_closure_func f);
+void dy_init(void);
+void dy_destroy(void);
 
-} dy_frame_source;
+jd_var *dy_despatch_register(const char *verb, jd_closure_func f);
+void dy_despatch_message(jd_var *msg);
+void dy_despatch_json(jd_var *json);
+void dy_despatch_init(void);
+void dy_despatch_destroy(void);
 
 #endif
 
