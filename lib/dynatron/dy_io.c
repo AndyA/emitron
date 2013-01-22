@@ -8,42 +8,67 @@
 
 dy_io_reader *dy_io_new_reader(int fd, size_t size) {
   dy_io_reader *rd = jd_alloc(sizeof(dy_io_reader));
-  rd->fd = fd;
-  rd->size = size;
-  rd->used = 0;
+  rd->type = NATIVE;
+  rd->h.n.fd = fd;
+  rd->h.n.size = size;
+  rd->h.n.used = 0;
   rd->pos = 0;
-  rd->buf = jd_alloc(size);
+  rd->h.n.buf = jd_alloc(size);
+  return rd;
+}
+
+dy_io_reader *dy_io_new_var_reader(jd_var *v) {
+  dy_io_reader *rd = jd_alloc(sizeof(dy_io_reader));
+  rd->type = VAR;
+  jd_assign(&rd->h.v, v);
+  rd->pos = 0;
   return rd;
 }
 
 void dy_io_free_reader(dy_io_reader *rd) {
-  jd_free(rd->buf);
+  switch (rd->type) {
+  case NATIVE:
+    jd_free(rd->h.n.buf);
+    break;
+  case VAR:
+    jd_release(&rd->h.v);
+    break;
+  }
   jd_free(rd);
 }
 
-ssize_t dy_io_fill(dy_io_reader *rd) {
-  ssize_t got = read(rd->fd, rd->buf, rd->size);
+static ssize_t fillbuf(dy_io_reader *rd) {
+  ssize_t got = read(rd->h.n.fd, rd->h.n.buf, rd->h.n.size);
   if (got <= 0) {
     if (got < 0) dy_error("read error: %m");
     return got;
   }
   rd->pos = 0;
-  rd->used = got;
+  rd->h.n.used = got;
   return got;
 }
 
 void dy_io_consume(dy_io_reader *rd, size_t len) {
   rd->pos += len;
-  if (rd->pos > rd->size) die("Out of range consume");
 }
 
 ssize_t dy_io_read(dy_io_reader *rd, char **bp) {
-  if (rd->pos == rd->used) {
-    ssize_t got = dy_io_fill(rd);
-    if (got <= 0) return got;
+  switch (rd->type) {
+  case NATIVE:
+    if (rd->pos == rd->h.n.used) {
+      ssize_t got = fillbuf(rd);
+      if (got <= 0) return got;
+    }
+    *bp = rd->h.n.buf + rd->pos;
+    return rd->h.n.used - rd->pos;
+  case VAR: {
+    size_t len;
+    const char *buf = jd_bytes(&rd->h.v, &len);
+    *bp = (char *) buf + rd->pos;
+    return len - rd->pos - 1;
   }
-  *bp = rd->buf + rd->pos;
-  return rd->used - rd->pos;
+  }
+  return 0;
 }
 
 dy_io_writer *dy_io_new_writer(int fd) {

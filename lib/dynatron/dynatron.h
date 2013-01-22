@@ -22,10 +22,16 @@ typedef enum {
 } dy_io_type;
 
 typedef struct {
-  int fd;
-  size_t size, used;
+  dy_io_type type;
+  union {
+    struct {
+      int fd;
+      size_t size, used;
+      char *buf;
+    } n;
+    jd_var v;
+  } h;
   unsigned pos;
-  char *buf;
 } dy_io_reader;
 
 typedef struct {
@@ -44,12 +50,12 @@ jd_var *dy_set_handler(jd_var *desp, const char *verb, jd_closure_func f);
 void dy_init(void);
 void dy_destroy(void);
 
-void dy_debug(const char *msg, ...);   
-void dy_notice(const char *msg, ...);  
-void dy_info(const char *msg, ...);    
-void dy_warning(const char *msg, ...); 
-void dy_error(const char *msg, ...);   
-void dy_fatal(const char *msg, ...);   
+void dy_debug(const char *msg, ...);
+void dy_notice(const char *msg, ...);
+void dy_info(const char *msg, ...);
+void dy_warning(const char *msg, ...);
+void dy_error(const char *msg, ...);
+void dy_fatal(const char *msg, ...);
 
 jd_var *dy_despatch_register(const char *verb, jd_closure_func f);
 void dy_despatch_enqueue(jd_var *msg);
@@ -68,8 +74,8 @@ void dy_thread_create(dy_worker worker, jd_var *arg);
 void dy_thread_join_all(void);
 
 dy_io_reader *dy_io_new_reader(int fd, size_t size);
+dy_io_reader *dy_io_new_var_reader(jd_var *v);
 void dy_io_free_reader(dy_io_reader *rd);
-ssize_t dy_io_fill(dy_io_reader *rd);
 void dy_io_consume(dy_io_reader *rd, size_t len);
 ssize_t dy_io_read(dy_io_reader *rd, char **bp);
 dy_io_writer *dy_io_new_writer(int fd);
