@@ -18,7 +18,7 @@ jd_var *dy_despatch_register(const char *verb, jd_closure_func f) {
 
 void dy_despatch_enqueue(jd_var *msg) {
   pthread_mutex_lock(&qmutex);
-  jd_assign(jd_push(&queue, 1), msg);
+  jd_clone(jd_push(&queue, 1), msg, 1);
   pthread_cond_signal(&qcond);
   pthread_mutex_unlock(&qmutex);
 }

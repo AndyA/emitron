@@ -13,13 +13,18 @@
 #include "dynatron.h"
 #include "utils.h"
 
+static void dbj(const char *msg, jd_var *v) {
+  jd_var json = JD_INIT;
+  jd_to_json_pretty(&json, v);
+  dy_debug("%s: %s", msg, jd_bytes(&json, NULL));
+  jd_release(&json);
+}
+
 static void listener(dy_io_reader *rd, dy_io_writer *wr, jd_var *arg) {
   jd_var msg = JD_INIT;
   while (dy_message_read(&msg, rd)) {
-    jd_var json;
-    jd_to_json_pretty(&json, &msg);
-    dy_debug("Got message %s", jd_bytes(&json, NULL));
-    jd_release(&json);
+    dbj("msg", &msg);
+    dy_despatch_enqueue(&msg);
   }
   jd_release(&msg);
 }
@@ -39,13 +44,14 @@ static void socket_listener(jd_var *arg) {
   struct sockaddr_in addr;
 
   dy_debug("Starting socket_listener");
+  dbj("config", arg);
 
   proto = socket(AF_INET, SOCK_STREAM, 0);
   if (proto < 0) die("Socket create failed: %m");
 
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = INADDR_ANY;
-  addr.sin_port = htons(6809);
+  addr.sin_port = htons(jd_get_int(jd_rv(arg, "$.config.port")));
   if (bind(proto, (struct sockaddr *)&addr, sizeof(addr)) < 0)
     die("Bind failed: %m");
 
@@ -62,8 +68,19 @@ static void socket_listener(jd_var *arg) {
   close(proto);
 }
 
+static void merge(jd_var *out, const char *dflt, jd_var *in) {
+  jd_var json = JD_INIT;
+  jd_set_string(&json, dflt);
+  jd_from_json(out, &json);
+  jd_merge(out, in, 0);
+  jd_release(&json);
+}
+
 static int listener_cb(jd_var *ctx, jd_var *rv, jd_var *arg) {
-  dy_thread_create(socket_listener, arg);
+  jd_var conf = JD_INIT;
+  merge(&conf, "{\"config\":{\"port\":6809}}", arg);
+  dy_thread_create(socket_listener, &conf);
+  jd_release(&conf);
   return 0;
 }
 

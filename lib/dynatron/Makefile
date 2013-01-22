@@ -51,10 +51,10 @@ clean:
 version:
 	perl tools/bump_version.pl VERSION
 
-test: $(LIB)
+test: $(LIB) $(BINS)
 	$(MAKE) -C t test
 
-valgrind: $(LIB)
+valgrind: $(LIB) $(BINS)
 	$(MAKE) -C t valgrind
 
 install: $(BINS)
