@@ -6,17 +6,17 @@ CTESTS=$(wildcard *.xt)
 PERLTESTS=$(wildcard *.t)
 LIBS=../../jsondata/libjsondata.a ../libdynatron.a
 TESTOBJ=$(CTESTS:.xt=.o)
-TESTBIN=$(TESTOBJ:.o=) $(PERLTESTS:.t=)
+TESTBIN=$(TESTOBJ:.o=.T) $(PERLTESTS:.t=.T)
 MISCOBJ=tap.o util.o jd_test.o
 OBJ=$(CTESTOBJ) $(MISCOBJ)
 DEPS=$(OBJ:.o=.d) 
 
 CFLAGS+=-I.. -I../../jsondata
 
-%: %.o $(MISCOBJ) $(LIBS)
+%.T: %.o $(MISCOBJ) $(LIBS)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-%: %.t
+%.T: %.t
 	perl tools/wrapperl.pl $< | gcc -o $@ -x c -
 
 %.o: %.xt
