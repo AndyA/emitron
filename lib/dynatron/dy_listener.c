@@ -15,17 +15,10 @@
 
 static dy_queue *queue;
 
-static void dbj(const char *msg, jd_var *v) {
-  jd_var json = JD_INIT;
-  jd_to_json_pretty(&json, v);
-  dy_debug("%s: %s", msg, jd_bytes(&json, NULL));
-  jd_release(&json);
-}
-
 static void listener(dy_io_reader *rd) {
   jd_var msg = JD_INIT;
   while (dy_message_read(&msg, rd)) {
-    dbj("received", &msg);
+    dy_debug("received: %lJ", &msg);
     dy_despatch_enqueue(&msg);
   }
   jd_release(&msg);
@@ -36,7 +29,7 @@ static void sender(dy_io_writer *wr) {
     jd_var msg = JD_INIT;
     dy_queue_dequeue(queue, &msg);
     dy_message_write(&msg, wr);
-    dbj("sent", &msg);
+    dy_debug("sent: %lJ", &msg);
     jd_release(&msg);
   }
 }
@@ -67,7 +60,7 @@ static void socket_listener(jd_var *arg) {
   struct sockaddr_in addr;
 
   dy_debug("Starting socket_listener");
-  dbj("config", arg);
+  dy_debug("config: %lJ", arg);
 
   proto = socket(AF_INET, SOCK_STREAM, 0);
   if (proto < 0) die("Socket create failed: %m");
