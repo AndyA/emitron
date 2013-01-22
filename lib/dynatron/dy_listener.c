@@ -76,7 +76,7 @@ static void merge(jd_var *out, const char *dflt, jd_var *in) {
   jd_release(&json);
 }
 
-static int listener_cb(jd_var *ctx, jd_var *rv, jd_var *arg) {
+static int listen_cb(jd_var *ctx, jd_var *rv, jd_var *arg) {
   jd_var conf = JD_INIT;
   merge(&conf, "{\"config\":{\"port\":6809}}", arg);
   dy_thread_create(socket_listener, &conf);
@@ -85,7 +85,7 @@ static int listener_cb(jd_var *ctx, jd_var *rv, jd_var *arg) {
 }
 
 void dy_listener_init(void) {
-  dy_despatch_register("listen", listener_cb);
+  dy_despatch_register("listen", listen_cb);
 }
 
 void dy_listener_destroy(void) {

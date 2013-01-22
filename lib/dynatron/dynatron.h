@@ -42,6 +42,12 @@ typedef struct {
   } h;
 } dy_io_writer;
 
+typedef struct {
+  jd_var queue;
+  pthread_mutex_t mutex;
+  pthread_cond_t cond;
+} dy_queue;
+
 extern unsigned dy_log_level;
 
 typedef void (*dy_worker)(jd_var *arg);
@@ -56,6 +62,11 @@ void dy_info(const char *msg, ...);
 void dy_warning(const char *msg, ...);
 void dy_error(const char *msg, ...);
 void dy_fatal(const char *msg, ...);
+
+dy_queue *dy_queue_new(void);
+void dy_queue_free(dy_queue *q);
+void dy_queue_enqueue(dy_queue *q, jd_var *msg);
+void dy_queue_dequeue(dy_queue *q, jd_var *msg);
 
 jd_var *dy_despatch_register(const char *verb, jd_closure_func f);
 void dy_despatch_enqueue(jd_var *msg);

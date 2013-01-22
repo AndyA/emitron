@@ -7,20 +7,14 @@
 #include "utils.h"
 
 static jd_var despatch = JD_INIT;
-static pthread_mutex_t qmutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t qcond = PTHREAD_COND_INITIALIZER;
-
-static jd_var queue = JD_INIT;
+static dy_queue *queue;
 
 jd_var *dy_despatch_register(const char *verb, jd_closure_func f) {
   return dy_set_handler(&despatch, verb, f);
 }
 
 void dy_despatch_enqueue(jd_var *msg) {
-  pthread_mutex_lock(&qmutex);
-  jd_clone(jd_push(&queue, 1), msg, 1);
-  pthread_cond_signal(&qcond);
-  pthread_mutex_unlock(&qmutex);
+  dy_queue_enqueue(queue, msg);
 }
 
 void dy_despatch_message(jd_var *msg) {
@@ -35,15 +29,7 @@ void dy_despatch_message(jd_var *msg) {
 }
 
 static void get_message(jd_var *msg) {
-  pthread_mutex_lock(&qmutex);
-  for (;;) {
-    if (jd_count(&queue)) {
-      jd_shift(&queue, 1, msg);
-      pthread_mutex_unlock(&qmutex);
-      return;
-    }
-    pthread_cond_wait(&qcond, &qmutex);
-  }
+  dy_queue_dequeue(queue, msg);
 }
 
 void dy_despatch_thread(jd_var *arg) {
@@ -58,12 +44,12 @@ void dy_despatch_thread(jd_var *arg) {
 
 void dy_despatch_init(void) {
   jd_set_hash(&despatch, 10);
-  jd_set_array(&queue, 10);
+  queue = dy_queue_new();
 }
 
 void dy_despatch_destroy(void) {
   jd_release(&despatch);
-  jd_release(&queue);
+  dy_queue_free(queue);
 }
 
 /* vim:ts=2:sw=2:sts=2:et:ft=c
