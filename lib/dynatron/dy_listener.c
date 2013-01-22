@@ -13,8 +13,25 @@
 #include "dynatron.h"
 #include "utils.h"
 
-static void listener(int rd, int wr, jd_var *arg) {
+static void listener(dy_io_reader *rd, dy_io_writer *wr, jd_var *arg) {
+  jd_var msg = JD_INIT;
+  while (dy_message_read(&msg, rd)) {
+    jd_var json;
+    jd_to_json_pretty(&json, &msg);
+    dy_debug("Got message %s", jd_bytes(&json, NULL));
+    jd_release(&json);
+  }
+  jd_release(&msg);
+}
 
+static void shim(int r, int w, jd_var *arg) {
+  dy_io_reader *rd = dy_io_new_reader(r, 16384);
+  dy_io_writer *wr = dy_io_new_writer(w);
+
+  listener(rd, wr, arg);
+
+  dy_io_free_writer(wr);
+  dy_io_free_reader(rd);
 }
 
 static void socket_listener(jd_var *arg) {
@@ -39,7 +56,7 @@ static void socket_listener(jd_var *arg) {
     socklen_t addrlen = sizeof(addr);
     int sock = accept(proto, (struct sockaddr *) &addr, &addrlen);
     dy_info("Control connection");
-    listener(sock, sock, arg);
+    shim(sock, sock, arg);
     close(sock);
   }
   close(proto);
