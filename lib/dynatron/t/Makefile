@@ -2,12 +2,13 @@
 
 include ../common.mk
 
-TESTS=$(wildcard *.t)
+CTESTS=$(wildcard *.xt)
+PERLTESTS=$(wildcard *.t)
 LIBS=../../jsondata/libjsondata.a ../libdynatron.a
-TESTOBJ=$(TESTS:.t=.o)
-TESTBIN=$(TESTS:.t=)
+TESTOBJ=$(CTESTS:.xt=.o)
+TESTBIN=$(TESTOBJ:.o=) $(PERLTESTS:.t=)
 MISCOBJ=tap.o util.o jd_test.o
-OBJ=$(TESTOBJ) $(MISCOBJ)
+OBJ=$(CTESTOBJ) $(MISCOBJ)
 DEPS=$(OBJ:.o=.d) 
 
 CFLAGS+=-I.. -I../../jsondata
@@ -15,7 +16,10 @@ CFLAGS+=-I.. -I../../jsondata
 %: %.o $(MISCOBJ) $(LIBS)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-%.o: %.t
+%: %.t
+	perl tools/wrapperl.pl $< | gcc -o $@ -x c -
+
+%.o: %.xt
 	$(CC) -o $@ $(CFLAGS) -x c -c $<
 
 %.d: %.c
@@ -23,7 +27,7 @@ CFLAGS+=-I.. -I../../jsondata
 	| sed '\''s/\($*\)\.o[ :]*/\1.o $@ : /g'\'' > $@; \
 	[ -s $@ ] || rm -f $@'
 
-%.d: %.t
+%.d: %.xt
 	@$(SHELL) -ec '$(CC) -MM $(CFLAGS) -x c $< \
 	| sed '\''s/\($*\)\.o[ :]*/\1.o $@ : /g'\'' > $@; \
 	[ -s $@ ] || rm -f $@'
