@@ -48,7 +48,7 @@ static void dy_log(unsigned level, const char *msg, va_list ap) {
     pthread_mutex_lock(&mutex);
 
     ts(tmp, sizeof(tmp));
-    jd_printf(&ldr, "%s %-7s ", tmp, lvl[level]);
+    jd_printf(&ldr, "%s | %-7s | ", tmp, lvl[level]);
     jd_vprintf(&str, msg, ap);
     split_lines(&ln, &str);
     count = jd_count(&ln);
