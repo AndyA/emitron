@@ -75,6 +75,7 @@ void dy_despatch_thread(jd_var *arg);
 void dy_despatch_init(void);
 void dy_despatch_destroy(void);
 
+void dy_listener_send(jd_var *msg);
 void dy_listener_init(void);
 void dy_listener_destroy(void);
 

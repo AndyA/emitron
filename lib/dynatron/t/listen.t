@@ -31,6 +31,7 @@ ok my $cl = Dynatron::Client->new( port => $PORT ), 'client created';
 
 eval { $cl->send( { verb => "ping" } ) };
 ok !$@, "send OK";
+sleep 1;
 
 done_testing();
 

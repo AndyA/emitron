@@ -13,6 +13,8 @@
 #include "dynatron.h"
 #include "utils.h"
 
+static dy_queue *queue;
+
 static void dbj(const char *msg, jd_var *v) {
   jd_var json = JD_INIT;
   jd_to_json_pretty(&json, v);
@@ -20,20 +22,41 @@ static void dbj(const char *msg, jd_var *v) {
   jd_release(&json);
 }
 
-static void listener(dy_io_reader *rd, dy_io_writer *wr, jd_var *arg) {
+static void listener(dy_io_reader *rd) {
   jd_var msg = JD_INIT;
   while (dy_message_read(&msg, rd)) {
-    dbj("msg", &msg);
+    dbj("received", &msg);
     dy_despatch_enqueue(&msg);
   }
   jd_release(&msg);
 }
 
+static void sender(dy_io_writer *wr) {
+  for (;;) {
+    jd_var msg = JD_INIT;
+    dy_queue_dequeue(queue, &msg);
+    dy_message_write(&msg, wr);
+    dbj("sent", &msg);
+    jd_release(&msg);
+  }
+}
+
+static void *li_shim(void *arg) {
+  listener((dy_io_reader *) arg);
+  return NULL;
+}
+
 static void shim(int r, int w, jd_var *arg) {
   dy_io_reader *rd = dy_io_new_reader(r, 16384);
   dy_io_writer *wr = dy_io_new_writer(w);
+  pthread_t li;
 
-  listener(rd, wr, arg);
+  /* TODO thread creation here? */
+  if (pthread_create(&li, NULL, li_shim, rd))
+    die("Can't create thread: %m");
+
+  sender(wr);
+  pthread_join(li, NULL);
 
   dy_io_free_writer(wr);
   dy_io_free_reader(rd);
@@ -84,11 +107,32 @@ static int listen_cb(jd_var *ctx, jd_var *rv, jd_var *arg) {
   return 0;
 }
 
+static int ping_cb(jd_var *ctx, jd_var *rv, jd_var *arg) {
+  jd_var info = JD_INIT;
+
+  jd_set_hash(&info, 3);
+  jd_set_string(jd_lv(&info, "$.date"), v_date);
+  jd_set_string(jd_lv(&info, "$.version"), v_version);
+  jd_set_string(jd_lv(&info, "$.git_hash"), v_git_hash);
+
+  dy_listener_send(&info);
+
+  jd_release(&info);
+  return 0;
+}
+
+void dy_listener_send(jd_var *msg) {
+  dy_queue_enqueue(queue, msg);
+}
+
 void dy_listener_init(void) {
+  queue = dy_queue_new();
   dy_despatch_register("listen", listen_cb);
+  dy_despatch_register("ping", ping_cb);
 }
 
 void dy_listener_destroy(void) {
+  dy_queue_free(queue);
 }
 
 /* vim:ts=2:sw=2:sts=2:et:ft=c
