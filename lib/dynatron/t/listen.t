@@ -3,9 +3,15 @@
 use strict;
 use warnings;
 
-use Test::More;
+use FindBin;
+use lib "$FindBin::Bin/../perl/lib";
 
-ok 1, "that's ok";
+use Test::More;
+use Dynatron::Client;
+
+my $cl = Dynatron::Client->new;
+
+$cl->send( { verb => "ping" } );
 
 done_testing();
 
