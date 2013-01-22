@@ -1,0 +1,13 @@
+[
+   {
+      "options" : {
+         "port" : 6809
+      },
+      "verb" : "listen"
+   },
+   {
+      "options" : {},
+      "prototype" : "ping",
+      "verb" : "new"
+   }
+]
