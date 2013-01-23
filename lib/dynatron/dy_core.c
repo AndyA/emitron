@@ -44,7 +44,17 @@ static void despatch_message(jd_var *self, jd_var *msg) {
   }
 }
 
+static void describe(jd_var *self) {
+  jd_var name = JD_INIT, stash = JD_INIT;
+  dy_object_name(self, &name);
+  dy_object_stash(self, &stash);
+  dy_debug("name: %V, stash: %lJ", &name, &stash);
+  jd_release(&name);
+  jd_release(&stash);
+}
+
 static int run_h(jd_var *self, jd_var *ctx, jd_var *arg) {
+  describe(self);
   for (;;) {
     jd_var msg = JD_INIT;
     dy_object_get_message(self, &msg);

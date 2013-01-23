@@ -174,5 +174,10 @@ void dy_object_name(jd_var *o, jd_var *name) {
   jd_assign(name, &ctx->name);
 }
 
+void dy_object_stash(jd_var *o, jd_var *stash) {
+  struct object_context *ctx = get_ctx(o);
+  jd_assign(stash, &ctx->obj);
+}
+
 /* vim:ts=2:sw=2:sts=2:et:ft=c
  */
