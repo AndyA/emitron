@@ -44,6 +44,8 @@ static void object_worker(jd_var *obj) {
 
 static int object_tell(jd_var *rv, jd_var *ctx, jd_var *arg) {
 
+  /* TODO make this more general; dy_object_broadcast perhaps */
+
   jd_var *targ = jd_get_ks(arg, "target", 0);
   if (!targ) {
     dy_listener_send_error("No target in %lJ", arg);

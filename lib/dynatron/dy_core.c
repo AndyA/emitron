@@ -40,6 +40,7 @@ static void despatch_message(jd_var *self, jd_var *msg) {
   }
   if (!dy_object_invokev(self, verb, msg)) {
     dy_debug("Message %J rejected", msg);
+    /* TODO send to any downstream objects */
   }
 }
 
