@@ -87,6 +87,7 @@ void dy_object_unregister(const char *name);
 int dy_object_invokev(jd_var *o, jd_var *method, jd_var *arg);
 int dy_object_invoke(jd_var *o, const char *method, jd_var *arg);
 void dy_object_get_message(jd_var *o, jd_var *msg);
+void dy_object_name(jd_var *o, jd_var *name);
 
 void dy_object_set_method(jd_var *obj, const char *method, jd_closure_func impl);
 

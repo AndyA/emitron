@@ -5,7 +5,7 @@
 #include "utils.h"
 
 struct object_context {
-  jd_var obj;
+  jd_var name, obj;
   dy_queue *queue;
 };
 
@@ -21,6 +21,7 @@ static struct object_context *ctx_new(void) {
 static void ctx_free(struct object_context *ctx) {
   dy_queue_free(ctx->queue);
   jd_release(&ctx->obj);
+  jd_release(&ctx->name);
   jd_free(ctx);
 }
 
@@ -91,6 +92,7 @@ void dy_object_register(const char *name, jd_var *o, const char *inherit) {
   }
 
   struct object_context *ctx = ctx_new();
+  jd_set_string(&ctx->name, name);
 
   if (inherit) {
     struct object_context *super = find_obj(inherit);
@@ -163,6 +165,11 @@ int dy_object_invoke(jd_var *o, const char *method, jd_var *arg) {
 void dy_object_get_message(jd_var *o, jd_var *msg) {
   struct object_context *ctx = get_ctx(o);
   dy_queue_dequeue(ctx->queue, msg);
+}
+
+void dy_object_name(jd_var *o, jd_var *name) {
+  struct object_context *ctx = get_ctx(o);
+  jd_assign(name, &ctx->name);
 }
 
 /* vim:ts=2:sw=2:sts=2:et:ft=c

@@ -41,7 +41,12 @@ eval {
   $cl->send(
     { verb   => 'tell',
       target => ['core'],
-      msg    => { verb => 'info' } }
+      msg    => {
+        verb   => 'clone',
+        name   => 'core_1',
+        config => {},
+      },
+    }
   );
 };
 sleep 2;

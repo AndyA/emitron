@@ -5,7 +5,30 @@
 #include "utils.h"
 
 static int clone_h(jd_var *self, jd_var *ctx, jd_var *arg) {
-  dy_debug("clone object, self=%lJ, ctx=%lJ, arg=%lJ", self,  ctx, arg);
+  jd_var super = JD_INIT, proto = JD_INIT, *cfg, *slot, *name;
+  dy_debug("clone object, self=%lJ, ctx=%lJ, arg=%lJ", self, ctx, arg);
+
+  if (name = jd_get_ks(arg, "name", 0), !name) {
+    dy_listener_send_error("No name in %lJ", arg);
+    goto done;
+  }
+
+  dy_object_name(self, &super);
+
+  jd_set_hash(&proto, 1);
+  slot = jd_get_ks(&proto, "config", 1);
+  if (cfg = jd_get_ks(arg, "config", 0), cfg)
+    jd_assign(slot, cfg);
+  else
+    jd_set_hash(slot, 1);
+
+  dy_debug("%V extends %V, prototype: %lJ", name, &super, &proto);
+
+  dy_object_register(jd_bytes(name, NULL), &proto, jd_bytes(&super, NULL));
+
+done:
+  jd_release(&proto);
+  jd_release(&super);
   return 0;
 }
 
