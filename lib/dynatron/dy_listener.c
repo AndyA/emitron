@@ -1,13 +1,14 @@
 /* dy_listener.c */
 
+#include <netinet/in.h>
+#include <pthread.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <pthread.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "jsondata.h"
 #include "dynatron.h"
@@ -92,7 +93,7 @@ static void merge(jd_var *out, const char *dflt, jd_var *in) {
   jd_release(&json);
 }
 
-static int listen_cb(jd_var *ctx, jd_var *rv, jd_var *arg) {
+static int listen_cb(jd_var *rv, jd_var *ctx, jd_var *arg) {
   jd_var conf = JD_INIT;
   merge(&conf, "{\"config\":{\"port\":6809}}", arg);
   dy_thread_create(socket_listener, &conf);
@@ -100,7 +101,7 @@ static int listen_cb(jd_var *ctx, jd_var *rv, jd_var *arg) {
   return 0;
 }
 
-static int ping_cb(jd_var *ctx, jd_var *rv, jd_var *arg) {
+static int ping_cb(jd_var *rv, jd_var *ctx, jd_var *arg) {
   jd_var info = JD_INIT;
 
   jd_set_hash(&info, 3);
@@ -116,6 +117,22 @@ static int ping_cb(jd_var *ctx, jd_var *rv, jd_var *arg) {
 
 void dy_listener_send(jd_var *msg) {
   dy_queue_enqueue(queue, msg);
+}
+
+void dy_listener_send_error(const char *msg, ...) {
+  jd_var vm = JD_INIT, err = JD_INIT;
+  va_list ap;
+
+  jd_set_hash(&vm, 4);
+  jd_set_string(jd_lv(&vm, "$.type"), "error");
+  va_start(ap, msg);
+  jd_vprintf(&err, msg, ap);
+  dy_error("Sending error: %V", &err);
+  jd_assign(jd_lv(&vm, "$.message"), &err);
+  va_end(ap);
+  dy_listener_send(&vm);
+  jd_release(&vm);
+  jd_release(&err);
 }
 
 void dy_listener_init(void) {

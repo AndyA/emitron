@@ -37,6 +37,9 @@ ok !$@, "receive OK";
 like $got->{version}, qr{^\d+\.\d\d$}, "got version";
 diag "dynatron version ", $got->{version};
 
+eval { $cl->send( { verb => "tell" } ) };
+sleep 2;
+
 done_testing();
 
 kill 2, $pid;

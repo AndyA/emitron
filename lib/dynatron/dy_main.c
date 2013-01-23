@@ -25,10 +25,15 @@ void dy_init(void) {
   dy_despatch_init();
   dy_object_init();
   dy_listener_init();
+
+  /* Objects */
+  dy_dummy_init();
 }
 
 void dy_destroy(void) {
   /* NOTE destroy order matters */
+  dy_dummy_destroy();
+
   dy_listener_destroy();
   dy_object_destroy();
   dy_despatch_destroy();
