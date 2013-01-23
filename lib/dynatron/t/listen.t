@@ -6,6 +6,7 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../perl/lib";
 
+use Data::Dumper;
 use JSON;
 use Test::More;
 use Dynatron::Client;
@@ -31,7 +32,10 @@ ok my $cl = Dynatron::Client->new( port => $PORT ), 'client created';
 
 eval { $cl->send( { verb => "ping" } ) };
 ok !$@, "send OK";
-sleep 1;
+my $got = eval { $cl->receive };
+ok !$@, "receive OK";
+like $got->{version}, qr{^\d+\.\d\d$}, "got version";
+diag "dynatron version ", $got->{version};
 
 done_testing();
 
