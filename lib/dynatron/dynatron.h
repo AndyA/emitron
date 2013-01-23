@@ -91,6 +91,7 @@ void dy_object_set_method(jd_var *obj, const char *method, jd_closure_func impl)
 
 void dy_thread_create(dy_worker worker, jd_var *arg);
 void dy_thread_join_all(void);
+size_t dy_thread_count(void);
 
 dy_io_reader *dy_io_new_reader(int fd, size_t size);
 dy_io_reader *dy_io_new_var_reader(jd_var *v);

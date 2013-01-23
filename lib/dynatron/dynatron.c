@@ -48,7 +48,7 @@ static void parse_options(int *argc, char ***argv) {
 static void monitor(void) {
   for (;;) {
     sleep(10);
-    dy_info("Time passes...");
+    dy_info("threads: %lu", (unsigned long) dy_thread_count());
   }
 }
 

@@ -44,6 +44,14 @@ static void add_thread(struct thread_context *ctx) {
   pthread_mutex_unlock(&active_mutex);
 }
 
+size_t dy_thread_count(void) {
+  struct thread_context *ctx;
+  size_t count;
+  for (count = 0, ctx = active; ctx; ctx = ctx->next)
+    count++;
+  return count;
+}
+
 static void *wrapper(void *ctxp) {
   struct thread_context *ctx = ctxp;
   ctx->worker(&ctx->arg);
