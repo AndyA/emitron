@@ -9,13 +9,23 @@ static int clone_h(jd_var *self, jd_var *ctx, jd_var *arg) {
   return 0;
 }
 
+static void despatch_message(jd_var *self, jd_var *msg) {
+  jd_var *verb = jd_get_ks(msg, "verb", 0);
+  if (!verb) {
+    dy_listener_send_error("Message %lJ has no verb");
+    return;
+  }
+  if (!dy_object_invokev(self, verb, msg)) {
+    dy_debug("Message %J rejected", msg);
+  }
+}
+
 static int run_h(jd_var *self, jd_var *ctx, jd_var *arg) {
-  dy_debug("run object, self=%lJ, ctx=%lJ, arg=%lJ", self,  ctx, arg);
   for (;;) {
     jd_var msg = JD_INIT;
-    dy_debug("%J waiting for message", self);
     dy_object_get_message(self, &msg);
     dy_debug("%J got message %lJ", self, &msg);
+    despatch_message(self, &msg);
     jd_release(&msg);
   }
   return 0;

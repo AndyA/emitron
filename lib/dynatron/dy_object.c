@@ -135,18 +135,29 @@ void dy_object_set_method(jd_var *obj, const char *method, jd_closure_func impl)
   jd_release(&cl);
 }
 
-void dy_object_invoke(jd_var *o, const char *method, jd_var *arg) {
+int dy_object_invokev(jd_var *o, jd_var *method, jd_var *arg) {
   struct object_context *ctx = get_ctx(o);
-  jd_var *cl = jd_get_ks(&ctx->obj, method, 0);
-
-  dy_debug("calling %s", method);
+  jd_var *cl = jd_get_key(&ctx->obj, method, 0);
 
   if (!cl) {
-    dy_listener_send_error("No method %s", method);
-    return;
+    dy_warning("%J has no method %V", o, method);
+    return 0;
   }
 
+  dy_debug("calling %V on %J", method, o);
   (void) jd_eval(cl, o, arg);
+  return 1;
+}
+
+int dy_object_invoke(jd_var *o, const char *method, jd_var *arg) {
+  jd_var mv = JD_INIT;
+  int rv;
+
+  jd_set_string(&mv, method);
+  rv = dy_object_invokev(o, &mv, arg);
+  jd_release(&mv);
+
+  return rv;
 }
 
 void dy_object_get_message(jd_var *o, jd_var *msg) {
