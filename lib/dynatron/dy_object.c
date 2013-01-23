@@ -11,21 +11,6 @@ struct object_context {
 
 static jd_var registry = JD_INIT;
 
-static int object_tell(jd_var *rv, jd_var *ctx, jd_var *arg) {
-  dy_debug("tell object, ctx=%lJ, rv=%lJ, arg=%lJ", ctx, rv, arg);
-
-  return 0;
-}
-
-void dy_object_init(void) {
-  jd_set_hash(&registry, 10);
-  dy_despatch_register("tell", object_tell);
-}
-
-void dy_object_destroy(void) {
-  jd_release(&registry);
-}
-
 static struct object_context *ctx_new(void) {
   struct object_context *ctx = jd_alloc(sizeof(struct object_context));
   jd_set_hash(&ctx->obj, 1);
@@ -54,6 +39,47 @@ static struct object_context *find_obj(const char *name) {
 
 static void object_worker(jd_var *obj) {
   dy_object_invoke(obj, "run", NULL);
+}
+
+static int object_tell(jd_var *rv, jd_var *ctx, jd_var *arg) {
+
+  jd_var *targ = jd_get_ks(arg, "target", 0);
+  if (!targ) {
+    dy_listener_send_error("No target in %lJ", arg);
+    return 0;
+  }
+
+  jd_var *msg = jd_get_ks(arg, "msg", 0);
+  if (!msg) {
+    dy_listener_send_error("No message in %lJ", arg);
+    return 0;
+  }
+
+  dy_debug("tell %J message %lJ", targ, msg);
+  size_t count = jd_count(targ);
+  unsigned i;
+
+  for (i = 0; i < count; i++) {
+    jd_var *name = jd_get_idx(targ, i);
+    jd_var *obj = jd_get_key(&registry, name, 0);
+    if (!obj) {
+      dy_listener_send_error("No object %J", name);
+      continue;
+    }
+    struct object_context *ctx = get_ctx(obj);
+    dy_queue_enqueue(ctx->queue, msg);
+  }
+
+  return 0;
+}
+
+void dy_object_init(void) {
+  jd_set_hash(&registry, 10);
+  dy_despatch_register("tell", object_tell);
+}
+
+void dy_object_destroy(void) {
+  jd_release(&registry);
 }
 
 void dy_object_register(const char *name, jd_var *o, const char *inherit) {
