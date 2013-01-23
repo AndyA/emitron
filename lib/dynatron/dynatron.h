@@ -82,8 +82,11 @@ void dy_listener_destroy(void);
 
 void dy_object_init(void);
 void dy_object_destroy(void);
-void dy_object_register(const char *name, jd_var *h);
+void dy_object_register(const char *name, jd_var *o, const char *inherit);
 void dy_object_unregister(const char *name);
+void dy_object_invoke(jd_var *o, const char *method, jd_var *arg);
+
+void dy_object_set_method(jd_var *obj, const char *name, jd_closure_func impl);
 
 void dy_thread_create(dy_worker worker, jd_var *arg);
 void dy_thread_join_all(void);
@@ -101,6 +104,9 @@ jd_var *dy_io_getvar(dy_io_writer *wr);
 
 jd_var *dy_message_read(jd_var *out, dy_io_reader *rd);
 void dy_message_write(jd_var *v, dy_io_writer *wr);
+
+void dy_core_init(void);
+void dy_core_destroy(void);
 
 void dy_dummy_init(void);
 void dy_dummy_destroy(void);

@@ -9,7 +9,7 @@ LIB=libdynatron.a
 BINOBJS=$(addsuffix .o,$(BINS))
 LIBOBJS=utils.o dy_message.o dy_despatch.o dy_main.o dy_log.o \
 	 dy_listener.o dy_object.o dy_thread.o dy_io.o dy_queue.o \
-	 dy_dummy.o
+	 dy_core.o dy_dummy.o
 OBJS=$(BINOBJS) $(LIBOBJS)
 DEPS=$(OBJS:.o=.d) 
 INST_BINS=$(PREFIX)/bin
