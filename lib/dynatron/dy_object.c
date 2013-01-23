@@ -6,7 +6,7 @@
 
 struct object_context {
   jd_var obj;
-  dy_queue *msg_queue;
+  dy_queue *queue;
 };
 
 static jd_var registry = JD_INIT;
@@ -29,12 +29,12 @@ void dy_object_destroy(void) {
 static struct object_context *ctx_new(void) {
   struct object_context *ctx = jd_alloc(sizeof(struct object_context));
   jd_set_hash(&ctx->obj, 1);
-  ctx->msg_queue = dy_queue_new();
+  ctx->queue = dy_queue_new();
   return ctx;
 }
 
 static void ctx_free(struct object_context *ctx) {
-  dy_queue_free(ctx->msg_queue);
+  dy_queue_free(ctx->queue);
   jd_release(&ctx->obj);
   jd_free(ctx);
 }
@@ -43,24 +43,17 @@ static void ctx_free_wrap(void *ctx) {
   ctx_free(ctx);
 }
 
-static struct object_context *find_obj(const char *name) {
-  jd_var *slot = jd_get_ks(&registry, name, 0);
-  if (slot) return (struct object_context *) jd_ptr(slot);
-  return NULL;
+static struct object_context *get_ctx(jd_var *o) {
+  return (struct object_context *) jd_ptr(o);
 }
 
-void dy_object_invoke(jd_var *o, const char *method, jd_var *arg) {
-  struct object_context *ctx = jd_ptr(o);
-  jd_var *cl = jd_get_ks(&ctx->obj, method, 0);
+static struct object_context *find_obj(const char *name) {
+  jd_var *slot = jd_get_ks(&registry, name, 0);
+  return slot ? get_ctx(slot) : NULL;
+}
 
-  dy_debug("calling %s", method);
-
-  if (!cl) {
-    dy_listener_send_error("No method %s", method);
-    return;
-  }
-
-  (void) jd_eval(cl, o, arg);
+static void object_worker(jd_var *obj) {
+  dy_object_invoke(obj, "run", NULL);
 }
 
 void dy_object_register(const char *name, jd_var *o, const char *inherit) {
@@ -89,10 +82,9 @@ void dy_object_register(const char *name, jd_var *o, const char *inherit) {
   jd_assign(jd_get_ks(&registry, name, 1), &obj);
   dy_info("Registered object %s", name);
 
-  dy_object_invoke(&obj, "run", NULL);
 
   /* TODO send ack? */
-  /* TODO start it */
+  dy_thread_create(object_worker, &obj);
 
   jd_release(&obj);
 }
@@ -110,11 +102,30 @@ void dy_object_unregister(const char *name) {
 
 /* helpers */
 
-void dy_object_set_method(jd_var *obj, const char *name, jd_closure_func impl) {
+void dy_object_set_method(jd_var *obj, const char *method, jd_closure_func impl) {
   jd_var cl = JD_INIT;
   jd_set_closure(&cl, impl);
-  jd_assign(jd_get_ks(obj, name, 1), &cl);
+  jd_assign(jd_get_ks(obj, method, 1), &cl);
   jd_release(&cl);
+}
+
+void dy_object_invoke(jd_var *o, const char *method, jd_var *arg) {
+  struct object_context *ctx = get_ctx(o);
+  jd_var *cl = jd_get_ks(&ctx->obj, method, 0);
+
+  dy_debug("calling %s", method);
+
+  if (!cl) {
+    dy_listener_send_error("No method %s", method);
+    return;
+  }
+
+  (void) jd_eval(cl, o, arg);
+}
+
+void dy_object_get_message(jd_var *o, jd_var *msg) {
+  struct object_context *ctx = get_ctx(o);
+  dy_queue_dequeue(ctx->queue, msg);
 }
 
 /* vim:ts=2:sw=2:sts=2:et:ft=c

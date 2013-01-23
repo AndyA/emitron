@@ -4,13 +4,20 @@
 #include "dynatron.h"
 #include "utils.h"
 
-static int clone_h(jd_var *rv, jd_var *ctx, jd_var *arg) {
-  dy_debug("clone object, ctx=%lJ, rv=%lJ, arg=%lJ", ctx, rv, arg);
+static int clone_h(jd_var *self, jd_var *ctx, jd_var *arg) {
+  dy_debug("clone object, self=%lJ, ctx=%lJ, arg=%lJ", self,  ctx, arg);
   return 0;
 }
 
-static int run_h(jd_var *rv, jd_var *ctx, jd_var *arg) {
-  dy_debug("run object, ctx=%lJ, rv=%lJ, arg=%lJ", ctx, rv, arg);
+static int run_h(jd_var *self, jd_var *ctx, jd_var *arg) {
+  dy_debug("run object, self=%lJ, ctx=%lJ, arg=%lJ", self,  ctx, arg);
+  for (;;) {
+    jd_var msg = JD_INIT;
+    dy_debug("%J waiting for message", self);
+    dy_object_get_message(self, &msg);
+    dy_debug("%J got message %lJ", self, &msg);
+    jd_release(&msg);
+  }
   return 0;
 }
 

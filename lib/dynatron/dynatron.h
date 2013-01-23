@@ -85,8 +85,9 @@ void dy_object_destroy(void);
 void dy_object_register(const char *name, jd_var *o, const char *inherit);
 void dy_object_unregister(const char *name);
 void dy_object_invoke(jd_var *o, const char *method, jd_var *arg);
+void dy_object_get_message(jd_var *o, jd_var *msg);
 
-void dy_object_set_method(jd_var *obj, const char *name, jd_closure_func impl);
+void dy_object_set_method(jd_var *obj, const char *method, jd_closure_func impl);
 
 void dy_thread_create(dy_worker worker, jd_var *arg);
 void dy_thread_join_all(void);
