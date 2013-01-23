@@ -45,7 +45,7 @@ tags:
 	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .
 
 clean:
-	rm -f $(OBJS) $(DEPS) $(BINS) tags version.h
+	rm -f $(OBJS) $(DEPS) $(BINS) $(LIB) tags version.h
 	$(MAKE) -C t clean
 
 version:
