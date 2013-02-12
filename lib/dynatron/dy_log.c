@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <sys/time.h>
 #include <time.h>
 
 #define TS_FORMAT "%Y/%m/%d %H:%M:%S"
@@ -24,11 +25,14 @@ static const char *lvl[] = {
 };
 
 static void ts(char *buf, size_t sz) {
-  time_t t = time(NULL);
+  struct timeval tv;
   struct tm *tmp;
-  tmp = gmtime(&t);
+  size_t len;
+  gettimeofday(&tv, NULL);
+  tmp = gmtime(&tv.tv_sec);
   if (!tmp) die("gmtime failed: %m");
-  strftime(buf, sz, TS_FORMAT, tmp);
+  len = strftime(buf, sz, TS_FORMAT, tmp);
+  snprintf(buf + len, sz - len, ".%06lu", (unsigned long) tv.tv_usec);
 }
 
 static void split_lines(jd_var *out, jd_var *v) {
