@@ -7,7 +7,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 
 #define TS_FORMAT "%Y/%m/%d %H:%M:%S"
 
@@ -62,7 +64,8 @@ static void dy_log(unsigned level, const char *msg, va_list ap) {
     pthread_mutex_lock(&mutex);
 
     ts(tmp, sizeof(tmp));
-    jd_printf(&ldr, "%s | %-7s | ", tmp, lvl[level]);
+    jd_printf(&ldr, "%s | %5lu | %-7s | ",
+              tmp, (unsigned long) getpid(), lvl[level]);
     jd_vprintf(&str, msg, ap);
     split_lines(&ln, &str);
     count = jd_count(&ln);
