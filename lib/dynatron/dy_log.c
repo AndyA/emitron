@@ -17,12 +17,11 @@ unsigned dy_log_level  = DEBUG;
 unsigned dy_log_colour = 1;
 
 static const char *lvl[] = {
-  "DEBUG",
-  "NOTICE",
-  "INFO",
-  "WARNING",
+  "FATAL",
   "ERROR",
-  "FATAL"
+  "WARNING",
+  "INFO",
+  "DEBUG"
 };
 
 static const char *lvl_col[] = {
@@ -54,7 +53,7 @@ static void split_lines(jd_var *out, jd_var *v) {
 }
 
 static void dy_log(unsigned level, const char *msg, va_list ap) {
-  if (level >= dy_log_level) {
+  if (level <= dy_log_level) {
     char tmp[30];
     int i;
     size_t count;
@@ -92,7 +91,6 @@ static void dy_log(unsigned level, const char *msg, va_list ap) {
   }
 
 LOGGER(dy_debug,    DEBUG)
-LOGGER(dy_notice,   NOTICE)
 LOGGER(dy_info,     INFO)
 LOGGER(dy_warning,  WARNING)
 LOGGER(dy_error,    ERROR)

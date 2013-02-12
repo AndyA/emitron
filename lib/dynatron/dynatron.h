@@ -8,12 +8,11 @@
 #include "jsondata.h"
 
 enum {
-  DEBUG,
-  NOTICE,
-  INFO,
-  WARNING,
   ERROR,
-  FATAL
+  FATAL,
+  WARNING,
+  INFO,
+  DEBUG
 };
 
 typedef enum {
@@ -58,7 +57,6 @@ void dy_init(void);
 void dy_destroy(void);
 
 void dy_debug(const char *msg, ...);
-void dy_notice(const char *msg, ...);
 void dy_info(const char *msg, ...);
 void dy_warning(const char *msg, ...);
 void dy_error(const char *msg, ...);
