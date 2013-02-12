@@ -7,12 +7,18 @@
 
 #include "jsondata.h"
 
+/* Error levels */
 enum {
   ERROR,
   FATAL,
   WARNING,
   INFO,
   DEBUG
+};
+
+/* Thread local slots */
+enum {
+  TD_SERIAL
 };
 
 typedef enum {
@@ -47,8 +53,10 @@ typedef struct {
   pthread_cond_t cond;
 } dy_queue;
 
+typedef struct thread_context *dy_thread;
+
 extern unsigned dy_log_level;
-extern unsigned dy_log_colour;
+extern unsigned dy_log_level;
 
 typedef void (*dy_worker)(jd_var *arg);
 
@@ -91,7 +99,8 @@ void dy_object_stash(jd_var *o, jd_var *stash);
 
 void dy_object_set_method(jd_var *obj, const char *method, jd_closure_func impl);
 
-void dy_thread_create(dy_worker worker, jd_var *arg);
+dy_thread dy_thread_create(dy_worker worker, jd_var *arg);
+void dy_thread_join(dy_thread td);
 void dy_thread_join_all(void);
 size_t dy_thread_count(void);
 

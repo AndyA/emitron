@@ -18,6 +18,11 @@ struct thread_context {
 static struct thread_context *active = NULL;
 static pthread_mutex_t active_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+#if 0
+static unsigned long serial;
+static pthread_mutex_t serial_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
+
 static struct thread_context *unlink(struct thread_context *this,
                                      struct thread_context *node) {
   if (this == node) return this->next;
@@ -59,7 +64,7 @@ static void *wrapper(void *ctxp) {
   return NULL;
 }
 
-static void create_thread(dy_worker worker, jd_var *arg) {
+static dy_thread create_thread(dy_worker worker, jd_var *arg) {
   struct thread_context *ctx = jd_alloc(sizeof(struct thread_context));
   pthread_attr_t attr;
 
@@ -73,27 +78,29 @@ static void create_thread(dy_worker worker, jd_var *arg) {
   pthread_attr_destroy(&attr);
 
   add_thread(ctx);
-  return;
+  return ctx;
 
 fail:
   die("Can't create thread: %m");
+  return NULL;
 }
 
-void dy_thread_create(dy_worker worker, jd_var *arg) {
+dy_thread dy_thread_create(dy_worker worker, jd_var *arg) {
+  dy_thread td;
   if (arg) {
-    create_thread(worker, arg);
+    td = create_thread(worker, arg);
   }
   else {
     jd_var tmp = JD_INIT;
-    create_thread(worker, &tmp);
+    td = create_thread(worker, &tmp);
     jd_release(&tmp);
   }
+  return td;
 }
 
-static void join_thread(struct thread_context *ctx) {
+void dy_thread_join(dy_thread td) {
   void *status;
-  pthread_join(ctx->thd, &status);
-  free_thread(ctx);
+  pthread_join(td->thd, &status);
 }
 
 void dy_thread_join_all(void) {
@@ -101,8 +108,12 @@ void dy_thread_join_all(void) {
   dy_info("Waiting for threads to terminate");
   for (ctx = active; ctx; ctx = next) {
     next = ctx->next;
-    join_thread(ctx);
+    dy_thread_join(ctx);
   }
+}
+
+unsigned long dy_thread_id(void) {
+  return 0;
 }
 
 /* vim:ts=2:sw=2:sts=2:et:ft=c
