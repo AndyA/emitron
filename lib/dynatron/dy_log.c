@@ -61,14 +61,14 @@ static void dy_log(unsigned level, const char *msg, va_list ap) {
     size_t count;
     jd_var ldr = JD_INIT, str = JD_INIT, ln = JD_INIT;
 
-    pthread_mutex_lock(&mutex);
-
     ts(tmp, sizeof(tmp));
     jd_printf(&ldr, "%s | %5lu | %-7s | ",
               tmp, (unsigned long) getpid(), lvl[level]);
     jd_vprintf(&str, msg, ap);
     split_lines(&ln, &str);
     count = jd_count(&ln);
+
+    pthread_mutex_lock(&mutex);
     for (i = 0; i < count; i++) {
       fprintf(stderr, "%s%s%s%s\n",
               dy_log_colour ? lvl_col[level] : "",
@@ -76,12 +76,12 @@ static void dy_log(unsigned level, const char *msg, va_list ap) {
               dy_log_colour ? COLOR_RESET : ""
              );
     }
+    pthread_mutex_unlock(&mutex);
 
     jd_release(&ldr);
     jd_release(&ln);
     jd_release(&str);
 
-    pthread_mutex_unlock(&mutex);
   }
 }
 
