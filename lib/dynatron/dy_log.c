@@ -67,11 +67,11 @@ static void dy_log(unsigned level, const char *msg, va_list ap) {
     split_lines(&ln, &str);
     count = jd_count(&ln);
     for (i = 0; i < count; i++) {
-      printf("%s%s%s%s\n",
-             dy_log_colour ? lvl_col[level] : "",
-             jd_bytes(&ldr, NULL), jd_bytes(jd_get_idx(&ln, i), NULL),
-             dy_log_colour ? COLOR_RESET : ""
-            );
+      fprintf(stderr, "%s%s%s%s\n",
+              dy_log_colour ? lvl_col[level] : "",
+              jd_bytes(&ldr, NULL), jd_bytes(jd_get_idx(&ln, i), NULL),
+              dy_log_colour ? COLOR_RESET : ""
+             );
     }
 
     jd_release(&ldr);
