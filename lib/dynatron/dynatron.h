@@ -49,6 +49,7 @@ typedef struct {
 } dy_queue;
 
 extern unsigned dy_log_level;
+extern unsigned dy_log_colour;
 
 typedef void (*dy_worker)(jd_var *arg);
 

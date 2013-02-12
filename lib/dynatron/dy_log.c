@@ -13,7 +13,8 @@
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-unsigned dy_log_level = DEBUG;
+unsigned dy_log_level  = DEBUG;
+unsigned dy_log_colour = 1;
 
 static const char *lvl[] = {
   "DEBUG",
@@ -23,6 +24,16 @@ static const char *lvl[] = {
   "ERROR",
   "FATAL"
 };
+
+static const char *lvl_col[] = {
+  "\x1b[41m" "\x1b[37m",  // white on red
+  "\x1b[41m" "\x1b[37m",  // white on red
+  "\x1b[31m",             // red
+  "\x1b[36m",             // cyan
+  "\x1b[32m",             // green
+};
+
+#define COLOR_RESET "\x1b[0m"
 
 static void ts(char *buf, size_t sz) {
   struct timeval tv;
@@ -57,8 +68,11 @@ static void dy_log(unsigned level, const char *msg, va_list ap) {
     split_lines(&ln, &str);
     count = jd_count(&ln);
     for (i = 0; i < count; i++) {
-      printf("%s%s\n", jd_bytes(&ldr, NULL),
-             jd_bytes(jd_get_idx(&ln, i), NULL));
+      printf("%s%s%s%s\n",
+             dy_log_colour ? lvl_col[level] : "",
+             jd_bytes(&ldr, NULL), jd_bytes(jd_get_idx(&ln, i), NULL),
+             dy_log_colour ? COLOR_RESET : ""
+            );
     }
 
     jd_release(&ldr);
