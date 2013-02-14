@@ -14,12 +14,12 @@ sub first {
 }
 
 use constant DB   => 'stash/db.json';
-use constant BASE => first( '/Volumes/Meeja', glob '~/ACE' );
+use constant BASE => first( '/Volumes/Meeja/ACE', glob '~/ACE' );
 use constant ROOT => BASE
- . '/ACE/132.185.236.109/thespace/'
+ . '/132.185.236.109/thespace/'
  . 'original_submissions_6tb_disc4/ACE Film Collection';
 
-use constant OUT => BASE . '/ACE/raw';
+use constant OUT => BASE . '/raw';
 
 my $db = JSON->new->utf8->decode( scalar file(DB)->slurp );
 
