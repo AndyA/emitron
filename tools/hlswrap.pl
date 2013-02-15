@@ -248,7 +248,7 @@ sub make_index {
     <title>$title</title>
   </head>
   <body>
-    <video width="1280" height="720" controls="controls" >
+    <video width="1024" height="576" controls="controls" >
       <source src="$media" type="application/x-mpegURL" />
     </video>
   </body>
