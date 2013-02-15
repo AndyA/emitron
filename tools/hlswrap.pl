@@ -134,7 +134,7 @@ sub stm::new {
   return bless {
     %args,
     frags  => [],
-    next   => 1,
+    next   => 0,
     closed => 0,
   }, $class;
 }
