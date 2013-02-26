@@ -9,14 +9,20 @@
 
 #include "jd_pretty.h"
 
+#define DY_ERROR_LEVELS \
+  X(ERROR)    \
+  X(FATAL)    \
+  X(WARNING)  \
+  X(INFO)     \
+  X(DEBUG)
+
 /* Error levels */
+#define X(x) x,
 enum {
-  ERROR,
-  FATAL,
-  WARNING,
-  INFO,
-  DEBUG
+  DY_ERROR_LEVELS
+  MAXLEVEL
 };
+#undef X
 
 /* Thread local slots */
 enum {

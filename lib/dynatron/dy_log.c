@@ -18,20 +18,19 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 unsigned dy_log_level  = DEBUG;
 unsigned dy_log_colour = 1;
 
+#define X(x) #x,
 static const char *lvl[] = {
-  "FATAL",
-  "ERROR",
-  "WARNING",
-  "INFO",
-  "DEBUG"
+  DY_ERROR_LEVELS
+  NULL
 };
+#undef X
 
 static const char *lvl_col[] = {
-  "\x1b[41m" "\x1b[37m",  // white on red
-  "\x1b[41m" "\x1b[37m",  // white on red
-  "\x1b[31m",             // red
-  "\x1b[36m",             // cyan
-  "\x1b[32m",             // green
+  "\x1b[41m" "\x1b[37m",  // ERROR    white on red
+  "\x1b[41m" "\x1b[37m",  // FATAL    white on red
+  "\x1b[31m",             // WARNING  red
+  "\x1b[36m",             // INFO     cyan
+  "\x1b[32m",             // DEBUG    green
 };
 
 #define COLOUR_RESET "\x1b[0m"
