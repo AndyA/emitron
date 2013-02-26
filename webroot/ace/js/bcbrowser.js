@@ -41,24 +41,27 @@ $(function() {
   }
 
   function build_chapter(sc, cw, chap) {
-    var left = Math.floor(sc(chap. in ));
-    var right = Math.floor(sc(chap.out));
+    var left = Math.floor(sc(chap['in']));
+    var right = Math.floor(sc(chap['out']));
     var col = cw.next();
     var player = $('#player')[0];
+    var id = mk_id('chapter', chap['in'], chap['out']);
 
     $('#chapters').append($('<div></div>').attr({
-      class: "chapter"
+      class: 'chapter',
+      id: id
     }).css({
       left: left + 'px',
       width: (right - left) + 'px',
       backgroundColor: col
     }).mouseenter(function(e) {
-      $('#popup').show().text(chap.desc).css({
+      $('#popup').show().text(chap['desc']).css({
         borderColor: col
       }).position({
         my: 'bottom',
         at: 'top',
-        of: '#chapters'
+        of: '#' + id,
+        collision: 'fit'
       });
     }).mouseleave(function(e) {
       $('#popup').hide();
