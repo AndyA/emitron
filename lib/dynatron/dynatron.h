@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include "jsondata.h"
+#include "jd_pretty.h"
 
 /* Error levels */
 enum {

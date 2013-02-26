@@ -2,7 +2,7 @@
 
 #include <pthread.h>
 
-#include "jsondata.h"
+#include "jd_pretty.h"
 #include "dynatron.h"
 #include "utils.h"
 

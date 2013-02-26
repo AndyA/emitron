@@ -1,6 +1,6 @@
 /* jd_test.c */
 
-#include "jsondata.h"
+#include "jd_pretty.h"
 #include "jd_test.h"
 #include "tap.h"
 

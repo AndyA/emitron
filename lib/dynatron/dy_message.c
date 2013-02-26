@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <unistd.h>
 
-#include "jsondata.h"
+#include "jd_pretty.h"
 #include "dynatron.h"
 #include "utils.h"
 
