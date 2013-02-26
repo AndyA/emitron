@@ -38,6 +38,10 @@ static struct object_context *find_obj(const char *name) {
   return slot ? get_ctx(slot) : NULL;
 }
 
+/* TODO this is the top level of the worker thread so need to catch
+ * exceptions here so they don't try to propagate back into the main
+ * thread. That would be bad. 
+ */
 static void object_worker(jd_var *obj) {
   dy_object_invoke(obj, "run", NULL);
 }
