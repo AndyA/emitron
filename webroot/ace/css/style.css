@@ -47,7 +47,7 @@ img {
 #progress {
   height: 4px;
   left: 0px;
-  width: 1024px;
+  width: 0px;
   background-color: red;
 }
 

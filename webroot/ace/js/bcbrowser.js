@@ -24,6 +24,8 @@ $(function() {
   var media_id = null;
   var media_ready = false;
   var media_pending = [];
+  var nav_width = $('#nav')[0].width;
+  console.log("nav_width=" + nav_width);
 
   function when_ready(cb) {
     if (media_ready) cb();
@@ -66,7 +68,7 @@ $(function() {
   });
 
   $('#player').bind('timeupdate', function(e) {
-    $('#progress').width(Math.floor(this.currentTime / this.duration * 1024));
+    $('#progress').width(Math.floor(this.currentTime / this.duration * nav_width));
   });
 
   $('#nav').click(function(e) {
