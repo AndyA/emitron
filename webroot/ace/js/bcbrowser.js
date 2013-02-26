@@ -37,16 +37,17 @@ $(function() {
       media_pending = [];
       media_id = id;
       console.log("Loading " + cat[id].media);
+      get_json(cat[id].data, function(data) {
+        var title = data['Title'];
+        console.log("Loaded data for " + id + ", " + title);
+        $('#title').text(title);
+        document.title = title;
+      });
       $('#player').attr({
         src: cat[id].media
       });
       $('#nav').attr({
         src: cat[id].full
-      });
-      get_json(cat[id].data, function(data) {
-        console.log("Loaded data");
-        $('#title').text(data['Title']);
-        document.title = data['Title'];
       });
     }
     when_ready(function() {
