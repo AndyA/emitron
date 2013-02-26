@@ -32,6 +32,41 @@ $(function() {
     else media_pending.push(cb);
   }
 
+  function scaler(inlo, inhi, outlo, outhi) {
+    return function(n) {
+      if (n < inlo) n = inlo;
+      if (n > inhi) n = inhi;
+      return (n - inlo) * (outhi - outlo) / (inhi - inlo) + outlo;
+    };
+  }
+
+  function build_chapter(sc, cw, chap) {
+    var left = Math.floor(sc(chap. in ));
+    var right = Math.floor(sc(chap.out));
+    var col = cw.next();
+    var player = $('#player')[0];
+
+    $('#chapters').append($('<div></div>').attr({
+      class: "chapter"
+    }).css({
+      left: left + 'px',
+      width: (right - left) + 'px',
+      backgroundColor: col
+    }).mouseenter(function(e) {
+      $('#popup').show().text(chap.desc).css({
+        borderColor: col
+      }).position({
+        my: 'bottom',
+        at: 'top',
+        of: '#chapters'
+      });
+    }).mouseleave(function(e) {
+      $('#popup').hide();
+    }).click(function(e) {
+      player.currentTime = chap. in ;
+    }));
+  }
+
   function switch_media(id, xp, yp) {
     console.log("switch_media(\"" + id + "\", " + xp + ", " + yp + ")");
     if (id != media_id) {
@@ -44,6 +79,17 @@ $(function() {
         console.log("Loaded data for " + id + ", " + title);
         $('#title').text(title);
         document.title = title;
+        var chaps = data['chapters'];
+        var cw = new ColourWheel(200, 60, 40, chaps.length);
+        when_ready(function() {
+          var player = $('#player')[0];
+          var $chapters = $('#chapters');
+          $chapters.empty()
+          var sc = scaler(0, player.duration, 0, nav_width);
+          for (var i = 0; i < chaps.length; i++) {
+            build_chapter(sc, cw, chaps[i]);
+          }
+        });
       });
       $('#player').attr({
         src: cat[id].media

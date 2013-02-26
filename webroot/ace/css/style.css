@@ -51,6 +51,11 @@ img {
   background-color: red;
 }
 
+#chapters {
+  left: 0px;
+  right: 0px;
+}
+
 #player {
   width: 1024px;
   height: 576px;
@@ -59,13 +64,38 @@ img {
 
 #nav {
   width: 1024px;
-  height: 80px;
+  height: 60px;
   padding: 0;
   margin: 0;
   border: 1px solid #333;
 }
 
+#chapters {
+  position: relative;
+  width: 1024px;
+  height: 8px;
+  padding: 0;
+  margin: 0;
+  background-color: #444;
+}
+
+.chapter {
+  position: absolute;
+  height: 8px;
+}
+
 #browser h1 {
   font-size: 1.2em;
   text-align: center;
+}
+
+#popup {
+  display: none;
+  position: absolute;
+  width: 80%;  
+  font-size: 0.8em;
+  padding: 1em;
+  background-color: rgba(0,0,0,0.60);
+  border: 3px solid white;
+  z-index: 100; 
 }
