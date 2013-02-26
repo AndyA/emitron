@@ -65,6 +65,10 @@ $(function() {
     media_pending = [];
   });
 
+  $('#player').bind('timeupdate', function(e) {
+    $('#progress').width(this.currentTime / this.duration * 1024);
+  });
+
   $('#nav').click(function(e) {
     if (media_id) {
       var cx = (e.pageX - $(this).offset().left) / this.width;
