@@ -34,11 +34,10 @@ static void get_message(jd_var *msg) {
 
 void dy_despatch_thread(jd_var *arg) {
   dy_info("Starting despatcher");
-  for (;;) {
-    jd_var msg = JD_INIT;
-    get_message(&msg);
-    dy_despatch_message(&msg);
-    jd_release(&msg);
+  for (;;) scope {
+    JD_VAR(msg);
+    get_message(msg);
+    dy_despatch_message(msg);
   }
 }
 

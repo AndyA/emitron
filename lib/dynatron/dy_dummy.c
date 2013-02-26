@@ -5,10 +5,7 @@
 #include "utils.h"
 
 void dy_dummy_init(void) {
-  jd_var obj = JD_INIT;
-  jd_set_hash(&obj, 1);
-  dy_object_register("dummy", &obj, "core");
-  jd_release(&obj);
+  scope dy_object_register("dummy", jd_nhv(1), "core");
 }
 
 void dy_dummy_destroy(void) {

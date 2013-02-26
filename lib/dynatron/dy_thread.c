@@ -24,7 +24,7 @@ static pthread_mutex_t serial_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 static struct thread_context *unhitch(struct thread_context *this,
-                                     struct thread_context *node) {
+                                      struct thread_context *node) {
   if (this == node) return this->next;
   this->next = unhitch(this->next, node);
   return this;
@@ -90,10 +90,8 @@ dy_thread dy_thread_create(dy_worker worker, jd_var *arg) {
   if (arg) {
     td = create_thread(worker, arg);
   }
-  else {
-    jd_var tmp = JD_INIT;
-    td = create_thread(worker, &tmp);
-    jd_release(&tmp);
+  else scope {
+    td = create_thread(worker, jd_nv());
   }
   return td;
 }

@@ -5,30 +5,30 @@
 #include "utils.h"
 
 static int clone_h(jd_var *self, jd_var *ctx, jd_var *arg) {
-  jd_var super = JD_INIT, proto = JD_INIT, *cfg, *slot, *name;
-  dy_debug("clone object, self=%lJ, ctx=%lJ, arg=%lJ", self, ctx, arg);
+  scope {
+    jd_var *name, *slot, *cfg;
 
-  if (name = jd_get_ks(arg, "name", 0), !name) {
-    dy_listener_send_error("No name in %lJ", arg);
-    goto done;
+    dy_debug("clone object, self=%lJ, ctx=%lJ, arg=%lJ", self, ctx, arg);
+
+    if (name = jd_get_ks(arg, "name", 0), !name) {
+      dy_listener_send_error("No name in %lJ", arg);
+      JD_RETURN(0);
+    }
+
+    JD_VAR(super);
+    dy_object_name(self, super);
+
+    JD_HV(proto, 1);
+    slot = jd_get_ks(proto, "config", 1);
+    if (cfg = jd_get_ks(arg, "config", 0), cfg)
+      jd_assign(slot, cfg);
+    else
+      jd_set_hash(slot, 1);
+
+    dy_debug("%V extends %V, prototype: %lJ", name, super, proto);
+
+    dy_object_register(jd_bytes(name, NULL), proto, jd_bytes(super, NULL));
   }
-
-  dy_object_name(self, &super);
-
-  jd_set_hash(&proto, 1);
-  slot = jd_get_ks(&proto, "config", 1);
-  if (cfg = jd_get_ks(arg, "config", 0), cfg)
-    jd_assign(slot, cfg);
-  else
-    jd_set_hash(slot, 1);
-
-  dy_debug("%V extends %V, prototype: %lJ", name, &super, &proto);
-
-  dy_object_register(jd_bytes(name, NULL), &proto, jd_bytes(&super, NULL));
-
-done:
-  jd_release(&proto);
-  jd_release(&super);
   return 0;
 }
 
@@ -45,35 +45,34 @@ static void despatch_message(jd_var *self, jd_var *msg) {
 }
 
 static void describe(jd_var *self) {
-  jd_var name = JD_INIT, stash = JD_INIT;
-  dy_object_name(self, &name);
-  dy_object_stash(self, &stash);
-  dy_debug("name: %V, stash: %lJ", &name, &stash);
-  jd_release(&name);
-  jd_release(&stash);
+  scope {
+    JD_2VARS(name, stash);
+    dy_object_name(self, name);
+    dy_object_stash(self, stash);
+    dy_debug("name: %V, stash: %lJ", name, stash);
+  }
 }
 
 static int run_h(jd_var *self, jd_var *ctx, jd_var *arg) {
   describe(self);
-  for (;;) {
-    jd_var msg = JD_INIT;
-    dy_object_get_message(self, &msg);
-    dy_debug("%J got message %lJ", self, &msg);
-    despatch_message(self, &msg);
-    jd_release(&msg);
+  for (;;) scope {
+    JD_VAR(msg);
+    dy_object_get_message(self, msg);
+    dy_debug("%J got message %lJ", self, msg);
+    despatch_message(self, msg);
   }
   return 0;
 }
 
 void dy_core_init(void) {
-  jd_var obj = JD_INIT;
-  jd_set_hash(&obj, 1);
+  scope {
+    JD_HV(obj, 1);
 
-  dy_object_set_method(&obj, "clone", clone_h);
-  dy_object_set_method(&obj, "run", run_h);
+    dy_object_set_method(obj, "clone", clone_h);
+    dy_object_set_method(obj, "run", run_h);
 
-  dy_object_register("core", &obj, NULL);
-  jd_release(&obj);
+    dy_object_register("core", obj, NULL);
+  }
 }
 
 void dy_core_destroy(void) {

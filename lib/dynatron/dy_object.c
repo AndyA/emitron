@@ -86,37 +86,37 @@ void dy_object_destroy(void) {
 }
 
 void dy_object_register(const char *name, jd_var *o, const char *inherit) {
-  jd_var obj = JD_INIT;
+  scope {
+    JD_VAR(obj);
 
-  if (find_obj(name)) {
-    dy_listener_send_error("Object %s already registered", name);
-    return;
-  }
-
-  struct object_context *ctx = ctx_new();
-  jd_set_string(&ctx->name, name);
-
-  if (inherit) {
-    struct object_context *super = find_obj(inherit);
-    if (!super) {
-      dy_listener_send_error("Can't find %s for %s to inherit from", inherit, name);
+    if (find_obj(name)) {
+      dy_listener_send_error("Object %s already registered", name);
       return;
     }
-    dy_debug("Inheriting %s from %s", name, inherit);
-    jd_merge(&ctx->obj, &super->obj, 1);
+
+    struct object_context *ctx = ctx_new();
+    jd_set_string(&ctx->name, name);
+
+    if (inherit) {
+      struct object_context *super = find_obj(inherit);
+      if (!super) {
+        dy_listener_send_error("Can't find %s for %s to inherit from", inherit, name);
+        JD_RETURN_VOID;
+      }
+      dy_debug("Inheriting %s from %s", name, inherit);
+      jd_merge(&ctx->obj, &super->obj, 1);
+    }
+
+    jd_merge(&ctx->obj, o, 1);
+
+    jd_set_object(obj, ctx, ctx_free_wrap);
+    jd_assign(jd_get_ks(&registry, name, 1), obj);
+    dy_info("Registered object %s", name);
+
+
+    /* TODO send ack? */
+    dy_thread_create(object_worker, obj);
   }
-
-  jd_merge(&ctx->obj, o, 1);
-
-  jd_set_object(&obj, ctx, ctx_free_wrap);
-  jd_assign(jd_get_ks(&registry, name, 1), &obj);
-  dy_info("Registered object %s", name);
-
-
-  /* TODO send ack? */
-  dy_thread_create(object_worker, &obj);
-
-  jd_release(&obj);
 }
 
 void dy_object_unregister(const char *name) {
@@ -133,10 +133,9 @@ void dy_object_unregister(const char *name) {
 /* helpers */
 
 void dy_object_set_method(jd_var *obj, const char *method, jd_closure_func impl) {
-  jd_var cl = JD_INIT;
-  jd_set_closure(&cl, impl);
-  jd_assign(jd_get_ks(obj, method, 1), &cl);
-  jd_release(&cl);
+  scope {
+    jd_assign(jd_get_ks(obj, method, 1), jd_ncv(impl));
+  }
 }
 
 int dy_object_invokev(jd_var *o, jd_var *method, jd_var *arg) {
@@ -154,14 +153,10 @@ int dy_object_invokev(jd_var *o, jd_var *method, jd_var *arg) {
 }
 
 int dy_object_invoke(jd_var *o, const char *method, jd_var *arg) {
-  jd_var mv = JD_INIT;
-  int rv;
-
-  jd_set_string(&mv, method);
-  rv = dy_object_invokev(o, &mv, arg);
-  jd_release(&mv);
-
-  return rv;
+  scope {
+    JD_RETURN(dy_object_invokev(o, jd_nsv(method), arg));
+  }
+  return 0;
 }
 
 void dy_object_get_message(jd_var *o, jd_var *msg) {

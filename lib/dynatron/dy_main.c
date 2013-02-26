@@ -5,16 +5,10 @@
 #include "utils.h"
 
 jd_var *dy_set_handler(jd_var *desp, const char *verb, jd_closure_func f) {
-  jd_var cl  = JD_INIT;
-  jd_var *slot;
-
-  jd_set_closure(&cl, f);
-
-  slot = jd_assign(jd_get_ks(desp, verb, 1), &cl);
-
-  jd_release(&cl);
-
-  return slot;
+  scope {
+    JD_RETURN(jd_assign(jd_get_ks(desp, verb, 1), jd_ncv(f)));
+  }
+  return NULL;
 }
 
 void dy_init(void) {
