@@ -3,9 +3,11 @@
 #ifndef __DYNATRON_H
 #define __DYNATRON_H
 
+#include <pthread.h>
 #include <stdlib.h>
+#include <unistd.h>
 
-#include "jsondata.h"
+#include "jd_pretty.h"
 
 /* Error levels */
 enum {

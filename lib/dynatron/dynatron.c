@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "jsondata.h"
+#include "jd_pretty.h"
 #include "dynatron.h"
 #include "utils.h"
 
@@ -59,14 +59,11 @@ int main(int argc, char *argv[]) {
 
   dy_thread_create(dy_despatch_thread, NULL);
 
-  for (argn = 0; argn < argc; argn++) {
-    jd_var arg = JD_INIT;
-    jd_var msg = JD_INIT;
-    jd_set_string(&arg, argv[argn]);
-    jd_from_json(&msg, &arg);
-    dy_despatch_enqueue(&msg);
-    jd_release(&msg);
-    jd_release(&arg);
+  for (argn = 0; argn < argc; argn++) scope {
+    JD_SV(arg, argv[argn]);
+    JD_VAR(msg);
+    jd_from_json(msg, arg);
+    dy_despatch_enqueue(msg);
   }
 
   monitor();

@@ -2,7 +2,7 @@
 
 #include <pthread.h>
 
-#include "jsondata.h"
+#include "jd_pretty.h"
 #include "dynatron.h"
 #include "utils.h"
 
@@ -23,10 +23,10 @@ static unsigned long serial;
 static pthread_mutex_t serial_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
-static struct thread_context *unlink(struct thread_context *this,
-                                     struct thread_context *node) {
+static struct thread_context *unhitch(struct thread_context *this,
+                                      struct thread_context *node) {
   if (this == node) return this->next;
-  this->next = unlink(this->next, node);
+  this->next = unhitch(this->next, node);
   return this;
 }
 
@@ -37,7 +37,7 @@ static void free_thread(struct thread_context *ctx) {
 
 static void remove_thread(struct thread_context *ctx) {
   pthread_mutex_lock(&active_mutex);
-  active = unlink(active, ctx);
+  active = unhitch(active, ctx);
   pthread_mutex_unlock(&active_mutex);
   free_thread(ctx);
 }
@@ -86,14 +86,12 @@ fail:
 }
 
 dy_thread dy_thread_create(dy_worker worker, jd_var *arg) {
-  dy_thread td;
+  volatile dy_thread td;
   if (arg) {
     td = create_thread(worker, arg);
   }
-  else {
-    jd_var tmp = JD_INIT;
-    td = create_thread(worker, &tmp);
-    jd_release(&tmp);
+  else scope {
+    td = create_thread(worker, jd_nv());
   }
   return td;
 }
