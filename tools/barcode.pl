@@ -7,16 +7,20 @@ use GD;
 use Path::Class;
 
 use constant QUALITY => 85;
+use constant THUMB_W => 180;
+use constant THUMB_H => 60;
 
 $| = 1;
 
 barcode($_) for @ARGV;
 
 sub barcode {
-  my $dir = dir $_[0];
-  my $bc = file( $dir, "barcode.jpeg" );
+  my $dir   = dir $_[0];
+  my $raw   = file( $dir, "barcode-raw.jpeg" );
+  my $bc    = file( $dir, "barcode.jpeg" );
+  my $thumb = file( $dir, "barcode-thumb.jpeg" );
   print "$dir\n";
-  if ( -e "$bc" ) {
+  if ( -e "$bc" && -e "$raw" && -e "$thumb" ) {
     print "  $bc exists\n";
     return;
   }
@@ -39,10 +43,19 @@ sub barcode {
     $pos += $sw;
   }
   my $dst = GD::Image->new( $w, $h, 1 );
-  $dst->copyResampled( $wrk, 0, 0, 0, 0, $ww, $h, $w, $h );
+  $dst->copyResampled( $wrk, 0, 0, 0, 0, $w, $h, $ww, $h );
 
   print "\n  Writing $bc\n";
-  print { $bc->openw } $dst->jpeg(QUALITY);
+  save_image( $dst, $bc );
+  save_image( $wrk, $raw );
+  my $tb = GD::Image->new( THUMB_W, THUMB_H, 1 );
+  $tb->copyResampled( $wrk, 0, 0, 0, 0, THUMB_W, THUMB_H, $ww, $h );
+  save_image( $tb, $thumb );
+}
+
+sub save_image {
+  my ( $img, $name ) = @_;
+  print { file($name)->openw } $img->jpeg(QUALITY);
 }
 
 # vim:ts=2:sw=2:sts=2:et:ft=perl
