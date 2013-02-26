@@ -66,7 +66,7 @@ $(function() {
   });
 
   $('#player').bind('timeupdate', function(e) {
-    $('#progress').width(this.currentTime / this.duration * 1024);
+    $('#progress').width(Math.floor(this.currentTime / this.duration * 1024));
   });
 
   $('#nav').click(function(e) {
