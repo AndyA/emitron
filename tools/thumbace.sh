@@ -14,7 +14,7 @@ for mpg in ~/ACE/raw/*.mpg; do
     tmpf="$tmp/frames.$name.tmp"
     rm -rf "$tmpf"
     mkdir -p "$tmpf"
-    ffmpeg -y -i "$mpg" -r 1 -f image2 "$tmpf/%08d.jpeg" < /dev/null >> "$log" 2>&1
+    ffmpeg -y -i "$mpg" -r 1 -f image2 "$tmpf/%08d.jpeg" < /dev/null >> "$log" 2>&1 || exit
     mv "$tmpf" "$frames"
   fi
 done

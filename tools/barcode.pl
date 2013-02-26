@@ -19,12 +19,13 @@ sub barcode {
   my $raw   = file( $dir, "barcode-raw.jpeg" );
   my $bc    = file( $dir, "barcode.jpeg" );
   my $thumb = file( $dir, "barcode-thumb.jpeg" );
+  return if -e "$bc" && -e "$raw" && -e "$thumb";
   print "$dir\n";
-  if ( -e "$bc" && -e "$raw" && -e "$thumb" ) {
-    print "  $bc exists\n";
+  my @img = sort grep { /\.jpe?g$/ } $dir->children;
+  unless (@img) {
+    print "  No images found\n";
     return;
   }
-  my @img = sort grep { /\.jpe?g$/ } $dir->children;
   my ( $wrk, $sw, $ww, $w, $h );
   my $pos = 0;
   for my $img (@img) {
@@ -33,8 +34,12 @@ sub barcode {
       ( $w, $h ) = $in->getBounds();
       my $slices = @img;
       $sw = int( $w / $slices + 2 );
-      print "  slice width: $sw\n";
       $ww = $sw * $slices;
+      while ( $ww > 32767 && $sw > 1 ) {
+        $sw--;
+        $ww = $sw * $slices;
+      }
+      print "  slice width: $sw\n";
       print "  work image width: $ww\n";
       $wrk = GD::Image->new( $ww, $h, 1 );
     }
