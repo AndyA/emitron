@@ -91,7 +91,7 @@ void dy_object_register(const char *name, jd_var *o, const char *inherit) {
 
     if (find_obj(name)) {
       dy_listener_send_error("Object %s already registered", name);
-      return;
+      JD_RETURN_VOID;
     }
 
     struct object_context *ctx = ctx_new();

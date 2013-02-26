@@ -86,7 +86,7 @@ fail:
 }
 
 dy_thread dy_thread_create(dy_worker worker, jd_var *arg) {
-  dy_thread td;
+  volatile dy_thread td;
   if (arg) {
     td = create_thread(worker, arg);
   }
