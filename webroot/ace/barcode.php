@@ -2,7 +2,6 @@
 <html>
   <head>
     <title>ACE Barcodes</title>
-    <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <?php
