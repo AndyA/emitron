@@ -4,6 +4,7 @@ body, #container {
   padding: 0;
   margin: 0;
   overflow: hidden;
+  font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
 }
 
 img {
@@ -42,7 +43,7 @@ img {
 #player {
   width: 1024px;
   height: 576px;
-  margin-top: 2em;
+  margin-top: 1em;
 }
 
 #nav {
@@ -51,4 +52,9 @@ img {
   padding: 0;
   margin: 0;
   border: 1px solid #333;
+}
+
+#browser h1 {
+  font-size: 1.2em;
+  text-align: center;
 }

@@ -43,6 +43,11 @@ $(function() {
       $('#nav').attr({
         src: cat[id].full
       });
+      get_json(cat[id].data, function(data) {
+        console.log("Loaded data");
+        $('#title').text(data['Title']);
+        document.title = data['Title'];
+      });
     }
     when_ready(function() {
       var player = $('#player')[0];
@@ -69,7 +74,7 @@ $(function() {
     }
   });
 
-  get_json(svc, function(data, status, xhr) {
+  get_json(svc, function(data) {
     var dock = $('#dock');
     for (var i = 0; i < data.length; i++) {
       var name = data[i].name;
