@@ -40,9 +40,9 @@ $(function() {
       $('#player').attr({
         src: cat[id].media
       });
-      //        empty().append($('<source></source>').attr({
-      //        src: cat[id].media
-      //      }));
+      $('#nav').attr({
+        src: cat[id].full
+      });
     }
     when_ready(function() {
       var player = $('#player')[0];
@@ -57,6 +57,16 @@ $(function() {
       (media_pending[i])()
     }
     media_pending = [];
+  });
+
+  $('#nav').click(function(e) {
+    if (media_id) {
+      var cx = (e.pageX - $(this).offset().left) / this.width;
+      when_ready(function() {
+        var player = $('#player')[0];
+        player.currentTime = player.duration * cx;
+      });
+    }
   });
 
   get_json(svc, function(data, status, xhr) {

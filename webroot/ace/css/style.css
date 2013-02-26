@@ -6,7 +6,7 @@ body, #container {
   overflow: hidden;
 }
 
-#dock img {
+img {
   padding: 0;
   margin: 0;
 }
@@ -34,8 +34,21 @@ body, #container {
   bottom: 0px;
 }
 
+#browser .wrap, #player {
+  margin: 0.1em 0.1em;
+  padding: 0.3em 2em;
+}
+
 #player {
   width: 1024px;
   height: 576px;
-  padding: 2em;
+  margin-top: 2em;
+}
+
+#nav {
+  width: 1024px;
+  height: 80px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #333;
 }
