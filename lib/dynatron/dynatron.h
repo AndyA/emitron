@@ -3,7 +3,9 @@
 #ifndef __DYNATRON_H
 #define __DYNATRON_H
 
+#include <pthread.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "jd_pretty.h"
 
