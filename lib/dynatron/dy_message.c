@@ -60,29 +60,27 @@ jd_var *dy_message_read(jd_var *out, dy_io_reader *rd) {
 }
 
 static void format_message(jd_var *out, jd_var *v) {
-  jd_var json = JD_INIT, msg = JD_INIT, sep = JD_INIT;
-
-  jd_set_array(&msg, 2);
-  jd_to_json(&json, v);
-  jd_set_int(jd_push(&msg, 1), jd_length(&json));
-  jd_assign(jd_push(&msg, 1), &json);
-  jd_set_string(&sep, "\n");
-  jd_join(out, &sep, &msg);
-
-  jd_release(&json);
-  jd_release(&msg);
-  jd_release(&sep);
+  scope {
+    JD_VAR(json);
+    JD_AV(msg, 2);
+    JD_SV(sep, "\n");
+    jd_to_json(json, v);
+    jd_set_int(jd_push(msg, 1), jd_length(json));
+    jd_assign(jd_push(msg, 1), json);
+    jd_join(out, sep, msg);
+  }
 }
 
 void dy_message_write(jd_var *v, dy_io_writer *wr) {
-  jd_var msg = JD_INIT;
-  size_t ml;
-  const char *buf;
+  scope {
+    JD_VAR(msg);
+    size_t ml;
+    const char *buf;
 
-  format_message(&msg, v);
-  buf = jd_bytes(&msg, &ml);
-  dy_io_write(wr, buf, ml - 1);
-  jd_release(&msg);
+    format_message(msg, v);
+    buf = jd_bytes(msg, &ml);
+    dy_io_write(wr, buf, ml - 1);
+  }
 }
 
 
