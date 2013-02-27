@@ -62,12 +62,18 @@ $(function() {
     }));
   }
 
+  function firstSentence(s) {
+    var dot = s.indexOf('.');
+    if (dot >= 0) return s.substr(0, dot);
+    return s;
+  }
+
   function loadChapters(id) {
     console.log("Loading " + cat[id].media);
     var $chapters = $('#chapters');
     $chapters.empty()
     getJson(cat[id].data, function(data) {
-      var title = data['Title'];
+      var title = firstSentence(data['Title']);
 
       $('#title').text(title);
       document.title = title;
