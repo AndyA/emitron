@@ -9,12 +9,11 @@ MagicPlayer.prototype = (function() {
   }
   function installHook(self, pl, name, args) {
     pl[name](function(e) {
-      var detail = [name]
-      for (var i = 0; i < args.length; i++) {
-        detail.push(args[i] + '=' + e[args[i]])
-      }
-      console.log(detail.join(', '))
-
+      //      var detail = [name]
+      //      for (var i = 0; i < args.length; i++) {
+      //        detail.push(args[i] + '=' + e[args[i]])
+      //      }
+      //      console.log(detail.join(', '))
       if (!self.seen[name]) self.seen[name] = 0
       if ((!self.seen[name]++) && self.defer[name]) {
         callAll(self, self.defer[name], [])

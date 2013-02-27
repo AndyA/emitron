@@ -43,8 +43,6 @@ $(function() {
     var col = cw.next();
     var id = mk_id('chapter', chap['in'], chap['out']);
 
-    console.log("Chapter, left=", left, ", right=", right, ", col=", col);
-
     $('#chapters').append($('<div></div>').attr({
       class: 'chapter',
       id: id
@@ -88,7 +86,6 @@ $(function() {
 
       var chaps = data['chapters'];
       mp.after('onTime', function(e) {
-        console.log("Building chapters");
         var player = mp.getPlayer();
         $chapters.empty()
         var sc = new Scaler(0, mp.getDuration(), 0, $chapters.width());
@@ -170,7 +167,6 @@ $(function() {
     });
 
     if (here.parts.frag) {
-      console.log("frag: ", here.parts.frag);
       var fp = here.parts.frag.split('.');
       var id = fp.shift();
       var seek = fp.length ? parseTime(fp.shift()) : 0;
