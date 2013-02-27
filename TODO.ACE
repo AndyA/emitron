@@ -1,0 +1,23 @@
+Use JWP.
+
+Colour by time (i.e. map seconds to degrees).
+
+Nav is canvas.
+
+Make sure we get >= 1024 thumbs.
+
+Pack thumbs as tiles.
+
+Drop current thumb into barcode.
+
+Why doesn't the bargraph line up precisely? Formatting?
+
+Fade nav on mouseout.
+
+Investigate short movies. Auto QA.
+
+Make dock slightly wider (scroll bar).
+
+Shorter GOP => faster seek?
+
+Wheel of thumbnails?
