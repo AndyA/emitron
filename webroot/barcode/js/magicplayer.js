@@ -83,27 +83,33 @@ MagicPlayer.prototype = (function() {
         installHooks(this);
         if (opt.onInit) opt.onInit.apply(this, [this.player]);
       }
-      if (opt.seekScaled) {
-        this.player.play();
-        this.after('onPlay', function(e) {
-          this.after('onTime', function(e) {
-            this.player.seek(this.player.getDuration() * opt.seekScaled);
+
+      if (opt.seek) {
+        if (opt.seek instanceof Array) {
+          this.player.play();
+          this.after('onPlay', function(e) {
+            this.after('onTime', function(e) {
+              this.player.seek(this.player.getDuration() * opt.seek[0]);
+            });
           });
-        });
-      }
-      else if (opt.seek) {
-        this.player.play();
-        this.after('onPlay', function(e) {
-          this.player.seek(opt.seek);
-        });
+        } else {
+          this.player.play();
+          this.after('onPlay', function(e) {
+            this.player.seek(opt.seek);
+          });
+        }
       }
       return this
     },
-    seekScaled: function(n) {
+    seek: function(n) {
       if (this.player) {
-        this.after('onTime', function(e) {
-          this.player.seek(this.player.getDuration() * n);
-        });
+        if (n instanceof Array) {
+          this.after('onTime', function(e) {
+            this.player.seek(this.player.getDuration() * n[0]);
+          });
+        } else {
+          this.player.seek(n);
+        }
       }
     },
     getPlayer: function() {

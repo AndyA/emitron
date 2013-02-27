@@ -5,7 +5,6 @@ $(function() {
 
   var media_id = null;
   var player_width = $('#player').width();
-  console.log("width: ", player_width);
   var mp = new MagicPlayer('player', {
     width: player_width,
     height: 576
@@ -19,6 +18,13 @@ $(function() {
 
   function parse_id(id) {
     return id.split('__');
+  }
+
+  function parseTime(tm) {
+    var part = tm.split(':');
+    var sec = 0;
+    for (var i = 0; i < part.length; i++) sec = sec * 60 + (1 * part[i]);
+    return sec;
   }
 
   function getJson(url, cb) {
@@ -58,7 +64,7 @@ $(function() {
     }).mouseleave(function(e) {
       $('#popup').hide();
     }).click(function(e) {
-      mp.getPlayer().seek(chap['in']);
+      mp.seek(chap['in']);
     }));
   }
 
@@ -94,17 +100,34 @@ $(function() {
     });
   }
 
-  function switchMedia(id, xp, yp) {
-    console.log("switchMedia(\"" + id + "\", " + xp + ", " + yp + ")");
+  function formatTime(n) {
+    var part = [];
+    n = Math.floor(n);
+    do {
+      var p = n % 60;
+      n = Math.floor(n / 60);
+      if (p < 10) p = '0' + p;
+      part.unshift(p);
+    } while (n > 0.1);
+    return part.join(':');
+  }
+
+  function makeFrag(id, pos) {
+    return[id, formatTime(pos)].join('.');
+  }
+
+  function switchMedia(id, seek) {
+    console.log("switchMedia(\"" + id + "\", ", seek, ")");
     if (id != media_id) {
       media_id = id;
       console.log("Loading " + cat[id].media);
       mp.load({
         file: cat[id].media,
-        seekScaled: xp,
+        seek: seek,
         onInit: function(player) {
           player.onTime(function(e) {
             $('#progress').width(Math.floor(e.position / e.duration * player_width));
+            window.location.hash = makeFrag(media_id, e.position);
           });
         }
       });
@@ -114,7 +137,7 @@ $(function() {
       loadChapters(id);
     }
     else {
-      mp.seekScaled(xp);
+      mp.seek(seek);
     }
   }
 
@@ -134,7 +157,7 @@ $(function() {
 
     $('#nav').click(function(e) {
       var cx = (e.pageX - $(this).offset().left) / this.width;
-      mp.seekScaled(cx);
+      mp.seek([cx]);
     });
 
     $('#dock img').click(function(e) {
@@ -143,8 +166,16 @@ $(function() {
       var offset = $this.offset();
       var cx = e.pageX - offset.left;
       var cy = e.pageY - offset.top;
-      switchMedia(id, cx / this.width, cy / this.height);
+      switchMedia(id, [cx / this.width]);
     });
 
+    if (here.parts.frag) {
+      console.log("frag: ", here.parts.frag);
+      var fp = here.parts.frag.split('.');
+      var id = fp.shift();
+      var seek = fp.length ? parseTime(fp.shift()) : 0;
+      switchMedia(id, seek);
+    }
   });
+
 });
