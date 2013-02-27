@@ -1,10 +1,11 @@
 <?php
   header('Content-type: application/json');
+  $link = '../ace';
   $db = array();
-  chdir(dirname(__FILE__) . '/..');
+  chdir(dirname(__FILE__) . "/../$link");
   $thumbs = glob("*/frames/barcode-thumb.jpeg");
   foreach ($thumbs as $tb) {
-    $base = dirname(dirname($tb));
+    $base = $link . '/' . dirname(dirname($tb));
     array_push($db, array(
       name  => $base, 
       thumb => $tb,
