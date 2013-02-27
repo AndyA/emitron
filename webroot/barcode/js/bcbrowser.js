@@ -21,7 +21,7 @@ $(function() {
     return id.split('__');
   }
 
-  function get_json(url, cb) {
+  function getJson(url, cb) {
     $.ajax({
       url: url,
       context: this,
@@ -31,7 +31,7 @@ $(function() {
     });
   }
 
-  function build_chapter(sc, cw, chap) {
+  function buildChapter(sc, cw, chap) {
     var left = sc.itrans(chap['in']);
     var right = sc.itrans(chap['out']);
     var col = cw.next();
@@ -62,11 +62,11 @@ $(function() {
     }));
   }
 
-  function load_chapters(id) {
+  function loadChapters(id) {
     console.log("Loading " + cat[id].media);
     var $chapters = $('#chapters');
     $chapters.empty()
-    get_json(cat[id].data, function(data) {
+    getJson(cat[id].data, function(data) {
       var title = data['Title'];
 
       $('#title').text(title);
@@ -82,14 +82,14 @@ $(function() {
         var sc = new Scaler(0, mp.getDuration(), 0, $chapters.width());
         var cw = new ColourWheel(200, 60, 40, chaps.length);
         for (var i = 0; i < chaps.length; i++) {
-          build_chapter(sc, cw, chaps[i]);
+          buildChapter(sc, cw, chaps[i]);
         }
       });
     });
   }
 
-  function switch_media(id, xp, yp) {
-    console.log("switch_media(\"" + id + "\", " + xp + ", " + yp + ")");
+  function switchMedia(id, xp, yp) {
+    console.log("switchMedia(\"" + id + "\", " + xp + ", " + yp + ")");
     if (id != media_id) {
       media_id = id;
       console.log("Loading " + cat[id].media);
@@ -105,14 +105,14 @@ $(function() {
       $('#nav').attr({
         src: cat[id].full
       });
-      load_chapters(id);
+      loadChapters(id);
     }
     else {
       mp.seekScaled(xp);
     }
   }
 
-  get_json(svc, function(data) {
+  getJson(svc, function(data) {
     var dock = $('#dock');
     for (var i = 0; i < data.length; i++) {
       var name = data[i].name;
@@ -137,7 +137,7 @@ $(function() {
       var offset = $this.offset();
       var cx = e.pageX - offset.left;
       var cy = e.pageY - offset.top;
-      switch_media(id, cx / this.width, cy / this.height);
+      switchMedia(id, cx / this.width, cy / this.height);
     });
 
   });
