@@ -22,6 +22,7 @@ MagicPlayer.prototype = (function() {
       }
     })
   }
+
   function installHooks(self) {
     var ev = {
       onBeforePlay: [],
@@ -47,6 +48,16 @@ MagicPlayer.prototype = (function() {
       installHook(self, self.player, k, v)
     })
   }
+
+  function installExtra(self) {
+    // For some reason JWP sometimes doesn't know the duration even
+    // after reporting it in an onTime event. So we cache any positive
+    // duration here. Seen with Firefox, may apply to others.
+    self.player.onTime(function(e) {
+      if (e.duration > self.duration) self.duration = e.duration;
+    });
+  }
+
   return {
     reset: function() {
       this.seen = {};
@@ -68,6 +79,7 @@ MagicPlayer.prototype = (function() {
       } else {
         this.player = jwplayer(this.elt).setup($.extend({},
         this.defaults, opt));
+        installExtra(this); // do this first
         installHooks(this);
         if (opt.onInit) opt.onInit.apply(this, [this.player]);
       }
@@ -95,7 +107,10 @@ MagicPlayer.prototype = (function() {
       }
     },
     getPlayer: function() {
-      return this.player
+      return this.player;
+    },
+    getDuration: function() {
+      return this.duration;
     }
   }
 })()

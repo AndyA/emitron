@@ -5,7 +5,7 @@ function Scaler(ilo, ihi, olo, ohi) {
       return (n - ilo) * (ohi - olo) / (ihi - ilo) + olo;
     };
   }
-  this.trans = scalar(ilo, ihi, olo, ohi);
+  this.trans = scaler(ilo, ihi, olo, ohi);
   this.inv = scaler(olo, ohi, ilo, ihi);
 }
 

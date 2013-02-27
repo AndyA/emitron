@@ -4,10 +4,14 @@ $(function() {
   var cat = {};
 
   var media_id = null;
+  var player_width = $('#player').width();
+  console.log("width: ", player_width);
   var mp = new MagicPlayer('player', {
-    width: 1024,
+    width: player_width,
     height: 576
   });
+
+  var sct = new Scaler(0, 10, 0, 10);
 
   function mk_id() {
     return Array.prototype.slice.call(arguments, 0).join('__');
@@ -27,6 +31,63 @@ $(function() {
     });
   }
 
+  function build_chapter(sc, cw, chap) {
+    var left = sc.itrans(chap['in']);
+    var right = sc.itrans(chap['out']);
+    var col = cw.next();
+    var id = mk_id('chapter', chap['in'], chap['out']);
+
+    console.log("Chapter, left=", left, ", right=", right, ", col=", col);
+
+    $('#chapters').append($('<div></div>').attr({
+      class: 'chapter',
+      id: id
+    }).css({
+      left: left + 'px',
+      width: (right - left) + 'px',
+      backgroundColor: col
+    }).mouseenter(function(e) {
+      $('#popup').show().text(chap['desc']).css({
+        borderColor: col
+      }).position({
+        my: 'bottom',
+        at: 'top',
+        of: '#' + id,
+        collision: 'fit'
+      });
+    }).mouseleave(function(e) {
+      $('#popup').hide();
+    }).click(function(e) {
+      mp.getPlayer().seek(chap['in']);
+    }));
+  }
+
+  function load_chapters(id) {
+    console.log("Loading " + cat[id].media);
+    var $chapters = $('#chapters');
+    $chapters.empty()
+    get_json(cat[id].data, function(data) {
+      var title = data['Title'];
+
+      $('#title').text(title);
+      document.title = title;
+
+      console.log("Loaded data for " + id + ", " + title);
+
+      var chaps = data['chapters'];
+      mp.after('onTime', function(e) {
+        console.log("Building chapters");
+        var player = mp.getPlayer();
+        $chapters.empty()
+        var sc = new Scaler(0, mp.getDuration(), 0, $chapters.width());
+        var cw = new ColourWheel(200, 60, 40, chaps.length);
+        for (var i = 0; i < chaps.length; i++) {
+          build_chapter(sc, cw, chaps[i]);
+        }
+      });
+    });
+  }
+
   function switch_media(id, xp, yp) {
     console.log("switch_media(\"" + id + "\", " + xp + ", " + yp + ")");
     if (id != media_id) {
@@ -37,13 +98,14 @@ $(function() {
         seekScaled: xp,
         onInit: function(player) {
           player.onTime(function(e) {
-            $('#progress').width(Math.floor(e.position / e.duration * 1024));
+            $('#progress').width(Math.floor(e.position / e.duration * player_width));
           });
         }
       });
       $('#nav').attr({
         src: cat[id].full
       });
+      load_chapters(id);
     }
     else {
       mp.seekScaled(xp);
