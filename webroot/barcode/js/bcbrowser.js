@@ -25,7 +25,6 @@ $(function() {
   var media_ready = false;
   var media_pending = [];
   var nav_width = $('#nav')[0].width;
-  console.log("nav_width=" + nav_width);
 
   function when_ready(cb) {
     if (media_ready) cb();
