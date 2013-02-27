@@ -34,12 +34,19 @@ $(function() {
       console.log("Loading " + cat[id].media);
       mp.load({
         file: cat[id].media,
-//        seekScaled: 0.5,
-        seek: 200,
+        seekScaled: xp,
+        onInit: function(player) {
+          player.onTime(function(e) {
+            $('#progress').width(Math.floor(e.position / e.duration * 1024));
+          });
+        }
       });
       $('#nav').attr({
         src: cat[id].full
       });
+    }
+    else {
+      mp.seekScaled(xp);
     }
   }
 
@@ -56,6 +63,11 @@ $(function() {
         src: data[i].thumb
       })));
     }
+
+    $('#nav').click(function(e) {
+      var cx = (e.pageX - $(this).offset().left) / this.width;
+      mp.seekScaled(cx);
+    });
 
     $('#dock img').click(function(e) {
       var $this = $(this);

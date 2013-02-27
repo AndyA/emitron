@@ -15,13 +15,6 @@ MagicPlayer.prototype = (function() {
       }
       console.log(detail.join(', '))
 
-      if (self.duration < 0) {
-        self.duration = pl.getDuration();
-        if (self.duration >= 0) {
-          console.log("**** DURATION = " + self.duration);
-        }
-      }
-
       if (!self.seen[name]) self.seen[name] = 0
       if ((!self.seen[name]++) && self.defer[name]) {
         callAll(self, self.defer[name], [])
@@ -73,10 +66,10 @@ MagicPlayer.prototype = (function() {
       if (this.player) {
         this.player.load(opt)
       } else {
-        this.player = jwplayer(this.elt).setup(
-        $.extend({},
+        this.player = jwplayer(this.elt).setup($.extend({},
         this.defaults, opt));
-        installHooks(this)
+        installHooks(this);
+        if (opt.onInit) opt.onInit.apply(this, [this.player]);
       }
       if (opt.seekScaled) {
         this.player.play();
@@ -93,6 +86,13 @@ MagicPlayer.prototype = (function() {
         });
       }
       return this
+    },
+    seekScaled: function(n) {
+      if (this.player) {
+        this.after('onTime', function(e) {
+          this.player.seek(this.player.getDuration() * n);
+        });
+      }
     },
     getPlayer: function() {
       return this.player
