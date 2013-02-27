@@ -18,18 +18,18 @@ img {
 
 #dock, #browser {
   position: absolute;
+  overflow: auto; 
+  left: 0px;
   top: 0px;
   bottom: 0px;
 }
 
 #dock {
-  overflow: auto; 
   left: 0px;
   width: 220px;
 }
 
 #browser {
-  overflow: hidden; 
   left: 220px;
   right: 0px;
 }
