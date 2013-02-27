@@ -25,6 +25,7 @@ $(function() {
   var media_ready = false;
   var media_pending = [];
   var nav_width = $('#nav')[0].width;
+  console.log("nav_width=" + nav_width);
 
   function when_ready(cb) {
     if (media_ready) cb();
@@ -43,10 +44,8 @@ $(function() {
     var left = Math.floor(sc(chap['in']));
     var right = Math.floor(sc(chap['out']));
     var col = cw.next();
+    var player = $('#player')[0];
     var id = mk_id('chapter', chap['in'], chap['out']);
-
-    console.log("Chapter: in=" + chap['in'] + ", out=" + chap['out'] + //
-    ", left=" + left + ", right=" + right);
 
     $('#chapters').append($('<div></div>').attr({
       class: 'chapter',
@@ -67,35 +66,8 @@ $(function() {
     }).mouseleave(function(e) {
       $('#popup').hide();
     }).click(function(e) {
-      jwplayer('player').seek(chap['in']);
+      player.currentTime = chap. in ;
     }));
-  }
-
-  var player = null;
-  function load_media(url) {
-    if (player) {
-      player.load({
-        file: url,
-        autostart: true
-      });
-    } else {
-      player = jwplayer('player').setup({
-        file: url,
-        width: 1024,
-        height: 576,
-        autostart: true
-      }).onPlay(function(e) {
-        console.log("Got some metadata");
-        media_ready = true;
-        for (var i = 0; i < media_pending.length; i++) {
-          (media_pending[i])()
-        }
-        media_pending = [];
-      }).onTime(function(e) {
-        //    console.log("onTime, duration=" + e.duration + ", position=" + e.position);
-        $('#progress').width(Math.floor(this.getPosition() / this.getDuration() * nav_width));
-      });
-    }
   }
 
   function switch_media(id, xp, yp) {
@@ -105,10 +77,6 @@ $(function() {
       media_pending = [];
       media_id = id;
       console.log("Loading " + cat[id].media);
-      load_media(cat[id].media);
-      $('#nav').attr({
-        src: cat[id].full
-      });
       get_json(cat[id].data, function(data) {
         var title = data['Title'];
         console.log("Loaded data for " + id + ", " + title);
@@ -117,42 +85,47 @@ $(function() {
         var chaps = data['chapters'];
         var cw = new ColourWheel(200, 60, 40, chaps.length);
         when_ready(function() {
-          console.log("Showing chapters");
-          var player = jwplayer('player');
+          var player = $('#player')[0];
           var $chapters = $('#chapters');
           $chapters.empty()
-          var sc = scaler(0, player.getDuration(), 0, nav_width);
+          var sc = scaler(0, player.duration, 0, nav_width);
           for (var i = 0; i < chaps.length; i++) {
             build_chapter(sc, cw, chaps[i]);
           }
         });
       });
+      $('#player').attr({
+        src: cat[id].media
+      });
+      $('#nav').attr({
+        src: cat[id].full
+      });
     }
     when_ready(function() {
-      var player = jwplayer('player');
-      player.seek(player.getDuration() * xp);
+      var player = $('#player')[0];
+      player.currentTime = player.duration * xp;
     });
   }
 
-  //  var ev = [ //
-  //  'onBeforePlay', 'onBuffer', 'onBufferChange', 'onBufferFull', 'onComplete', //
-  //  'onError', 'onFullscreen', 'onIdle', 'onMeta', 'onMute', 'onPause', //'onPlay',
-  //  'onPlaylist', 'onPlaylistItem', 'onReady', 'onResize', 'onSeek',
-  //  /*'onTime',*/
-  //  'onVolume'];
-  //  function hook_event(p, ev) {
-  //    p[ev](function(e) {
-  //      console.log(ev);
-  //    });
-  //  }
-  //  var player = jwplayer('player');
-  //  for (var i = 0; i < ev.length; i++) hook_event(player, ev[i]);
+  $('#player').bind('loadedmetadata', function(e) {
+    console.log("Got some metadata");
+    media_ready = true;
+    for (var i = 0; i < media_pending.length; i++) {
+      (media_pending[i])()
+    }
+    media_pending = [];
+  });
+
+  $('#player').bind('timeupdate', function(e) {
+    $('#progress').width(Math.floor(this.currentTime / this.duration * nav_width));
+  });
+
   $('#nav').click(function(e) {
     if (media_id) {
       var cx = (e.pageX - $(this).offset().left) / this.width;
       when_ready(function() {
-        var player = jwplayer('player');
-        player.seek(player.getDuration() * cx);
+        var player = $('#player')[0];
+        player.currentTime = player.duration * cx;
       });
     }
   });
