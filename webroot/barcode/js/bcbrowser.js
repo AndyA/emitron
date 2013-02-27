@@ -33,7 +33,9 @@ $(function() {
       media_id = id;
       console.log("Loading " + cat[id].media);
       mp.load({
-        file: cat[id].media
+        file: cat[id].media,
+//        seekScaled: 0.5,
+        seek: 200,
       });
       $('#nav').attr({
         src: cat[id].full
