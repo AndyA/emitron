@@ -1,36 +1,37 @@
 /* dy_listener.c */
 
+#include <netinet/in.h>
+#include <pthread.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <pthread.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#include "jsondata.h"
+#include "jd_pretty.h"
 #include "dynatron.h"
 #include "utils.h"
 
 static dy_queue *queue;
 
 static void listener(dy_io_reader *rd) {
-  jd_var msg = JD_INIT;
-  while (dy_message_read(&msg, rd)) {
-    dy_debug("received: %lJ", &msg);
-    dy_despatch_enqueue(&msg);
+  scope {
+    JD_VAR(msg);
+    while (dy_message_read(msg, rd)) {
+      dy_debug("received: %lJ", msg);
+      dy_despatch_enqueue(msg);
+    }
   }
-  jd_release(&msg);
 }
 
 static void sender(dy_io_writer *wr) {
-  for (;;) {
-    jd_var msg = JD_INIT;
-    dy_queue_dequeue(queue, &msg);
-    dy_message_write(&msg, wr);
-    dy_debug("sent: %lJ", &msg);
-    jd_release(&msg);
+  for (;;) scope {
+    JD_VAR(msg);
+    dy_queue_dequeue(queue, msg);
+    dy_message_write(msg, wr);
+    dy_debug("sent: %lJ", msg);
   }
 }
 
@@ -85,37 +86,53 @@ static void socket_listener(jd_var *arg) {
 }
 
 static void merge(jd_var *out, const char *dflt, jd_var *in) {
-  jd_var json = JD_INIT;
-  jd_set_string(&json, dflt);
-  jd_from_json(out, &json);
-  jd_merge(out, in, 0);
-  jd_release(&json);
+  scope {
+    JD_SV(json, dflt);
+    jd_from_json(out, json);
+    jd_merge(out, in, 0);
+  }
 }
 
-static int listen_cb(jd_var *ctx, jd_var *rv, jd_var *arg) {
-  jd_var conf = JD_INIT;
-  merge(&conf, "{\"config\":{\"port\":6809}}", arg);
-  dy_thread_create(socket_listener, &conf);
-  jd_release(&conf);
+static int listen_cb(jd_var *rv, jd_var *ctx, jd_var *arg) {
+  scope {
+    JD_VAR(conf);
+    merge(conf, "{\"config\":{\"port\":6809}}", arg);
+    dy_thread_create(socket_listener, conf);
+  }
   return 0;
 }
 
-static int ping_cb(jd_var *ctx, jd_var *rv, jd_var *arg) {
-  jd_var info = JD_INIT;
+static int ping_cb(jd_var *rv, jd_var *ctx, jd_var *arg) {
+  scope {
+    JD_HV(info, 3);
+    jd_set_string(jd_lv(info, "$.date"), v_date);
+    jd_set_string(jd_lv(info, "$.version"), v_version);
+    jd_set_string(jd_lv(info, "$.git_hash"), v_git_hash);
+    dy_listener_send(info);
 
-  jd_set_hash(&info, 3);
-  jd_set_string(jd_lv(&info, "$.date"), v_date);
-  jd_set_string(jd_lv(&info, "$.version"), v_version);
-  jd_set_string(jd_lv(&info, "$.git_hash"), v_git_hash);
-
-  dy_listener_send(&info);
-
-  jd_release(&info);
+  }
   return 0;
 }
 
 void dy_listener_send(jd_var *msg) {
   dy_queue_enqueue(queue, msg);
+}
+
+void dy_listener_send_error(const char *msg, ...) {
+  scope {
+    JD_HV(vm, 4);
+    JD_VAR(err);
+    va_list ap;
+
+    jd_set_hash(vm, 4);
+    jd_set_string(jd_lv(vm, "$.type"), "error");
+    va_start(ap, msg);
+    jd_vprintf(err, msg, ap);
+    dy_error("Sending error: %V", err);
+    jd_assign(jd_lv(vm, "$.message"), err);
+    va_end(ap);
+    dy_listener_send(vm);
+  }
 }
 
 void dy_listener_init(void) {

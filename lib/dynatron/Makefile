@@ -8,7 +8,8 @@ BINS=dynatron
 LIB=libdynatron.a
 BINOBJS=$(addsuffix .o,$(BINS))
 LIBOBJS=utils.o dy_message.o dy_despatch.o dy_main.o dy_log.o \
-	 dy_listener.o dy_object.o dy_thread.o dy_io.o dy_queue.o
+	 dy_listener.o dy_object.o dy_thread.o dy_io.o dy_queue.o \
+	 dy_core.o dy_dummy.o
 OBJS=$(BINOBJS) $(LIBOBJS)
 DEPS=$(OBJS:.o=.d) 
 INST_BINS=$(PREFIX)/bin
@@ -45,7 +46,7 @@ tags:
 	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .
 
 clean:
-	rm -f $(OBJS) $(DEPS) $(BINS) tags version.h
+	rm -f $(OBJS) $(DEPS) $(BINS) $(LIB) tags version.h
 	$(MAKE) -C t clean
 
 version:

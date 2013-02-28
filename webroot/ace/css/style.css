@@ -1,0 +1,101 @@
+body, #container {
+  color: white;
+  background-color: black;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
+}
+
+img {
+  padding: 0;
+  margin: 0;
+}
+
+#dock .wrap {
+  padding: 0.1em 0.4em;
+  margin: 0.1em 0.1em;
+}
+
+#dock {
+  overflow: auto; 
+  position: absolute;
+  left: 0px;
+  width: 200px;
+  top: 0px;
+  bottom: 0px;
+}
+
+#browser {
+  overflow: hidden; 
+  position: absolute;
+  left: 200px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+}
+
+#browser .wrap, #player {
+  margin: 0.1em 0.1em;
+  padding: 0.3em 2em;
+}
+
+#browser .wrap {
+/*  position: relative;*/
+}
+
+#progress {
+  height: 4px;
+  left: 0px;
+  width: 0px;
+  background-color: red;
+}
+
+#chapters {
+  left: 0px;
+  right: 0px;
+}
+
+#player {
+  width: 1024px;
+  height: 576px;
+  margin-top: 1em;
+}
+
+#nav {
+  width: 1024px;
+  height: 60px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #333;
+}
+
+#chapters {
+  position: relative;
+  width: 1024px;
+  height: 8px;
+  padding: 0;
+  margin: 0;
+  background-color: #444;
+}
+
+.chapter {
+  position: absolute;
+  height: 8px;
+}
+
+#browser h1 {
+  font-size: 1.2em;
+  text-align: center;
+}
+
+#popup {
+  display: none;
+  position: absolute;
+  width: 40%;  
+  font-size: 0.8em;
+  padding: 1em;
+  background-color: rgba(0,0,0,0.60);
+  border: 3px solid white;
+  z-index: 100; 
+}

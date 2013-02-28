@@ -6,7 +6,7 @@
 #include "util.h"
 #include "tap.h"
 
-#include "jsondata.h"
+#include "jd_pretty.h"
 
 #define SIG 0x1A2B3C4D
 

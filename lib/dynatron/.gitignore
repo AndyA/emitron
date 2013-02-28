@@ -3,5 +3,6 @@
 /*.o
 /core
 /dynatron
+/tags
 /test.*
 /version.h

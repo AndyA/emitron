@@ -3,17 +3,30 @@
 #ifndef __DYNATRON_H
 #define __DYNATRON_H
 
+#include <pthread.h>
 #include <stdlib.h>
+#include <unistd.h>
 
-#include "jsondata.h"
+#include "jd_pretty.h"
 
+#define DY_ERROR_LEVELS \
+  X(ERROR)    \
+  X(FATAL)    \
+  X(WARNING)  \
+  X(INFO)     \
+  X(DEBUG)
+
+/* Error levels */
+#define X(x) x,
 enum {
-  DEBUG,
-  NOTICE,
-  INFO,
-  WARNING,
-  ERROR,
-  FATAL
+  DY_ERROR_LEVELS
+  MAXLEVEL
+};
+#undef X
+
+/* Thread local slots */
+enum {
+  TD_SERIAL
 };
 
 typedef enum {
@@ -48,6 +61,9 @@ typedef struct {
   pthread_cond_t cond;
 } dy_queue;
 
+typedef struct thread_context *dy_thread;
+
+extern unsigned dy_log_level;
 extern unsigned dy_log_level;
 
 typedef void (*dy_worker)(jd_var *arg);
@@ -57,7 +73,6 @@ void dy_init(void);
 void dy_destroy(void);
 
 void dy_debug(const char *msg, ...);
-void dy_notice(const char *msg, ...);
 void dy_info(const char *msg, ...);
 void dy_warning(const char *msg, ...);
 void dy_error(const char *msg, ...);
@@ -76,14 +91,26 @@ void dy_despatch_init(void);
 void dy_despatch_destroy(void);
 
 void dy_listener_send(jd_var *msg);
+void dy_listener_send_error(const char *msg, ...);
 void dy_listener_init(void);
 void dy_listener_destroy(void);
 
 void dy_object_init(void);
 void dy_object_destroy(void);
+void dy_object_register(const char *name, jd_var *o, const char *inherit);
+void dy_object_unregister(const char *name);
+int dy_object_invokev(jd_var *o, jd_var *method, jd_var *arg);
+int dy_object_invoke(jd_var *o, const char *method, jd_var *arg);
+void dy_object_get_message(jd_var *o, jd_var *msg);
+void dy_object_name(jd_var *o, jd_var *name);
+void dy_object_stash(jd_var *o, jd_var *stash);
 
-void dy_thread_create(dy_worker worker, jd_var *arg);
+void dy_object_set_method(jd_var *obj, const char *method, jd_closure_func impl);
+
+dy_thread dy_thread_create(dy_worker worker, jd_var *arg);
+void dy_thread_join(dy_thread td);
 void dy_thread_join_all(void);
+size_t dy_thread_count(void);
 
 dy_io_reader *dy_io_new_reader(int fd, size_t size);
 dy_io_reader *dy_io_new_var_reader(jd_var *v);
@@ -98,6 +125,12 @@ jd_var *dy_io_getvar(dy_io_writer *wr);
 
 jd_var *dy_message_read(jd_var *out, dy_io_reader *rd);
 void dy_message_write(jd_var *v, dy_io_writer *wr);
+
+void dy_core_init(void);
+void dy_core_destroy(void);
+
+void dy_dummy_init(void);
+void dy_dummy_destroy(void);
 
 #endif
 
