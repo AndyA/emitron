@@ -11,8 +11,6 @@ $(function() {
     height: 576
   });
 
-  var sct = new Scaler(0, 10, 0, 10);
-
   function getField(rec, name) {
     return rec['base'] + rec[name];
   }
