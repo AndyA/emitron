@@ -19,7 +19,9 @@
         'media' => "$name/$name.m3u8", 
         'full'  => "$name/frames/barcode.jpeg", 
         'raw'   => "$name/frames/barcode-raw.jpeg",
-        'data'  => empty($_GET['callback']) ? "data/$name.json" : "$self&id=$name"
+        'data'  => empty($_GET['callback']) 
+                    ? "$dir/$base/data/$name.json" 
+                    : "$self&id=$name"
       ));
     }
   }

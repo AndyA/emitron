@@ -35,7 +35,7 @@ $(function() {
     $.ajax({
       url: url,
       context: this,
-      dataType: 'json',
+      dataType: 'jsonp',
       global: false,
       success: cb
     });
@@ -80,7 +80,7 @@ $(function() {
     console.log("Loading " + getField(cat[id], 'media'));
     var $chapters = $('#chapters');
     $chapters.empty()
-    getJson(getField(cat[id], 'data'), function(data) {
+    getJson(cat[id].data, function(data) {
       var title = firstSentence(data['Title']);
 
       $('#title').text(title);
