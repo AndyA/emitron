@@ -1,6 +1,7 @@
 $(function() {
   var here = new URLParser(window.location.href);
-  var svc = here.makeAbsolute('svc/barcode.php');
+  //  var svc = here.makeAbsolute('svc/barcode.php');
+  var svc = 'http://newstream.hexten.net/barcode/svc/barcode.php';
   var cat = {};
 
   var media_id = null;
