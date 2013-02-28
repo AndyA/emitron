@@ -4,24 +4,19 @@ PRXD=proxy
 WRPD=wrap
 MXF=$(wildcard $(SRCD)/*.mxf)
 PRX=$(patsubst $(SRCD)/%.mxf, $(PRXD)/%.mov, $(MXF))
-WRP=$(patsubst $(SRCD)/%.mxf, $(WRPD)/%.mov, $(MXF))
 
-all: $(PRXD) $(PRX) $(WRPD) $(WRP)
+all: $(PRXD) $(PRX) 
 
 $(PRXD):
 	mkdir -p $(PRXD)
 
-$(WRPD):
-	mkdir -p $(WRPD)
-
 $(PRX): $(PRXD)/%.mov: $(SRCD)/%.mxf
-	ffmpeg -y -i $< -c:a libfaac -b:a 192k -c:v libx264 -b:v 5000k -r 25 -threads 0 $@
-
-$(WRP): $(WRPD)/%.mov: $(SRCD)/%.mxf
-	ffmpeg -y -i $< -c:a copy -c:v copy -r 25 -threads 0 $@
+	ffmpeg -y -i "$<" \
+		-vf format=yuv420p,yadif,crop=720:576:0:32 \
+		-c:a libfaac -b:a 192k \
+		-c:v libx264 -b:v 5000k \
+		-aspect 16:9 \
+		"$@"
 
 clean:
 	rm -rf $(PRXD)
-
-
-
