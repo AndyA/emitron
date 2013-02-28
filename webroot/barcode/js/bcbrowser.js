@@ -12,6 +12,10 @@ $(function() {
 
   var sct = new Scaler(0, 10, 0, 10);
 
+  function getField(rec, name) {
+    return rec['base'] + rec[name];
+  }
+
   function mk_id() {
     return Array.prototype.slice.call(arguments, 0).join('__');
   }
@@ -73,10 +77,10 @@ $(function() {
   }
 
   function loadChapters(id) {
-    console.log("Loading " + cat[id].media);
+    console.log("Loading " + getField(cat[id], 'media'));
     var $chapters = $('#chapters');
     $chapters.empty()
-    getJson(cat[id].data, function(data) {
+    getJson(getField(cat[id], 'data'), function(data) {
       var title = firstSentence(data['Title']);
 
       $('#title').text(title);
@@ -117,9 +121,9 @@ $(function() {
     console.log("switchMedia(\"" + id + "\", ", seek, ")");
     if (id != media_id) {
       media_id = id;
-      console.log("Loading " + cat[id].media);
+      console.log("Loading " + getField(cat[id], 'media'));
       mp.load({
-        file: cat[id].media,
+        file: getField(cat[id], 'media'),
         seek: seek,
         onInit: function(player) {
           player.onTime(function(e) {
@@ -129,7 +133,7 @@ $(function() {
         }
       });
       $('#nav').attr({
-        src: cat[id].full
+        src: getField(cat[id], 'full')
       });
       loadChapters(id);
     }
@@ -148,7 +152,7 @@ $(function() {
         class: "wrap"
       }).append($('<img></img>').attr({
         id: id,
-        src: data[i].thumb
+        src: getField(data[i], 'thumb')
       })));
     }
 
