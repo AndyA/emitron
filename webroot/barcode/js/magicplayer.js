@@ -84,6 +84,11 @@ MagicPlayer.prototype = (function() {
       }
 
       if (opt.seek) {
+        // Kinda hacky: if seek is an array we take its first element
+        // as a fraction (0.0 .. 1.0) of the whole video. So [0.5] would
+        // seek to half way through the video. That means we need to
+        // wait for the duration to be valid before we can compute
+        // the absolute time.
         if (opt.seek instanceof Array) {
           this.player.play();
           this.after('onPlay', function(e) {
