@@ -5,10 +5,14 @@ $(function() {
   var cat = {};
 
   var media_id = null;
-  var player_width = $('#player').width();
+
+  var $player = $('#player');
+  var player_width = $player.width();
+  var player_height = $player.height();
+
   var mp = new MagicPlayer('player', {
     width: player_width,
-    height: 576
+    height: player_height
   });
 
   function getField(rec, name) {
