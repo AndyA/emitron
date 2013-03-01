@@ -30,6 +30,18 @@ $(function() {
     return sec;
   }
 
+  function formatTime(n) {
+    var part = [];
+    n = Math.floor(n);
+    do {
+      var p = n % 60;
+      n = Math.floor(n / 60);
+      if (p < 10) p = '0' + p;
+      part.unshift(p);
+    } while (n > 0.1);
+    return part.join(':');
+  }
+
   function getJson(url, cb) {
     $.ajax({
       url: url,
@@ -98,18 +110,6 @@ $(function() {
         }
       });
     });
-  }
-
-  function formatTime(n) {
-    var part = [];
-    n = Math.floor(n);
-    do {
-      var p = n % 60;
-      n = Math.floor(n / 60);
-      if (p < 10) p = '0' + p;
-      part.unshift(p);
-    } while (n > 0.1);
-    return part.join(':');
   }
 
   function makeFrag(id, pos) {
