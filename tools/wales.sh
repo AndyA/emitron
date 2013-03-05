@@ -1,9 +1,9 @@
 #!/bin/bash
 
-out="webroot/ace"
+out="webroot/hwb"
 mkdir -p "$out"
-for f in ~/ACE/raw/*.mpg; do
-  name="$( basename "$f" ".mpg" )"
+for f in mxf/proxy/*.mov; do
+  name="$( basename "$f" ".mov" )"
   outd="$out/$name"
   echo "$f $outd"
   if [ -d "$outd" ]; then
