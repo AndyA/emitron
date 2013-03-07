@@ -26,7 +26,7 @@ my %ns = (
 
 my $rdf = RDF::Helper->new(
   BaseInterface => 'RDF::Trine',
-  namespaces    => \%ns,
+  namespaces    => {%ns},
   ExpandQNames  => 1
 );
 
