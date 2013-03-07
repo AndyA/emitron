@@ -9,7 +9,7 @@ use Test::More;
 use RDF::FourStore;
 
 ok my $fs
- = RDF::FourStore->new( endpoint => 'http://localhost:9000/sparql/' ),
+ = RDF::FourStore->new( endpoint => 'http://localhost:9000' ),
  'new';
 isa_ok $fs, 'RDF::FourStore';
 

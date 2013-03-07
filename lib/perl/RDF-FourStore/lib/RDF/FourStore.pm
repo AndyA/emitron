@@ -60,13 +60,16 @@ sub _decode {
   return \@rs;
 }
 
+sub _dkv { defined $_[1] ? ( $_[0] => $_[1] ) : () }
+
 sub select {
   my ( $self, $query ) = @_;
   my $req = {
     query => join( "\n", $self->ns->to_sparql, $query ),
-    ( defined $self->softlimit ) ? ( 'soft-limit' => $self->softlimit ) : (),
+    _dkv( 'soft-limit' => $self->softlimit ),
   };
-  my $resp = $self->ua->post( $self->endpoint, Content => $req );
+  my $resp
+   = $self->ua->post( $self->endpoint . '/sparql/', Content => $req );
   croak $resp->status_line if $resp->is_error;
   return $self->_decode( $resp->content );
 }
