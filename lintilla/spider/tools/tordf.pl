@@ -10,18 +10,25 @@ use RDF::Trine;
 use RDF::Helper::Constants qw(:dc);
 use RDF::Trine::Serializer::RDFXML;
 
-use constant DB     => 'stash/db.json';
-use constant RES_NS => 'http://dps.bbc.co.uk/res/';
+use constant DB => 'stash/db.json';
 
 my ( %fountain, %stash );
 
 my $db = JSON->new->utf8->decode( scalar file(DB)->slurp );
 
 my %ns = (
-  dc   => 'http://purl.org/dc/terms/',
-  xsd  => 'http://www.w3.org/2001/XMLSchema#',
-  foaf => 'http://xmlns.com/foaf/0.1/',
-  res  => RES_NS,                                # made up
+  dcmit => 'http://purl.org/dc/dcmitype/',
+  dct   => 'http://purl.org/dc/terms/',
+  event => 'http://purl.org/NET/c4dm/event.owl#',
+  foaf  => 'http://xmlns.com/foaf/0.1/',
+  ore   => 'http://www.openarchives.org/ore/terms/',
+  owl   => 'http://www.w3.org/2002/07/owl#',
+  rdf   => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+  rdfs  => 'http://www.w3.org/2000/01/rdf-schema#',
+  sem   => 'http://semanticweb.cs.vu.nl/2009/11/sem/',
+  skos  => 'http://www.w3.org/2008/05/skos#',
+  void  => 'http://rdfs.org/ns/void#',
+  xsd   => 'http://www.w3.org/2001/XMLSchema#',
 );
 
 my $rdf = RDF::Helper->new(
@@ -43,8 +50,8 @@ sub words { join ' ', grep defined $_ && $_ ne '', @_ }
 
 sub resource_uri {
   my ( $key, $val ) = @_;
-  return RES_NS . $key . '/'
-   . ( $stash{$key}{$val} ||= ++$fountain{$key} );
+  return join '', '/', $key, '/',
+   ( $stash{$key}{$val} ||= ++$fountain{$key} ), '#id';
 }
 
 sub load_rec {
@@ -60,7 +67,7 @@ sub load_rec {
 
   my %mapper = (
     'Choreographer'      => undef,
-    'Date'               => 'dc:date',
+    'Date'               => 'dct:date',
     'Director'           => undef,
     'Full credits'       => undef,
     'Full synopsis'      => undef,
@@ -73,11 +80,11 @@ sub load_rec {
       #      my $co  = $rdf->new_bnode;
       #      $rdf->assert_resource( $uri, 'foaf:Agent', $co );
       #      $rdf->assert_literal( $co, 'foaf:name', $val );
-      $rdf->assert_resource( $ruri, 'dc:creator', $uri );
+      $rdf->assert_resource( $ruri, 'dct:creator', $uri );
     },
     'Series'   => undef,
-    'Synopsis' => 'dc:description',
-    'title'    => 'dc:title',
+    'Synopsis' => 'dct:description',
+    'title'    => 'dct:title',
     'chapters' => undef,
   );
 
