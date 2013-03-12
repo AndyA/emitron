@@ -105,7 +105,10 @@ sub load_rec {
       $rdf->assert_resource( $ruri, 'dct:creator',
         make_agent( company => $_[0] ) );
     },
-    'Series'   => undef,
+    'Series' => sub {
+      $rdf->assert_resource( $ruri, 'res:series',
+        make_agent( series => $_[0] ) );
+    },
     'Synopsis' => 'dct:description',
     'title'    => 'dct:title',
     'chapters' => undef,
