@@ -98,7 +98,7 @@ sub load_rec {
       }
     },
     'Full credits'       => undef,
-    'Full synopsis'      => undef,
+    'Full synopsis'      => undef,    # chapters
     'Minutes'            => undef,
     'Part'               => undef,
     'Production Company' => sub {
