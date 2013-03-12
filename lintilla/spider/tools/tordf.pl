@@ -89,7 +89,16 @@ sub load_rec {
           make_agent( director => $ent ) );
       }
     },
-    'Date'     => 'dct:date',
+    # rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime"
+    'Date' => sub {
+      $rdf->assert_literal(
+        $ruri,
+        'dct:date',
+        $rdf->new_literal(
+          $_[0], undef, 'http://www.w3.org/2001/XMLSchema#dateTime'
+        )
+      );
+    },
     'Director' => sub {
       for my $ent ( split /\s*,\s*/, $_[0] ) {
         next if $ent =~ /^\s*$/;
