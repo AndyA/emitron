@@ -13,8 +13,6 @@ use RDF::Trine::Serializer::RDFXML;
 use constant IDMAP => 'stash/id.json';
 use constant DB    => 'stash/db.json';
 
-my ( %fountain, %stash );
-
 my $db = load_json(DB);
 my $idm
  = -e IDMAP
@@ -59,12 +57,11 @@ print $ser->serialize_model_to_string($mod);
 sub words { join ' ', grep defined $_ && $_ ne '', @_ }
 
 sub make_agent {
-  my ( $cat, $thing ) = @_;
+  my ( $cat, $thing, $type ) = @_;
   my $uri = resource_uri( $cat, $thing );
   unless ( $done{$uri} ) {
-    my $co = $rdf->new_bnode;
-    $rdf->assert_resource( $uri, 'foaf:Agent', $co );
-    $rdf->assert_literal( $co, 'foaf:name', $thing );
+    $rdf->assert_resource( $uri, 'rdf:type', $type );
+    $rdf->assert_literal( $uri, 'foaf:name', $thing );
     $done{$uri}++;
   }
   return $uri;
@@ -77,7 +74,7 @@ sub load_rec {
   die "Undefined ID" unless defined $id;
   my $ruri = resource_uri( media => $id );
 
-  #  print "$ruri\n";
+  $rdf->assert_resource( $ruri, 'rdf:type', 'res:media' );
 
   $rec->{title} = words( delete @{$rec}{ 'Article', 'Title' } );
 
@@ -86,24 +83,18 @@ sub load_rec {
       for my $ent ( split /\s*,\s*/, $_[0] ) {
         next if $ent =~ /^\s*$/;
         $rdf->assert_resource( $ruri, 'res:choreographer',
-          make_agent( director => $ent ) );
+          make_agent( person => $ent, 'foaf:Person' ) );
       }
     },
-    # rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime"
     'Date' => sub {
-      $rdf->assert_literal(
-        $ruri,
-        'dct:date',
-        $rdf->new_literal(
-          $_[0], undef, 'http://www.w3.org/2001/XMLSchema#dateTime'
-        )
-      );
+      $rdf->assert_literal( $ruri, 'dct:date',
+        $rdf->new_literal( $_[0], undef, 'xsd:dateTime' ) );
     },
     'Director' => sub {
       for my $ent ( split /\s*,\s*/, $_[0] ) {
         next if $ent =~ /^\s*$/;
         $rdf->assert_resource( $ruri, 'res:director',
-          make_agent( director => $ent ) );
+          make_agent( person => $ent, 'foaf:Person' ) );
       }
     },
     'Full credits'       => undef,
@@ -112,11 +103,12 @@ sub load_rec {
     'Part'               => undef,
     'Production Company' => sub {
       $rdf->assert_resource( $ruri, 'dct:creator',
-        make_agent( company => $_[0] ) );
+        make_agent( company => $_[0], 'foaf:Agent' ) );
     },
+    'Series' => undef,
     'Series' => sub {
       $rdf->assert_resource( $ruri, 'res:series',
-        make_agent( series => $_[0] ) );
+        make_agent( series => $_[0], 'res:Series' ) );
     },
     'Synopsis' => 'dct:description',
     'title'    => 'dct:title',
@@ -140,12 +132,14 @@ sub resource_uri {
   return "/$id#id";
 }
 
+sub fountain { ++$idm->{seq} }
+
 sub get_id {
   my ( $cat, $thing ) = @_;
 
   my $id = $idm->{id}{$cat}{$thing};
   unless ( defined $id ) {
-    $id = $idm->{id}{$cat}{$thing} = ++$idm->{seq};
+    $id = $idm->{id}{$cat}{$thing} = fountain();
     save_json( IDMAP, $idm );
   }
   return $id;
