@@ -1,0 +1,68 @@
+#!/usr/bin/env perl
+
+use Moose;
+
+use Getopt::Long;
+use RDF::FourStore;
+use Term::ReadLine;
+use JSON;
+
+my %O = ( endpoint => 'http://localhost:9000', );
+
+GetOptions( 'endpoint:s' => \$O{endpoint} ) or die;
+
+print "SPARQL REPL. Try \\help\n\n";
+repl( RDF::FourStore->new(%O) );
+
+sub repl {
+  my $fs = shift;
+  local $SIG{INT} = sub {
+    print "\nUse \\quit to exit\n";
+  };
+  my $term   = Term::ReadLine->new("SPARQL REPL");
+  my @sparql = ();
+  my %verb   = (
+    quit => sub { exit },
+    help => sub { print "Coming soon...\n" },
+    go   => sub { query( $fs, join "\n", splice @sparql ) },
+  );
+  while () {
+    my $ln = $term->readline('sparql> ');
+    last unless defined $ln;
+    #    $term->addhistory($ln) if $ln !~ /^\s*$/;
+    chomp $ln;
+    eval {
+      if ( $ln =~ /^\s*\\\s*(\S+)(.*)/ ) {
+        my ( $cmd, $tail ) = ( $1, $2 );
+        my @m = match( $cmd, \%verb );
+        die "Unknown command: $cmd\n" unless @m;
+        if ( @m > 1 ) {
+          die "$cmd matches: ", join( ', ', sort @m ), "\n";
+        }
+        else {
+          $verb{ $m[0] }->($tail);
+        }
+      }
+      else {
+        push @sparql, $ln;
+      }
+    };
+    if ( my $err = $@ ) {
+      print "*** ", tidy($err), "\n";
+    }
+  }
+}
+
+sub query {
+  my ( $fs, $sparql ) = @_;
+  my $rs = $fs->select($sparql);
+  print JSON->new->pretty->canonical->encode($rs);
+}
+
+sub trim { my $s = shift; s/^\s+//, s/\s+$// for $s; $s }
+sub tidy { my $s = trim( $_[0] ); $s =~ s/\s+/ /g; $s }
+
+sub match { grep /^\Q$_[0]/, keys %{ $_[1] } }
+
+# vim:ts=2:sw=2:sts=2:et:ft=perl
+
