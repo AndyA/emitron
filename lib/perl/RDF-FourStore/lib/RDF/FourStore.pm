@@ -37,6 +37,8 @@ has ns => (
 sub _decode {
   my ( $self, $xml ) = @_;
 
+  print "$xml\n";
+
   my @rs  = ();
   my $dom = XML::LibXML->load_xml( string => $xml );
   my $xp  = XML::LibXML::XPathContext->new($dom);
@@ -62,7 +64,7 @@ sub _decode {
 
 sub _dkv { defined $_[1] ? ( $_[0] => $_[1] ) : () }
 
-sub select {
+sub construct {
   my ( $self, $query ) = @_;
   my $req = {
     query => join( "\n", $self->ns->to_sparql, $query ),
@@ -71,7 +73,12 @@ sub select {
   my $resp
    = $self->ua->post( $self->endpoint . '/sparql/', Content => $req );
   croak $resp->status_line if $resp->is_error;
-  return $self->_decode( $resp->content );
+  return $resp->content;
+}
+
+sub select {
+  my $self = shift;
+  return $self->_decode( $self->construct(@_) );
 }
 
 1;
