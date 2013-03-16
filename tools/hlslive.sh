@@ -38,7 +38,7 @@ mkdir -p "$work"
 logs="$work/logs"
 mkdir -p "$logs"
 
-gop=8
+gop=4
 preset=veryfast
 audio_options="-acodec libfaac -ac 2"
 video_options="-vcodec libx264"
@@ -48,24 +48,20 @@ pipefmt=mpegts
 font="$HOME/Dropbox/Fonts/Envy Code R.ttf"
 
 #rates="
-#  W=400;H=224;R=25;BV=300;BA=96;AR=44100;P=baseline
-#  W=640;H=360;R=25;BV=704;BA=96;AR=44100;P=baseline
-#  W=688;H=384;R=25;BV=1372;BA=128;AR=48000;P=baseline
-#  W=1024;H=576;R=25;BV=2000;BA=96;AR=44100;P=baseline"
+#  N=p10;BV=32;R=5;P=baseline;W=224;H=126;BA=24;AR=22050
+#  N=p20;BV=128;R=12.5;P=baseline;level=3;W=400;H=224;BA=48;AR=44100
+#  N=p30;BV=304;R=25;P=baseline;level=3;W=400;H=224;BA=64;AR=44100
+#  N=p40;BV=400;R=25;P=main;level=3;W=512;H=288;BA=96;AR=44100
+#  N=p50;BV=700;R=25;P=main;level=3;W=640;H=360;BA=96;AR=44100
+#  N=p60;BV=1200;R=25;P=main;level=3;W=704;H=396;BA=96;AR=44100
+#  N=p70;BV=2016;R=25;P=main;level=3.1;W=1024;H=576;BA=96;AR=44100
+#  N=p80;BV=3372;R=25;P=high;level=4;W=1280;H=720;BA=128;AR=44100
+#  N=p90;BV=5100;R=25;P=high;level=4;W=1920;H=1080;BA=192;AR=48000"
 
 rates="
-  N=p10;BV=32;R=5;P=baseline;W=224;H=126;BA=24;AR=22050
-  N=p20;BV=128;R=12.5;P=baseline;level=3;W=400;H=224;BA=48;AR=44100
   N=p30;BV=304;R=25;P=baseline;level=3;W=400;H=224;BA=64;AR=44100
-  N=p40;BV=400;R=25;P=main;level=3;W=512;H=288;BA=96;AR=44100
   N=p50;BV=700;R=25;P=main;level=3;W=640;H=360;BA=96;AR=44100
-  N=p60;BV=1200;R=25;P=main;level=3;W=704;H=396;BA=96;AR=44100
-  N=p70;BV=2016;R=25;P=main;level=3.1;W=1024;H=576;BA=96;AR=44100
-  N=p80;BV=3372;R=25;P=high;level=4;W=1280;H=720;BA=128;AR=44100
-  N=p90;BV=5100;R=25;P=high;level=4;W=1920;H=1080;BA=192;AR=48000"
-
-#rates="
-#  N=p90;BV=5100;R=25;P=high;level=4;W=1920;H=1080;BA=192;AR=48000"
+  N=p70;BV=2016;R=25;P=main;level=3.1;W=1024;H=576;BA=96;AR=44100"
 
 fifos=""
 tees=""
@@ -126,17 +122,14 @@ if [ "$preprocess" ]; then
   if [ "$deinterlace" ]; then
     extra="$extra -filter:v yadif"
   fi
-#  if [ "$dog" ]; then
-#    extra="$extra -i $dog -r:v 25 -filter_complex overlay=40:40"
-#  fi
   # Make it 16x9
-  pad="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
+  pad="pad=ih*16/(9*sar):ih:(ow-iw)/2:(oh-ih)/2"
   pixfmt="-pix_fmt yuv420p"
   pipefmt="avi"
   mkfifo $fifo
   {
     set -x
-    ffmpeg -vsync cfr  -y -i "$source" -r:v 25 -r:a 48000 \
+    ffmpeg -y -i "$source" -r:v 25 -r:a 48000 \
       -s 1920x1080 -vf "$pad" $extra \
       -map 0:0 -map 0:1 \
       -acodec pcm_s16le -vcodec rawvideo \
@@ -154,8 +147,8 @@ if [ "$dog" ]; then
   mkfifo $fifo
   {
     set -x
-    ffmpeg -vsync cfr -f $pipefmt -y -i "$source" -r:v 25 -r:a 48000 \
-      -i "$dog" -r:v 25 -filter_complex overlay=40:40 \
+    ffmpeg -f $pipefmt -y -i "$source" -r:v 25 -r:a 48000 \
+      -i "$dog" -filter_complex overlay=40:40 \
       -map 0:0 -map 0:1 \
       -acodec pcm_s16le -vcodec rawvideo \
       $pixfmt -f $pipefmt "$fifo"
@@ -199,7 +192,7 @@ for rt in $rates; do
   mkfifo $fifo
   {
     set -x
-    ffmpeg -vsync cfr -f $pipefmt -i "$fifo" \
+    ffmpeg -f $pipefmt -i "$fifo" \
       -map 0:0 -map 0:1 \
       $audio_options -r:a $AR -b:a ${BA}k \
       $video_options -profile:v $P $video_extra \

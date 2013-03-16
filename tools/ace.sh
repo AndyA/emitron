@@ -10,7 +10,7 @@ for f in ~/ACE/raw/*.mpg; do
     echo "$outd exists, skipping"
   else
     echo "Encoding $f to $outd"
-    ./tools/hlsvod.sh -p "$f" "$outd"
+    ./tools/hlslive.sh -p "$f" "$outd"
   fi
 done
 
