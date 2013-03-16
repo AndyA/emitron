@@ -18,8 +18,7 @@ find {
   wanted   => sub {
     return unless -f && /\.xml$/;
     my $obj = file($_);
-    #    print "\r$obj", ('   ') x 3;
-    print "$obj\n";
+    print "\r$obj", ('   ') x 3;
     my $rel = $obj->absolute->relative(ELVIS);
     my ( $kind, $base ) = split /\//, $rel;
     ( my $id = $base ) =~ s/\.xml$//;
@@ -29,7 +28,7 @@ find {
       my $xml = do { local $/; <$fh> };
 
       my $dd = parse_elvis($xml);
-      $db{$kind}{$id} = $dd;
+      $db{$id}{$kind} = $dd;
     }
   },
  },
@@ -37,7 +36,8 @@ find {
 
 print "\n";
 my $fh = STASH->openw;
-print $fh JSON->canonical->pretty->encode( \%db );
+$fh->binmode(':utf8');
+print $fh JSON->new->canonical->pretty->encode( \%db );
 
 sub parse_elvis {
   my $xml = shift;
