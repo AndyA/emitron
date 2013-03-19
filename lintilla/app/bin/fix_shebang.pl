@@ -6,6 +6,8 @@ use warnings;
 use File::Which qw( which );
 use Path::Class;
 
+use constant PROTO => 'proto';
+
 my %FIX = ( perl => ['public/dispatch.cgi', 'public/dispatch.fcgi'] );
 
 while ( my ( $lang, $scripts ) = each %FIX ) {
@@ -20,11 +22,12 @@ while ( my ( $lang, $scripts ) = each %FIX ) {
 
 sub set_shebang {
   my ( $script, $interp ) = @_;
-  my @li = file($script)->slurp;
+  my $proto = file( PROTO, $script );
+  my @li = $proto->slurp;
   $li[0] = "#!$interp\n";
   my $tmp = file("$script.tmp");
   { print { $tmp->openw } join '', @li }
-  chmod( ( stat $script )[2], $tmp );
+  chmod( ( stat "$proto" )[2], $tmp );
   rename "$tmp", $script or die "Can't rename $tmp as $script";
 }
 
