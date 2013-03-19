@@ -1,4 +1,4 @@
-#!/home/andy/perl5/perlbrew/perls/perl-5.16.0/bin/perl
+#!/usr/bin/env perl
 use Dancer ':syntax';
 use FindBin '$RealBin';
 use Plack::Runner;
