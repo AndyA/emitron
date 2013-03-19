@@ -13,7 +13,9 @@ get '/' => sub {
   template 'index';
 };
 
-# for now...
+# TODO move this into a config file.
+# TODO it'd be nice to be able to have, say, thumb80 depend
+# on small200 to avoid loading the original repeatedly.
 my %RECIPE = (
   thumb80 => {
     width  => 80,
