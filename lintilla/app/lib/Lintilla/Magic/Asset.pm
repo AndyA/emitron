@@ -32,6 +32,8 @@ sub get {
     }
     else {
       # Can't get the lock - so wait for the file
+      # TODO what happens if the file never appears?
+      # We can't have every 404 wait for a timeout...
       my $got = wait_for_file( $fn, $self->timeout );
       defined $got or die "Gave up waiting for $fn: $!\n";
     }

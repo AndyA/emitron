@@ -39,6 +39,11 @@ get '/asset/**/var/*/*.jpg' => sub {
   my $in_file = file( DOCROOT, 'asset', $dir, "$id.jpg" );
   my $out_file = file( DOCROOT, 'asset', $dir, 'var', $recipe, "$id.jpg" );
 
+  unless ( -e $in_file ) {
+    status 'not_found';
+    return "Not found";
+  }
+
   my $sc = Lintilla::Image::Scaler->new(
     in_file  => $in_file,
     out_file => $out_file,
