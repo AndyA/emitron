@@ -22,6 +22,13 @@ sub get {
   my $fn   = $self->filename;
   unless ( -e $fn ) {
     my $lockf = "$fn.LOCK";
+    # TODO use the lock to indicate that the conversion is in
+    # progress rather than waiting for the output file.
+    # TODO dump a .ERROR file if the conversion fails so we
+    # don't get DOSed by repeatedly trying to convert a broken
+    # file.
+    # TODO move .LOCK / .ERROR into a parallel work dir - outside
+    # webroot.
     file($lockf)->parent->mkpath;
     open my $lh, '>>', $lockf or die "Can't write $lockf: $!\n";
     if ( flock( $lh, LOCK_EX ) ) {
