@@ -58,10 +58,11 @@ get '/asset/**/var/*/*.jpg' => sub {
 
   $magic->get;
 
-  my $self = uri_for("/asset/$dir/var/$recipe/$id.jpg");
+  my $self = request->uri_for("/asset/$dir/var/$recipe/$id.jpg");
+  $self =~ s@/dispatch\.f?cgi/@/@;    # hack
   debug "self: ", $self;
 
-  return redirect $self;
+  return redirect $self, 307;
 };
 
 get '/app/helper' => sub {
