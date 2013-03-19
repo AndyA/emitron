@@ -34,10 +34,13 @@ get '/asset/**/var/*/*.jpg' => sub {
   my $spec = $RECIPE{$recipe};
   die "Unknown recipe $recipe" unless defined $spec;
 
-  my $dir = join '/', @$path;
+  my $name = "$id.jpg";
 
-  my $in_file = file( DOCROOT, 'asset', $dir, "$id.jpg" );
-  my $out_file = file( DOCROOT, 'asset', $dir, 'var', $recipe, "$id.jpg" );
+  my @p = ( 'asset', @$path );
+  my @v = ( 'var',   $recipe );
+
+  my $in_file = file( DOCROOT, @p, $name );
+  my $out_file = file( DOCROOT, @p, @v, $name );
 
   unless ( -e $in_file ) {
     status 'not_found';
@@ -58,7 +61,7 @@ get '/asset/**/var/*/*.jpg' => sub {
 
   $magic->get;
 
-  my $self = request->uri_for("/asset/$dir/var/$recipe/$id.jpg");
+  my $self = request->uri_for( join '/', '', @p, @v, $name );
   $self =~ s@/dispatch\.f?cgi/@/@;    # hack
 
   return redirect $self, 307;
