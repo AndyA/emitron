@@ -9,10 +9,9 @@ ProxyRequests Off
   DocumentRoot /opt/newstream/lintilla/app/public
   CustomLog /opt/newstream/lintilla/app/logs/apache.access_log combined
   ErrorLog /opt/newstream/lintilla/app/logs/apache.error_log
-
+  LogLevel debug
   RewriteLog /opt/newstream/lintilla/app/logs/apache.rewrite_log
   RewriteLogLevel 9
-  LogLevel debug
 
   <Directory "/opt/newstream/lintilla/app/public">
     AllowOverride None
@@ -20,11 +19,10 @@ ProxyRequests Off
     Order allow,deny
     Allow from all
 
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ /dispatch.fcgi/$1 [QSA,L]
   </Directory>
-
-  RewriteEngine On
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteRule ^(.*)$ /dispatch.fcgi$1 [QSA,L]
 
 </VirtualHost>
 
