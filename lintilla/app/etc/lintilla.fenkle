@@ -9,14 +9,17 @@ ProxyRequests Off
   DocumentRoot /opt/newstream/lintilla/app/public
   CustomLog /opt/newstream/lintilla/app/logs/apache.access_log combined
   ErrorLog /opt/newstream/lintilla/app/logs/apache.error_log
-  #RewriteLog /opt/newstream/lintilla/app/logs/apache.rewrite_log
-  #RewriteLogLevel 9
 
-  <Directory "/opt/newstream/lintilla/app/webroot">
+  RewriteLog /opt/newstream/lintilla/app/logs/apache.rewrite_log
+  RewriteLogLevel 9
+  LogLevel debug
+
+  <Directory "/opt/newstream/lintilla/app/public">
     AllowOverride None
     Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
     Order allow,deny
     Allow from all
+
   </Directory>
 
   RewriteEngine On
