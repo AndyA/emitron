@@ -75,6 +75,7 @@ sub load_rec {
   my $ruri = resource_uri( media => $id );
 
   $rdf->assert_resource( $ruri, 'rdf:type', 'res:media' );
+  $rdf->assert_literal( $ruri, 'res:asset', $id );
 
   $rec->{title} = words( delete @{$rec}{ 'Article', 'Title' } );
 
