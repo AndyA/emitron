@@ -18,6 +18,7 @@ Lintilla::Util - Utility stuff
 
 sub wait_for_file {
   my ( $name, $timeout ) = @_;
+  $name = "$name";    # stringify once
   return $name if -e $name;
   my $deadline = defined $timeout ? time + $timeout : undef;
   until ( defined $deadline && time >= $deadline ) {
