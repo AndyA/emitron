@@ -67,9 +67,4 @@ get '/asset/**/var/*/*.jpg' => sub {
   return redirect $self, 307;
 };
 
-get '/app/helper' => sub {
-  content_type 'text/plain';
-  return "Hello, World!";
-};
-
 true;
