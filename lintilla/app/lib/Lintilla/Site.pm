@@ -59,7 +59,7 @@ get '/asset/**/var/*/*.jpg' => sub {
     provider => $sc
   );
 
-  $magic->get;
+  $magic->get or die "Can't render";
 
   my $self = request->uri_for( join '/', '', @p, @v, $name );
   $self =~ s@/dispatch\.f?cgi/@/@;    # hack

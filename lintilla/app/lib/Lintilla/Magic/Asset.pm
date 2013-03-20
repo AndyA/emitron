@@ -22,8 +22,6 @@ sub get {
   my $fn   = $self->filename;
   unless ( -e $fn ) {
     my $lockf = "$fn.LOCK";
-    # TODO use the lock to indicate that the conversion is in
-    # progress rather than waiting for the output file.
     # TODO dump a .ERROR file if the conversion fails so we
     # don't get DOSed by repeatedly trying to convert a broken
     # file.
@@ -31,20 +29,17 @@ sub get {
     # webroot.
     file($lockf)->parent->mkpath;
     open my $lh, '>>', $lockf or die "Can't write $lockf: $!\n";
-    if ( flock( $lh, LOCK_EX ) ) {
-      $self->provider->create;    # make the image
-      flock( $lh, LOCK_UN ) or die "Can't unlock $lockf: $!\n";
+    if ( flock( $lh, LOCK_EX | LOCK_NB ) ) {
+      eval { $self->provider->create };
+      my $err = @_;
       close $lh;
-      unlink $lockf;
+      die $err if $err;
     }
     else {
-      # Can't get the lock - so wait for the file
-      # TODO what happens if the file never appears?
-      # We can't have every 404 wait for a timeout...
-      my $got = wait_for_file( $fn, $self->timeout );
-      defined $got or die "Gave up waiting for $fn: $!\n";
+      flock( $lh, LOCK_EX );
     }
   }
+  return unless -e $fn;
   return $fn;
 }
 
