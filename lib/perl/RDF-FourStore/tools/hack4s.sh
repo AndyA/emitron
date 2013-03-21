@@ -1,7 +1,8 @@
 #!/bin/bash
 
 bindir="bin4s"
-tmpdir="/tmp/4s.tmp"
+tmpdat="/tmp/4s.d"
+tmplog="/tmp/4s.l"
 mkdir -p "$bindir"
 
 fs_backend=$( which 4s-backend ) || {
@@ -15,18 +16,32 @@ datadir="$( strings "$fs_backend" | \
   exit 1
 }
 
-while [ ${#tmpdir} -lt ${#datadir} ]; do tmpdir="${tmpdir}_"; done
+while [ ${#tmpdat} -lt ${#datadir} ]; do tmpdat="${tmpdat}_"; done
 
-mkdir -p "$tmpdir"
+fs_httpd=$( which 4s-httpd ) || {
+  echo "Can't find 4s-httpd" 1>&2
+  exit 1
+}
+
+logdir="$( strings "$fs_httpd" | \
+  perl -lne 'print $1 if m{^(/.+)/query-%s.log}' )" || {
+  echo "Can't find log directory" 1>&2
+  exit 1
+}
+
+while [ ${#tmplog} -lt ${#logdir} ]; do tmplog="${tmplog}_"; done
+
+mkdir -p "$tmpdat" "$tmplog"
 
 fs_dir="$( dirname "$fs_backend" )"
 find "$fs_dir" -maxdepth 1 -name '4s-*' | while read bin; do
   dst="$bindir"/"$( basename "$bin" )"
-  [ "$bin" -nt "$dst" ] && perl -pe "s@$datadir@$tmpdir@g" < "$bin" > "$dst"
+  [ "$bin" -nt "$dst" ] \
+    && perl -pe "s@$datadir@$tmpdat@g; s@$logdir@$tmplog@g" < "$bin" > "$dst"
   chmod a+x "$dst"
 done
 
-echo "$tmpdir";
+echo "$tmpdat";
 
 # vim:ts=2:sw=2:sts=2:et:ft=sh
 
