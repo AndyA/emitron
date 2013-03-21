@@ -9,6 +9,7 @@
 /Makefile.old
 /Session.vim
 /_build*
+/bin4s/
 /blib*
 /cover_db
 /pm_to_blib*
