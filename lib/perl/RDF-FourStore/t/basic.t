@@ -13,8 +13,8 @@ ok my $fs
  'new';
 isa_ok $fs, 'RDF::FourStore';
 
-my $rs = $fs->select('SELECT * WHERE { ?s ?p ?o }');
-diag Dumper($rs);
+#my $rs = $fs->select('SELECT * WHERE { ?s ?p ?o }');
+#diag Dumper($rs);
 
 done_testing();
 
