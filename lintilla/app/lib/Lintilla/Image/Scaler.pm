@@ -1,8 +1,10 @@
 package Lintilla::Image::Scaler;
 
 use Moose;
+use Dancer ':syntax';
 
 use GD;
+use LWP::UserAgent;
 use List::Util qw( min max );
 use Path::Class;
 
@@ -12,7 +14,8 @@ Lintilla::Image::Scaler - Scale / crop / pad an image
 
 =cut
 
-has ['in_file', 'out_file'] => ( is => 'ro', required => 1 );
+has ['in_file', 'in_url'] => ( is => 'ro' );
+has out_file => ( is => 'ro', required => 1 );
 has spec => ( is => 'ro', isa => 'HashRef', required => 1 );
 
 sub _fit {
@@ -22,38 +25,62 @@ sub _fit {
   return ( int( $iw * $sc ), int( $ih * $sc ) );
 }
 
+sub _load_source {
+  my $self = shift;
+  if ( defined( my $in_file = $self->in_file ) ) {
+    debug("loading $in_file");
+    my $img = GD::Image->new("$in_file");
+    defined $img or die "Can't load $in_file";
+    return $img;
+  }
+
+  if ( defined( my $in_url = $self->in_url ) ) {
+    debug("fetching $in_url");
+    my $resp = LWP::UserAgent->new->get($in_url);
+    die $resp->status_line if $resp->is_error;
+    my $img = GD::Image->new( $resp->content );
+    defined $img or die "Can't load $in_url";
+    return $img;
+  }
+
+  die "No source provided (in_file or in_url)";
+}
+
+sub _save {
+  my ( $self, $fn, $img, $quality ) = @_;
+  $quality ||= 90;
+  my $tmp = file("$fn.tmp");
+  die "$tmp exists" if -e "$tmp";
+  $tmp->parent->mkpath;
+  my $of = $tmp->openw;
+  $of->binmode;
+  print $of $img->jpeg($quality);
+
+  rename "$tmp", "$fn"
+   or die "Can't link $tmp to $fn: $!\n";
+}
+
 sub create {
   my $self     = shift;
-  my $in_file  = $self->in_file;
   my $out_file = $self->out_file;
-  my $img      = GD::Image->new("$in_file");
-  defined $img or die "Can't load $in_file";
+  my $img      = $self->_load_source;
 
   my $spec = $self->spec;
-  my $out  = $self->out_file;
-  my $tmp  = "$out.tmp";
-  die "$tmp exists" if -e $tmp;
-
-  file($tmp)->parent->mkpath;
 
   my ( $iw, $ih ) = $img->getBounds;
   if ( $iw > $spec->{width} || $ih > $spec->{height} ) {
     my ( $ow, $oh )
      = $self->_fit( $iw, $ih, $spec->{width}, $spec->{height} );
+    debug "scale ${iw}x${ih} -> ${ow}x${oh}";
     my $thb = GD::Image->new( $ow, $oh, 1 );
     $thb->copyResampled( $img, 0, 0, 0, 0, $ow, $oh, $iw, $ih );
-    my $of = file($tmp)->openw;
-    $of->binmode;
-    print $of $thb->jpeg(90);
+    debug "save $out_file";
+    $self->_save( $out_file, $thb );
   }
   else {
-    link $in_file, $tmp or die "Can't link $in_file to $tmp: $!\n";
+    debug "duplicate to $out_file";
+    $self->_save( $out_file, $img );
   }
-
-  rename $tmp, "$out_file"
-   or die "Can't link $tmp to $out_file: $!\n";
-
-  return;
 }
 
 1;

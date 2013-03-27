@@ -17,15 +17,27 @@ get '/' => sub {
 # TODO it'd be nice to be able to have, say, thumb80 depend
 # on small200 to avoid loading the original repeatedly.
 my %RECIPE = (
-  thumb80 => {
-    width  => 80,
-    height => 80
+  display => {
+    width  => 1024,
+    height => 576,
   },
-  small200 => {
+  thumb => {
+    width  => 80,
+    height => 80,
+    base   => 'display',
+  },
+  small => {
     width  => 200,
-    height => 200
+    height => 200,
+    base   => 'display',
   }
 );
+
+sub our_uri_for {
+  my $uri = request->uri_for( join '/', '', @_ );
+  $uri =~ s@/dispatch\.f?cgi/@/@;    # hack
+  return $uri;
+}
 
 get '/asset/**/var/*/*.jpg' => sub {
   my ( $path, $recipe, $id ) = splat;
@@ -36,19 +48,19 @@ get '/asset/**/var/*/*.jpg' => sub {
 
   my $name = "$id.jpg";
 
-  my @p = ( 'asset', @$path );
-  my @v = ( 'var',   $recipe );
+  my @p = ( asset => @$path );
+  my @v = ( var   => $recipe );
 
-  my $in_file = file( DOCROOT, @p, $name );
+  my $in_url = our_uri_for( @p,
+    ( defined $spec->{base} ? ( var => $spec->{base} ) : () ), $name );
+
   my $out_file = file( DOCROOT, @p, @v, $name );
 
-  unless ( -e $in_file ) {
-    status 'not_found';
-    return "Not found";
-  }
+  debug "in_url: $in_url";
+  debug "out_file: $out_file";
 
   my $sc = Lintilla::Image::Scaler->new(
-    in_file  => $in_file,
+    in_url   => $in_url,
     out_file => $out_file,
     spec     => $spec
   );
@@ -61,8 +73,7 @@ get '/asset/**/var/*/*.jpg' => sub {
 
   $magic->get or die "Can't render";
 
-  my $self = request->uri_for( join '/', '', @p, @v, $name );
-  $self =~ s@/dispatch\.f?cgi/@/@;    # hack
+  my $self = our_uri_for( @p, @v, $name );
 
   return redirect $self, 307;
 };
