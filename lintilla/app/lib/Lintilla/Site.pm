@@ -14,8 +14,6 @@ get '/' => sub {
 };
 
 # TODO move this into a config file.
-# TODO it'd be nice to be able to have, say, thumb80 depend
-# on small200 to avoid loading the original repeatedly.
 my %RECIPE = (
   display => {
     width  => 1024,
@@ -30,7 +28,12 @@ my %RECIPE = (
     width  => 200,
     height => 200,
     base   => 'display',
-  }
+  },
+  slice => {
+    width  => 800,
+    height => 180,
+    base   => 'display',
+  },
 );
 
 sub our_uri_for {
