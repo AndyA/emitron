@@ -1,5 +1,3 @@
-Use of uninitialized value $comment in concatenation(.) or string at / home / andy / perl5 / perlbrew / perls / perl - 5.16.0 / lib / site_perl / 5.16.0 / JavaScript / Beautifier.pm line 571,
-<STDIN > line 1.
 $(function() {
   var here = new URLParser(window.location.href);
 
@@ -30,7 +28,7 @@ $(function() {
     getJson('/catalogue.json', function(db) {
       var $c = $('#content');
       var imgs = db.img;
-      for (var i = 0; i < imgs.length && i < 30; i++) {
+      for (var i = 0; i < imgs.length && i < 100; i++) {
         var iurl = imageURL(db, imgs[i], 'slice');
         $c.append($('<img></img>').attr({
           class: 'slice',
