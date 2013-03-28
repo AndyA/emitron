@@ -1,7 +1,7 @@
 package Lintilla::Image::Scaler;
 
 use Moose;
-use Dancer ':syntax';
+#use Dancer ':syntax';
 
 use GD;
 use LWP::UserAgent;
@@ -28,14 +28,14 @@ sub _fit {
 sub _load_source {
   my $self = shift;
   if ( defined( my $in_file = $self->in_file ) ) {
-    debug("loading $in_file");
+    #    debug("loading $in_file");
     my $img = GD::Image->new("$in_file");
     defined $img or die "Can't load $in_file";
     return $img;
   }
 
   if ( defined( my $in_url = $self->in_url ) ) {
-    debug("fetching $in_url");
+    #    debug("fetching $in_url");
     my $resp = LWP::UserAgent->new->get($in_url);
     die $resp->status_line if $resp->is_error;
     my $img = GD::Image->new( $resp->content );
@@ -71,14 +71,14 @@ sub create {
   if ( $iw > $spec->{width} || $ih > $spec->{height} ) {
     my ( $ow, $oh )
      = $self->_fit( $iw, $ih, $spec->{width}, $spec->{height} );
-    debug "scale ${iw}x${ih} -> ${ow}x${oh}";
+    #    debug "scale ${iw}x${ih} -> ${ow}x${oh}";
     my $thb = GD::Image->new( $ow, $oh, 1 );
     $thb->copyResampled( $img, 0, 0, 0, 0, $ow, $oh, $iw, $ih );
-    debug "save $out_file";
+    #    debug "save $out_file";
     $self->_save( $out_file, $thb );
   }
   else {
-    debug "duplicate to $out_file";
+    #    debug "duplicate to $out_file";
     $self->_save( $out_file, $img );
   }
 }

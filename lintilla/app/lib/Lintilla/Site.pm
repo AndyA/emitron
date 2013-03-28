@@ -31,7 +31,7 @@ my %RECIPE = (
   },
   slice => {
     width  => 800,
-    height => 180,
+    height => 150,
     base   => 'display',
   },
 );
@@ -41,6 +41,10 @@ sub our_uri_for {
   $uri =~ s@/dispatch\.f?cgi/@/@;    # hack
   return $uri;
 }
+
+get '/config/recipe' => sub {
+  return \%RECIPE;
+};
 
 get '/asset/**/var/*/*.jpg' => sub {
   my ( $path, $recipe, $id ) = splat;
