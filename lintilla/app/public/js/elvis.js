@@ -28,7 +28,7 @@ $(function() {
     getJson('/catalogue.json', function(db) {
       var $c = $('#content');
       var imgs = db.img;
-      for (var i = 0; i < imgs.length && i < 100; i++) {
+      for (var i = 0; i < imgs.length; i++) {
         var iurl = imageURL(db, imgs[i], 'slice');
         $c.append($('<img></img>').attr({
           class: 'slice',
