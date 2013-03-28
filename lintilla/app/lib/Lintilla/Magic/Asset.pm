@@ -17,7 +17,7 @@ has provider => ( is => 'ro', required => 1 );
 
 has timeout => ( isa => 'Maybe[Num]', is => 'ro', default => 20 );
 
-sub get {
+sub render {
   my $self = shift;
   my $fn   = $self->filename;
   unless ( -e $fn ) {

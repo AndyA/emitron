@@ -78,7 +78,7 @@ get '/asset/**/var/*/*.jpg' => sub {
     provider => $sc
   );
 
-  $magic->get or die "Can't render";
+  $magic->render or die "Can't render";
 
   my $self = our_uri_for( @p, @v, $name );
 
