@@ -9,4 +9,4 @@ use Dancer::Test;
 route_exists [GET => '/'];
 response_status_is ['GET' => '/'], 200;
 
-done_testing();
+done_testing;
