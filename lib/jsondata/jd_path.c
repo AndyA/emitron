@@ -2,7 +2,9 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <stdarg.h>
 
+#include "jd_private.h"
 #include "jsondata.h"
 
 static int is_positive_int(jd_var *v) {
@@ -20,87 +22,79 @@ static int is_positive_int(jd_var *v) {
   return 1;
 }
 
-jd_var *jd_get_context(jd_var *root, jd_var *path, jd_context *ctx, int vivify) {
-  jd_var part = JD_INIT, wrap = JD_INIT, dollar = JD_INIT, elt = JD_INIT;
-  jd_var *ptr;
-  unsigned depth = 0;
+jd_var *jd_get_context(jd_var *root, jd_var *path,
+                       jd_path_context *ctx, int vivify) {
+  jd_var *ptr = NULL;
 
-  if (path->type == ARRAY) {
-    jd_assign(&part, path);
-  }
-  else {
-    jd_var dot = JD_INIT;
-    jd_set_string(&dot, ".");
-    jd_split(&part, path, &dot);
-    jd_release(&dot);
-  }
+  JD_SCOPE {
+    JD_2VARS(part, elt);
 
-  /* move root inside a hash: { "$": root } */
-  jd_set_hash(&wrap, 1);
-  jd_set_string(&dollar, "$");
-  jd_assign(jd_get_key(&wrap, &dollar, 1), root);
+    if (path->type == ARRAY)
+      jd_clone(part, path, 0);
+    else
+      jd_split(part, path, jd_nsv("."));
 
-  ptr = &wrap;
-  while (ptr && jd_shift(&part, 1, &elt)) {
-    if (ptr->type == VOID) {
-      /* empty slot: type depends on key format */
-      if (is_positive_int(&elt))
-        jd_set_array(ptr, 1);
-      else
-        jd_set_hash(ptr, 1);
-    }
+    if (!jd_shift(part, 1, elt) || jd_compare(elt, jd_nsv("$")))
+      jd_throw("Bad path");
 
-    if (ptr->type == ARRAY) {
-      size_t ac = jd_count(ptr);
-      jd_int ix = jd_get_int(&elt);
-      if (ix == ac && vivify)
-        ptr = jd_push(ptr, 1);
-      else if (ix < ac)
-        ptr = jd_get_idx(ptr, ix);
+    for (ptr = root; ptr && jd_shift(part, 1, elt);) {
+      if (ptr->type == VOID) {
+        /* empty slot: type depends on key format */
+        if (is_positive_int(elt))
+          jd_set_array(ptr, 1);
+        else
+          jd_set_hash(ptr, 1);
+      }
+
+      if (ptr->type == ARRAY) {
+        size_t ac = jd_count(ptr);
+        jd_int ix = jd_get_int(elt);
+        if (ix == ac && vivify)
+          ptr = jd_push(ptr, 1);
+        else if (ix < ac)
+          ptr = jd_get_idx(ptr, ix);
+        else {
+          ptr = NULL;
+        }
+      }
+      else if (ptr->type == HASH) {
+        ptr = jd_get_key(ptr, elt, vivify);
+      }
       else {
-        ptr = NULL;
-        break;
+        jd_throw("Unexpected element in structure");
       }
     }
-    else if (ptr->type == HASH) {
-      ptr = jd_get_key(ptr, &elt, vivify);
-    }
-    depth++;
   }
 
-  jd_release(&part);
-  jd_release(&wrap);
-  jd_release(&dollar);
-  jd_release(&elt);
-
-  /* Hack: depth 0 means empty path, depth 1 means root - so don't
-   * return a pointer to the innards of wrap. Anything else is inside
-   * the structure and safe to return directly. 
-   */
-  switch (depth) {
-  case 0:
-    return NULL;
-  case 1:
-    return root;
-  default:
-    return ptr;
-  }
+  return ptr;
 }
 
-static jd_var *getter(jd_var *root, const char *path, int vivify) {
-  jd_var *rv, pv = JD_INIT;
-  jd_set_string(&pv, path);
-  rv = jd_get_context(root, &pv, NULL, vivify);
-  jd_release(&pv);
+static jd_var *getter(jd_var *root, const char *path, va_list ap, int vivify) {
+  jd_var *rv = NULL;
+  JD_SCOPE {
+    JD_VAR(pv);
+    jd_vprintf(pv, path, ap);
+    rv = jd_get_context(root, pv, NULL, vivify);
+  }
   return rv;
 }
 
-jd_var *jd_lv(jd_var *root, const char *path) {
-  return getter(root, path, 1);
+jd_var *jd_lv(jd_var *root, const char *path, ...) {
+  jd_var *rv;
+  va_list ap;
+  va_start(ap, path);
+  rv = getter(root, path, ap, 1);
+  va_end(ap);
+  return rv;
 }
 
-jd_var *jd_rv(jd_var *root, const char *path) {
-  return getter(root, path, 0);
+jd_var *jd_rv(jd_var *root, const char *path, ...) {
+  jd_var *rv;
+  va_list ap;
+  va_start(ap, path);
+  rv = getter(root, path, ap, 0);
+  va_end(ap);
+  return rv;
 }
 
 /* vim:ts=2:sw=2:sts=2:et:ft=c

@@ -6,7 +6,7 @@
 #include "util.h"
 #include "tap.h"
 #include "jd_test.h"
-#include "jsondata.h"
+#include "jd_pretty.h"
 
 static void is_str(jd_var *v, const char *s, const char *msg) {
   jd_var sv = JD_INIT;
@@ -118,8 +118,88 @@ static void test_bytes(void) {
   jd_release(&v1);
 }
 
+static void test_trim(void) {
+  jd_var str = JD_INIT, out = JD_INIT;
+
+  jd_set_string(&str, "\n\t TRIM THIS\n\n");
+  jd_ltrim(&out, &str);
+  jdt_is_json(&out, "\"TRIM THIS\\n\\n\"", "ltrim");
+
+  jd_rtrim(&out, &str);
+  jdt_is_json(&out, "\"\\n\\t TRIM THIS\"", "rtrim");
+
+  jd_trim(&out, &str);
+  jdt_is_json(&out, "\"TRIM THIS\"", "trim");
+
+  jd_set_string(&str, "TRIM THIS");
+  jd_trim(&out, &str);
+  jdt_is_json(&out, "\"TRIM THIS\"", "trim (nop)");
+
+  jd_set_string(&str, "");
+  jd_ltrim(&out, &str);
+  jdt_is_json(&out, "\"\"", "ltrim empty");
+
+  jd_rtrim(&out, &str);
+  jdt_is_json(&out, "\"\"", "rtrim empty");
+
+  jd_trim(&out, &str);
+  jdt_is_json(&out, "\"\"", "trim empty");
+
+  jd_release(&str);
+  jd_release(&out);
+}
+
+static void test_printf(void) {
+  scope {
+    JD_2VARS(v, p1);
+
+    jdt_is_string(jd_printf(v, "foo"), "foo", "printf");
+
+    jdt_is_string(jd_printf(v, "%%"), "%", "printf %");
+
+    jdt_is_string(jd_printf(v, "%d %i %o %u %x %X %ld %llx %Lg %p",
+    1, 2, 100, 200, 300, 399, 1l, 10ll, (long double) 1.25, (void *) 0xff),
+    "1 2 144 200 12c 18F 1 a 1.25 0xff",
+    "printf ints");
+
+    jdt_is_string(jd_printf(v, "%s bar", "foo"), "foo bar", "printf char *");
+    jdt_is_string(jd_printf(v, "%s %s", "foo", "bar"), "foo bar", "printf char *");
+
+    jdt_is_string(jd_printf(v, "%s %-7s ", "foo", "bar"),
+    "foo bar     ", "printf char * (padded)");
+
+    jd_set_string(p1, "bar");
+    jdt_is_string(jd_printf(v, "foo %V", p1), "foo bar", "printf jd_var *");
+
+    jd_from_jsons(p1, "{\"name\":\"foo\",\"value\":1.25}");
+    jdt_is_string(jd_printf(v, "rec=%J", p1),
+    "rec={\"name\":\"foo\",\"value\":1.25}",
+    "printf json jd_var *");
+
+    jdt_is_string(jd_printf(v, "rec=%lJ", p1),
+    "rec={\n  \"name\": \"foo\",\n  \"value\": 1.25\n}",
+    "printf pretty json jd_var *");
+
+    jd_set_string(p1, "bar");
+    jd_printvf(v, p1);
+    ok(jd_bytes(v, NULL) == jd_bytes(p1, NULL), "printf format referenced");
+
+    jd_set_string(p1, "JUNK ");
+    while (jd_length(p1) < 20000) {
+      jd_append(p1, p1);
+    }
+    jd_printf(v, "%s", jd_bytes(p1, NULL));
+    jdt_is(v, p1, "printf long string");
+
+    jd_printf(v, "%^foo");
+    jdt_is_string(v, "%^foo", "unknown escape");
+
+  }
+}
+
 static void test_misc(void) {
   jd_var v1 = JD_INIT, v2 = JD_INIT;
+  char tmp[200];
   jd_set_string(&v1, "foo");
   jd_set_string(&v2, "bar");
 
@@ -127,11 +207,7 @@ static void test_misc(void) {
   ok(jd_compare(&v1, &v2) > 0 , "foo > bar");
   ok(jd_compare(&v2, &v1) <  0 , "bar < foo");
 
-  jd_printf(&v1, "Hello, %s", "World");
-  jd_set_string(&v2, "Hello, World");
-  ok(jd_compare(&v1, &v2) == 0, "printf");
-
-  /*  jd_set_int(&v1, 12345);*/
+  jd_assign(&v2, &v1);
   jd_stringify(&v1, &v1);
   ok(jd_compare(&v1, &v2) == 0, "stringify string == nop");
 
@@ -143,6 +219,21 @@ static void test_misc(void) {
   is_str(&v1, "1.25", "stringify real");
   jd_set_void(&v1);
   is_str(&v1, "null", "stringify void");
+  jd_set_array(&v1, 0);
+  is_str(&v1, "[]", "stringify array");
+  jd_set_hash(&v1, 0);
+  is_str(&v1, "{}", "stringify hash");
+  is_str(NULL, "<NULL>", "stringify null");
+
+  jd_set_void(&v1);
+  v1.type = 100;
+  snprintf(tmp, sizeof(tmp), "<UNKNOWN(100):%p>", &v1);
+  is_str(&v1, tmp, "stringify bad type");
+  v1.type = VOID;
+
+  jd_set_object(&v1, &v1, NULL);
+  snprintf(tmp, sizeof(tmp), "<OBJECT:%p>", &v1);
+  is_str(&v1, tmp, "stringify bad type");
 
   jd_release(&v1);
   jd_release(&v2);
@@ -154,6 +245,8 @@ void test_main(void) {
   test_find();
   test_split();
   test_bytes();
+  test_printf();
+  test_trim();
 }
 
 /* vim:ts=2:sw=2:sts=2:et:ft=c

@@ -3,6 +3,7 @@
 .DS_Store
 .gdb_history
 /*.tmp/
+/elvis/
 /incoming/
 /temp/
 /tmp/

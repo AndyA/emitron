@@ -1,9 +1,11 @@
 /* jd_hash.c */
 
+#include "jd_private.h"
 #include "jsondata.h"
 
 jd_hash *jd_hash_new(size_t size) {
   jd_hash *jdh = jd_alloc(sizeof(jd_hash));
+  if (size < 20) size = 20;
   jdh->b = jd_alloc(sizeof(jd_hash_bucket *) * size);
   jdh->size = size;
   jdh->used = 0;
@@ -11,9 +13,8 @@ jd_hash *jd_hash_new(size_t size) {
   return jdh;
 }
 
-jd_hash *jd_hash_retain(jd_hash *jdh) {
+void jd_hash_retain(jd_hash *jdh) {
   jdh->hdr.refs++;
-  return jdh;
 }
 
 static void free_contents(jd_hash *jdh) {
@@ -36,13 +37,9 @@ void jd_hash_free(jd_hash *jdh) {
   jd_free(jdh);
 }
 
-jd_hash *jd_hash_release(jd_hash *jdh) {
-  if (jdh->hdr.refs <= 1) {
+void jd_hash_release(jd_hash *jdh) {
+  if (jdh->hdr.refs-- <= 1)
     jd_hash_free(jdh);
-    return NULL;
-  }
-  jdh->hdr.refs--;
-  return jdh;
 }
 
 size_t jd_hash_count(jd_hash *jdh) {
@@ -79,7 +76,7 @@ jd_var *jd_hash_get(jd_hash *jdh, jd_var *key, int vivify) {
 
 jd_hash *jd_hash_rehash(jd_hash *jdh) {
   size_t count = jd_hash_count(jdh);
-  jd_hash *tmp = jd_hash_new(count * 2);
+  jd_hash *tmp = jd_hash_new(count * 4);
   unsigned i;
 
   for (i = 0; i < jdh->size; i++) {
@@ -135,18 +132,19 @@ jd_var *jd_hash_keys(jd_hash *jdh, jd_var *keys) {
 }
 
 jd_var *jd_hash_merge(jd_var *out, jd_hash *jdh, int deep) {
-  unsigned i;
-  size_t count = jd_hash_count(jdh);
-  jd_var keys = JD_INIT;
+  JD_SCOPE {
+    unsigned i;
+    size_t count = jd_hash_count(jdh);
+    JD_VAR(keys);
 
-  jd_hash_keys(jdh, &keys);
-  for (i = 0; i < count; i++) {
-    jd_var *k = jd_get_idx(&keys, i);
-    if (deep) jd_clone(jd_get_key(out, k, 1), jd_hash_get(jdh, k, 0), 1);
-    else jd_assign(jd_get_key(out, k, 1), jd_hash_get(jdh, k, 0));
+    jd_hash_keys(jdh, keys);
+    for (i = 0; i < count; i++) {
+      jd_var *k = jd_get_idx(keys, i);
+      if (deep) jd_clone(jd_get_key(out, k, 1), jd_hash_get(jdh, k, 0), 1);
+      else jd_assign(jd_get_key(out, k, 1), jd_hash_get(jdh, k, 0));
+    }
+
   }
-
-  jd_release(&keys);
   return out;
 }
 

@@ -5,7 +5,8 @@
 
 #include "util.h"
 #include "tap.h"
-#include "jsondata.h"
+#include "jd_test.h"
+#include "jd_pretty.h"
 
 static void test_hash(size_t sz) {
   jd_var ha = JD_INIT, keys = JD_INIT;
@@ -33,7 +34,7 @@ static void test_hash(size_t sz) {
 
   jd_assign(jd_get_key(&ha, &k3, 1), &v3);
 
-  jd_keys(&ha, &keys);
+  jd_keys(&keys, &ha);
   /* TODO actually check the keys... */
 
   ok(jd_compare(jd_get_key(&ha, &k1, 0), &v1) == 0, "found foo again");
@@ -58,6 +59,26 @@ static void test_hash(size_t sz) {
   jd_release(&v3);
 }
 
+static void test_ks(void) {
+  jd_var h = JD_INIT;
+
+  jd_set_hash(&h, 1);
+  jd_set_string(jd_get_ks(&h, "name", 1), "foo");
+  jd_set_int(jd_get_ks(&h, "value", 1), 1234);
+
+  jdt_is_json(&h, "{\"name\":\"foo\",\"value\":1234}", "strings as keys");
+
+  jd_set_real(jd_get_ks(&h, "value", 1), 1.25);
+
+  jdt_is_json(&h, "{\"name\":\"foo\",\"value\":1.25}", "strings as keys, replace");
+
+  jd_delete_ks(&h, "value", NULL);
+
+  jdt_is_json(&h, "{\"name\":\"foo\"}", "strings as keys, delete");
+
+  jd_release(&h);
+}
+
 void test_main(void) {
   nest_in("Bucket size 1");
   test_hash(1);
@@ -65,6 +86,7 @@ void test_main(void) {
   nest_in("Bucket size 10");
   test_hash(10);
   nest_out();
+  test_ks();
 }
 
 /* vim:ts=2:sw=2:sts=2:et:ft=c

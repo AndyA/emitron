@@ -1,5 +1,6 @@
 /* jd_string.c */
 
+#include "jd_private.h"
 #include "jsondata.h"
 
 #include <stdarg.h>
@@ -29,12 +30,16 @@ jd_string *jd_string_empty(jd_string *jds) {
   return jds;
 }
 
-jd_string *jd_string_from(const char *s) {
-  size_t len = strlen(s) + 1;
-  jd_string *jds = jd_string_new(len);
-  memcpy(jds->data, s, len);
-  jds->used = len;
+jd_string *jd_string_from_bytes(const char *s, size_t size) {
+  jd_string *jds = jd_string_new(size + 1);
+  memcpy(jds->data, s, size);
+  jds->data[size] = '\0';
+  jds->used = size + 1;
   return jds;
+}
+
+jd_string *jd_string_from(const char *s) {
+  return jd_string_from_bytes(s, strlen(s));
 }
 
 jd_string *jd_string_ensure(jd_string *jds, size_t size) {
@@ -62,18 +67,13 @@ void jd_string_free(jd_string *jds) {
   jd_free(jds);
 }
 
-jd_string *jd_string_retain(jd_string *jds) {
+void jd_string_retain(jd_string *jds) {
   jds->hdr.refs++;
-  return jds;
 }
 
-jd_string *jd_string_release(jd_string *jds) {
-  if (jds->hdr.refs <= 1) {
+void jd_string_release(jd_string *jds) {
+  if (jds->hdr.refs-- <= 1)
     jd_string_free(jds);
-    return NULL;
-  }
-  jds->hdr.refs--;
-  return jds;
 }
 
 size_t jd_string_length(jd_string *jds) {
@@ -84,7 +84,7 @@ jd_string *jd_string_append(jd_string *jds, jd_var *v) {
   jd_string *vs = jd_as_string(v);
   size_t len = jd_string_length(vs);
   jd_string_space(jds, len);
-  memcpy(jds->data + jds->used - 1, vs->data, len + 1);
+  memmove(jds->data + jds->used - 1, vs->data, len + 1);
   jds->used += len;
   return jds;
 }
@@ -107,8 +107,8 @@ int jd_string_compare(jd_string *jds, jd_var *v) {
   return la < lb ? -1 : la > lb ? 1 : 0;
 }
 
-unsigned long jd_string_hashcalc(jd_string *jds) {
-  unsigned long h = 0;
+unsigned long jd_string_hashcalc(jd_string *jds, jd_type t) {
+  unsigned long h = t;
   size_t len = jd_string_length(jds);
   unsigned i;
   for (i = 0; i < len; i++) {
@@ -117,45 +117,26 @@ unsigned long jd_string_hashcalc(jd_string *jds) {
   return h;
 }
 
-jd_string *jd_string_vprintf(jd_string *jds, const char *fmt, va_list ap) {
-  jd_string_empty(jds);
-  for (;;) {
-    va_list aq;
-    va_copy(aq, ap);
-    size_t sz = vsnprintf(jds->data, jds->size, fmt, aq);
-    va_end(aq);
-    if (sz < jds->size) {
-      jds->used = sz + 1;
-      return jds;
-      break;
-    }
-    jd_string_ensure(jds, sz + 1);
-  }
-}
-
-jd_string *jd_string_printf(jd_string *jds, const char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  jd_string_vprintf(jds, fmt, ap);
-  va_end(ap);
-  return jds;
-}
-
 jd_var *jd_string_sub(jd_string *jds, int from, int len, jd_var *out) {
   size_t sl = jd_string_length(jds);
-  jd_string *jo;
 
   if (from < 0) from += sl;
   if (len <= 0 || from < 0 || from >= sl) {
     jd_set_string(out, "");
     return out;
   }
-  if (from + len > sl) len = sl - from;
-  jd_set_empty_string(out, len + 1);
-  jo = jd_as_string(out);
-  memcpy(jo->data, jds->data + from, len);
-  jo->data[len] = '\0';
-  jo->used = len + 1;
+
+  JD_SCOPE {
+    JD_VAR(tmp);
+    jd_string *jo;
+    if (from + len > sl) len = sl - from;
+    jd_set_empty_string(tmp, len + 1);
+    jo = jd_as_string(tmp);
+    memcpy(jo->data, jds->data + from, len);
+    jo->data[len] = '\0';
+    jo->used = len + 1;
+    jd_assign(out, tmp);
+  }
   return out;
 }
 
@@ -215,7 +196,7 @@ jd_var *jd_string_numify(jd_string *jds, jd_var *out) {
     return jd_set_void(out);
 
   sl = jd_string_length(jds);
-  iv = (jd_int) strtoll(jds->data, &end, 10);
+  iv = (jd_int) JD_STRTOINT(jds->data, &end, 10);
   if (end - jds->data == sl)
     return jd_set_int(out, iv);
 
@@ -223,7 +204,7 @@ jd_var *jd_string_numify(jd_string *jds, jd_var *out) {
   if (end - jds->data == sl)
     return jd_set_real(out, rv);
 
-  jd_die("Can't convert to a number");
+  jd_throw("Can't convert to a number");
 
   return NULL;
 }

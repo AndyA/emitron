@@ -1,6 +1,12 @@
+.*.sw?
+.DS_Store
+.gdb_history
 /*.a
 /*.d
 /*.o
 /core
+/cover/
 /jdtest
+/tags
 /version.h
+Session.vim

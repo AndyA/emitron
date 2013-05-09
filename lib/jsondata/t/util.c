@@ -2,11 +2,12 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "util.h"
 #include "tap.h"
 
-#include "jsondata.h"
+#include "jd_pretty.h"
 
 #define SIG 0x1A2B3C4D
 
@@ -16,7 +17,8 @@ struct memhdr {
   unsigned sig;
 };
 
-struct memhdr *memlist = NULL;
+static struct memhdr *memlist = NULL;
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #define HDR(m) ((struct memhdr *) (m) - 1)
 #define MEM(h) ((struct memhdr *) (h) + 1)
@@ -25,9 +27,11 @@ static void *t_alloc(size_t size) {
   struct memhdr *h = malloc(size + sizeof(struct memhdr));
   if (!h)return NULL;
   h->size = size;
-  h->next = memlist;
   h->sig = SIG;
+  pthread_mutex_lock(&mutex);
+  h->next = memlist;
   memlist = h;
+  pthread_mutex_unlock(&mutex);
   return MEM(h);
 }
 
@@ -41,7 +45,9 @@ static struct memhdr *unhook(struct memhdr *list, struct memhdr *h) {
 static void t_free(void *m) {
   if (m) {
     struct memhdr *h = HDR(m);
+    pthread_mutex_lock(&mutex);
     memlist = unhook(memlist, h);
+    pthread_mutex_unlock(&mutex);
     free(h);
   }
 }
@@ -75,19 +81,22 @@ static void check_leaks(void) {
   }
 }
 
-void test_init(void) {
-  hook_alloc();
-}
+int main(int argc, char *argv[]) {
+  int i, count = 1;
+  const char *tc_env = NULL;
 
-void test_done(void) {
+  if (argc > 1)
+    count = atoi(argv[1]);
+  else if (tc_env = getenv("JD_TEST_COUNT"), tc_env)
+    count = atoi(tc_env);
+  else
+    hook_alloc();
+
+  for (i = 0; i < count; i++)
+    test_main();
+
   check_leaks();
   done_testing();
-}
-
-int main(void) {
-  test_init();
-  test_main();
-  test_done();
   return 0;
 }
 

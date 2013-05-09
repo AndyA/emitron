@@ -1,4 +1,4 @@
-.PHONY: all clean tags install version test valgrind
+.PHONY: all clean tags install version test valgrind cover
 
 include common.mk
 
@@ -7,7 +7,9 @@ PREFIX ?= /usr/local
 BINS=jdtest
 BINOBJ=$(addsuffix .o,$(BINS))
 LIB=libjsondata.a
-LIBOBJ=jsondata.o jd_string.o jd_array.o jd_hash.o jd_path.o jd_json.o
+LIBOBJ=jsondata.o jd_string.o jd_array.o jd_hash.o \
+       jd_path.o jd_json.o jd_closure.o jd_object.o \
+       jd_printf.o jd_exception.o jd_map.o
 OBJS=$(BINOBJ) $(LIBOBJ)
 DEPS=$(OBJS:.o=.d) 
 INST_BINS=$(PREFIX)/bin
@@ -45,6 +47,9 @@ test: $(LIB)
 
 valgrind: $(LIB)
 	$(MAKE) -C t valgrind
+
+cover:
+	tools/cover.sh
 
 install: $(BINS)
 	touch VERSION

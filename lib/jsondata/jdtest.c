@@ -1,15 +1,19 @@
 /* jdtest.c */
 
 #include <stdio.h>
-#include "jsondata.h"
+
+#include "jd_pretty.h"
 
 int main(void) {
-  jd_var v1 = JD_INIT, v2 = JD_INIT;
-  jd_set_string(&v1, "Hello, World");
-  jd_assign(&v2, &v1);
-  jd_release(&v1);
-  printf("%s\n", v2.v.s->data);
-  jd_release(&v2);
+  try {
+    JD_2VARS(a, b);
+    jd_set_string(a, "This is A");
+    jd_throw("Oops: a=%J", a);
+    jd_set_bool(b, 1);
+  }
+  puts("cleanup");
+  catch (e) jd_rethrow(e);
+
   return 0;
 }
 

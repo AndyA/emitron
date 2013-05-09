@@ -1,7 +1,0 @@
-                              RTSP        RTMP
-Strobe                        No          Yes
-Quicktime Player              Yes         No
-VLC client (Mac OS)           No          No
-VLC client (Ubuntu)           Yes         Yes
-Totem  (Ubuntu)               Yes         No
-hlspipe.py                    Yes

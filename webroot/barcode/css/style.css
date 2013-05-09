@@ -1,0 +1,92 @@
+body, #container {
+  color: white;
+  background-color: black;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", 
+    Calibri, Helvetica, Arial, sans-serif;
+}
+
+img {
+  padding: 0;
+  margin: 0;
+}
+
+#dock, #browser {
+  position: absolute;
+  overflow: auto; 
+  left: 0px;
+  top: 0px;
+  bottom: 0px;
+}
+
+#dock {
+  left: 0px;
+  width: 220px;
+}
+
+#dock .wrap {
+  margin: 0.1em 0.4em;
+}
+
+#browser {
+  left: 220px;
+  right: 0px;
+}
+
+#browser .wrap {
+  padding: 0;
+  width: 1024px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.media {
+  position: relative;
+  width: 1024px;
+  padding: 0;
+  margin: 0;
+}
+
+#player {
+  height: 576px;
+  margin-bottom: 1em;
+}
+
+#chapters {
+  height: 8px;
+  background-color: #444;
+}
+
+.chapter {
+  position: absolute;
+  height: 8px;
+}
+
+#nav {
+  height: 60px;
+  border: 1px solid #333;
+}
+
+#progress {
+  height: 4px;
+  width: 0px;
+  background-color: red;
+}
+
+#browser h1 {
+  font-size: 1.2em;
+  text-align: center;
+}
+
+#popup {
+  display: none;
+  position: absolute;
+  width: 40%;  
+  font-size: 0.8em;
+  padding: 1em;
+  background-color: rgba(0,0,0,0.60);
+  border: 3px solid white;
+  z-index: 100; 
+}

@@ -3,23 +3,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "jd_private.h"
 #include "jsondata.h"
 
 #define BASE(jda) \
-  ((jd_var *)((jda)->s.data + (jda)->seek))
+  ((jd_var *)((jda)->s.data))
 #define ELT(jda, idx) \
   (BASE(jda) + (idx))
 
 jd_array *jd_array_new(size_t size) {
   jd_array *jda = jd_alloc(sizeof(jd_array));
   jd_string_init(&jda->s, size * sizeof(jd_var));
-  jda->seek = 0;
   return jda;
 }
 
-jd_array *jd_array_retain(jd_array *jda) {
+void jd_array_retain(jd_array *jda) {
   jd_string_retain(&jda->s);
-  return jda;
 }
 
 static void release(jd_array *jda, unsigned from, size_t count) {
@@ -27,16 +26,16 @@ static void release(jd_array *jda, unsigned from, size_t count) {
   for (i = from; i < from + count; i++) jd_release(ELT(jda, i));
 }
 
-jd_array *jd_array_release(jd_array *jda) {
+void jd_array_release(jd_array *jda) {
   if (jda->s.hdr.refs == 1)
     release(jda, 0, jd_array_count(jda));
-  return jd_string_release(&jda->s) ? jda : NULL;
+  jd_string_release(&jda->s);
 }
 
 static unsigned cook_idx(int idx, size_t count, size_t max) {
   if (idx < 0) idx += count;
   if (idx < 0 || idx >= max)
-    jd_die("Array index %d out of bounds (0..%lu)", idx, (unsigned long) max);
+    jd_throw("Array index %d out of bounds (0..%lu)", idx, (unsigned long) max);
   return (unsigned) idx;
 }
 
@@ -55,7 +54,7 @@ jd_var *jd_array_get(jd_array *jda, int idx) {
 }
 
 size_t jd_array_count(jd_array *jda) {
-  return (jda->s.used - jda->seek) / sizeof(jd_var);
+  return jda->s.used / sizeof(jd_var);
 }
 
 jd_var *jd_array_insert(jd_array *jda, int idx, size_t count) {
@@ -79,10 +78,9 @@ size_t jd_array_remove(jd_array *jda, int idx, size_t count, jd_var *slot) {
       jd_assign(slot++, ELT(jda, ix + i));
   }
   release(jda, ix, count);
-  if (idx == 0)
-    jda->seek += count * sizeof(jd_var);
-  else
-    memmove(ELT(jda, ix), ELT(jda, ix + count), (avail - count) * sizeof(jd_var));
+  memmove(ELT(jda, ix), ELT(jda, ix + count), (avail - count) * sizeof(jd_var));
+  jda->s.used -= count * sizeof(jd_var);
+
   return count;
 }
 
@@ -117,7 +115,7 @@ static jd_var *array_stringify(jd_var *out, jd_array *jda) {
 static jd_var *array_join(jd_var *out, jd_var *sep, jd_array *jda) {
   size_t len = 0;
   size_t count = jd_array_count(jda);
-  size_t slen = jd_length(sep);
+  size_t slen = sep ? jd_length(sep) : 0;
   unsigned i;
 
   for (i = 0; i < count; i++) {
@@ -128,7 +126,7 @@ static jd_var *array_join(jd_var *out, jd_var *sep, jd_array *jda) {
   jd_set_empty_string(out, len);
 
   for (i = 0; i < count; i++) {
-    if (i) jd_append(out, sep);
+    if (sep && i) jd_append(out, sep);
     jd_append(out, ELT(jda, i));
   }
 
@@ -136,10 +134,11 @@ static jd_var *array_join(jd_var *out, jd_var *sep, jd_array *jda) {
 }
 
 jd_var *jd_array_join(jd_var *out, jd_var *sep, jd_array *jda) {
-  jd_var ar = JD_INIT;
-  array_stringify(&ar, jda);
-  array_join(out, sep, jd_as_array(&ar));
-  jd_release(&ar);
+  JD_SCOPE {
+    JD_VAR(ar);
+    array_stringify(ar, jda);
+    array_join(out, sep, jd_as_array(ar));
+  }
   return out;
 }
 
@@ -158,12 +157,9 @@ jd_array *jd_array_append(jd_array *jda, jd_var *v) {
   return jd_array_splice(jda, jd_array_count(jda), v);
 }
 
-static int cmp(const void *a, const void *b) {
-  return jd_compare((jd_var *) a, (jd_var *) b);
-}
-
-jd_array *jd_array_sort(jd_array *jda) {
-  qsort(jda->s.data, jd_array_count(jda), sizeof(jd_var), cmp);
+jd_array *jd_array_sort(jd_array *jda, int (*cmp)(jd_var *, jd_var *)) {
+  qsort(jda->s.data, jd_array_count(jda), sizeof(jd_var),
+        (int ( *)(const void *, const void *)) cmp);
   return jda;
 }
 
