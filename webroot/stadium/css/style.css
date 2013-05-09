@@ -1,1 +1,6 @@
-
+.slider {
+  width: 200px;
+  height: 7px;
+  padding: 4px;
+  margin: 4px;
+}
