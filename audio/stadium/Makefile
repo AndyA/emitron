@@ -14,7 +14,7 @@ $(INDIR)/wigan.wav: $(INDIR)/wiganleft.wav $(INDIR)/wiganright.wav
 $(OUTDIR)/commentary.m4a: $(INDIR)/commentary.wav
 	ffmpeg -y -i "$<" -c:a libfaac -b:a 128k "$@"
 
-%.m4a: %.wav
+$(OUTDIR)/%.m4a: $(INDIR)/%.wav
 	ffmpeg -y -i "$<" -c:a libfaac -b:a 128k "$@"
 
 clean:
