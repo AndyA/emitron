@@ -1,22 +1,14 @@
 INDIR=media
 OUTDIR=../../webroot/stadium/media
 
-all: stereo $(OUTDIR)/commentary.m4a $(OUTDIR)/millwall.m4a $(OUTDIR)/wigan.m4a
+WAV=$(wildcard $(INDIR)/*.wav)
+M4A=$(patsubst $(INDIR)/%.wav, $(OUTDIR)/%.m4a, $(WAV))
 
-stereo: $(INDIR)/millwall.wav $(INDIR)/wigan.wav
-
-$(INDIR)/millwall.wav: $(INDIR)/millwallleft.wav $(INDIR)/millwallright.wav
-	sox -M $(INDIR)/millwallleft.wav $(INDIR)/millwallright.wav $(INDIR)/millwall.wav
-
-$(INDIR)/wigan.wav: $(INDIR)/wiganleft.wav $(INDIR)/wiganright.wav
-	sox -M $(INDIR)/wiganleft.wav $(INDIR)/wiganright.wav $(INDIR)/wigan.wav
-
-$(OUTDIR)/commentary.m4a: $(INDIR)/commentary.wav
-	ffmpeg -y -i "$<" -c:a libfaac -b:a 128k "$@"
+all: $(M4A)
 
 $(OUTDIR)/%.m4a: $(INDIR)/%.wav
-	ffmpeg -y -i "$<" -c:a libfaac -b:a 128k "$@"
+	ffmpeg -y -i "$<" -c:a libfaac -b:a 96k "$@"
 
 clean:
-	rm -f $(INDIR)/millwall.wav $(INDIR)/wigan.wav
+	rm -f $(M4A)
 
