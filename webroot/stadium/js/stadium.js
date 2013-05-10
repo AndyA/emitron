@@ -3,6 +3,14 @@ $(function() {
   var asset = ["media/commentary.m4a", "media/millwall.m4a", "media/wigan.m4a"];
   var track = [];
 
+  var SPEED_OF_SOUND = 340.29;
+  var END_TO_END = 140; // Assume 100m pitch, mics set back 20m at each end
+  var SIDE_TO_SIDE = 80; // Approx 80m apart at each end
+  // Dist in the range 0 (west) to 1 (east)
+  function distanceToDelay(dist) {
+    return (END_TO_END * dist) / SPEED_OF_SOUND;
+  }
+
   function getAudioContext() {
     if (typeof AudioContext !== "undefined") return new AudioContext();
     if (typeof webkitAudioContext !== "undefined") return new webkitAudioContext();
@@ -33,6 +41,7 @@ $(function() {
     for (var i = 0; i < track.length; i++) {
       (function(t) {
         $controls.append($('<div class="slider"></div>').slider({
+          range: true,
           slide: function(evt, ui) {
             console.log(t.name, ": ", ui.value);
             t.gain.gain.value = ui.value / 100;
@@ -57,6 +66,11 @@ $(function() {
   $('#play').click(play);
   $('#stop').click(stop);
 
+  $("#slider").slider({
+    range: true,
+    values: [17, 67]
+  });
+
   var ctx = getAudioContext();
 
   var j = new Join(function() {
@@ -71,9 +85,9 @@ $(function() {
         var src = ctx.createBufferSource();
         src.buffer = ctx.createBuffer(data, false);
         track.push({
-          "src": src,
-          "name": url.replace(/([^\/\.]+)\.[^\/\.]+$/, '$1'),
-          "url": url
+          src: src,
+          name: url.replace(/([^\/\.]+)\.[^\/\.]+$/, '$1'),
+          url: url
         });
         console.log("Loaded " + url);
         cb();

@@ -1,6 +1,8 @@
+body{
+/*  font: 62.5% "Trebuchet MS", sans-serif;*/
+/*  margin: 50px;*/
+}
+
 .slider {
-  width: 200px;
-  height: 7px;
-  padding: 4px;
-  margin: 4px;
+  font-size: 62.5%;
 }
