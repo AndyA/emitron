@@ -66,11 +66,6 @@ $(function() {
   $('#play').click(play);
   $('#stop').click(stop);
 
-  $("#slider").slider({
-    range: true,
-    values: [17, 67]
-  });
-
   var ctx = getAudioContext();
 
   var j = new Join(function() {
