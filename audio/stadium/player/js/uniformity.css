@@ -1,0 +1,117 @@
+#image{
+position:absolute;
+cursor:pointer;
+}
+
+#bar{
+	width:150px;
+	height:15px;
+	border:1px solid grey;
+	background-color:#555555;
+	position:relative;
+	cursor:pointer;
+}
+
+#navigator{
+	width:200px;
+	height:25px;
+	border:0px;	
+	font-family:"Arial", helvetica, sans-serif;
+	font-size:12px;
+	color:#FFFFFF;	
+	text-align:center
+	vertical-align:top;
+}
+
+
+#score th{
+	border:0px;	
+	font-family:"Arial", helvetica, sans-serif;
+	font-size:24px;
+	color:#FFFFFF;	
+	text-align:center
+	vertical-align:top;
+	font-weight:normal
+}
+
+#score td{
+	border:0px;	
+	font-family:"Arial", helvetica, sans-serif;
+	font-size:14px;
+	color:#FFFFFF;	
+	text-align:center
+	vertical-align:top;
+}
+
+
+#slider{
+	width:0%;
+	height:100%;
+	background-color:#888888;
+	top:0px;
+	left:0px;
+	position:absolute;
+	cursor:pointer;
+}
+
+#info{
+	width:200px;
+	height:25px;
+	border:0px;	
+	font-family:"Arial", helvetica, sans-serif;
+	font-size:12px;
+	color:#FFFFFF;	
+	text-align:center
+	vertical-align:middle;
+}
+
+
+#balancebar{
+	width:75px;
+	height:15px;
+	border:1px solid grey;
+	background-color:#888888;
+	position:relative;
+	cursor:pointer;
+}
+
+#balancebar2{
+	width:75px;
+	height:15px;
+	border:1px solid grey;
+	background-color:#555555;
+	position:relative;
+	cursor:pointer;
+}
+
+#slider3{
+	width:0%;
+	height:100%;
+	background-color:#555555;
+	top:0px;
+	left:0px;
+	position:relative;
+	cursor:pointer;
+}
+
+
+#slider2{
+	width:0%;
+	height:100%;
+	background-color:#888888;
+	top:0px;
+	right:0px;
+	position:relative;
+	cursor:pointer;
+}
+ 
+#info3{
+	width:200px;
+	height:25px;
+	border:0px;	
+	font-family:"Arial", helvetica, sans-serif;
+	font-size:12px;
+	color:#FFFFFF;	
+	text-align:center
+	vertical-align:middle;
+}

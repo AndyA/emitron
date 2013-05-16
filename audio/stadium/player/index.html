@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-GB" xmlns:po="http://purl.org/ontology/po/" xmlns:mo="http://purl.org/ontology/mo/" xmlns:dc="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xmlns:og="http://ogp.me/ns#"> <head profile="http://dublincore.org/documents/dcq-html/"> 
+<head>
+<title>Uniformity Testing</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+<link rel="stylesheet" type="text/css" href="js/uniformity.css"  /> 
+
+<script src="js/radiotrial.js"></script>
+
+<script type='text/javascript' src='js/jquery.js'></script>
+<script type='text/javascript'>
+
+$( document ).ready(function() {
+	var 	permX = 326,
+		permY = 76;
+	$("#image").css({left:permX-15, top:permY-10});
+ $(document).mousemove(function(e){
+//	console.log("click " + click);
+	if(e.pageX < 640 & e.pageY < 280 & click == 1){
+	permX = e.pageX;
+	permY = e.pageY;
+    	$("#image").css({left:e.pageX-15, top:e.pageY-10});
+//	console.log("left:e.pageX " + e.pageX);
+//     console.log("top:e.pageY " + e.pageY);
+//	console.log("permX " + permX);
+//     console.log("permY " + permY);
+	}
+	else {
+    	$("#image").css({left:permX-15, top:permY-10});
+//	console.log("permX " + permX);
+//      console.log("permY " + permY);
+	}
+	});
+});
+
+
+
+
+
+
+
+</script>
+<script type='text/javascript'>
+
+
+
+
+function point_it(event){
+
+var event;
+var xRatio;
+    pos_x = event.offsetX?(event.offsetX):event.pageX-document.getElementById("imgName").offsetLeft;
+//    pos_y = event.offsetY?(event.offsetY):event.pageY-document.getElementById("imgName").offsetTop;
+//    console.log("pos_x " + pos_x);
+//    console.log("pos_y " + pos_y);
+
+if (click == 2)
+{
+pos_x = TopX;
+//pos_y = TopY;
+
+}
+if(pos_x <= 640){
+xRatio=(pos_x)/640;
+x=xRatio * 100;
+}
+
+/*
+yRatio=(140-pos_y)*(140-pos_y)/280/280;
+y=yRatio * 100;
+//document.getElementById("xycoordinates").innerHTML="Coordinates: (" + x1 + "," + y1 + ")";
+*/
+
+var ratio = xRatio
+crowdBalance(xRatio);
+// Use an equal-power crossfading curve:
+// audio1.volume = Math.cos(xRatio * 0.5*Math.PI);
+// audio1.volume = 1-xRatio;
+// console.log("audio1.volume " + audio1.volume);
+
+// audio2.volume = Math.cos((1.0 - xRatio) * 0.5*Math.PI);
+// audio2.volume = xRatio;
+// console.log("audio2.volume " + audio2.volume);
+/*
+// audio3.volume = Math.cos(yRatio * 0.5*Math.PI);
+// audio3.volume = 1-yRatio;
+// console.log("audio3.volume " + audio3.volume);
+*/
+
+
+}
+
+
+
+
+
+//onMouseOver="mover(image1)" onMouseOut="mout(image2)"
+
+</script>
+</head>
+<body onload="init();">
+
+<a onMousemove="point_it(event)">
+<table id="imgName" style="cursor:pointer" onclick="changeImage();" width = "642" height = "283" background = "wembleyplansmall.png" border = "0" cellpadding="0" cellspacing="0" valign = "center">
+<tr height = "100">
+<td width = "100"><img src = "manchestercity.png" width = "90"></td>
+<td width = "440">
+</td>
+<td width = "100"><img src = "chelsea.png" width = "90"></td>
+</tr>
+<tr height = "81">
+</tr>
+<tr height = "90">
+<td width = "100"></td>
+<td width = "440">
+
+<table width = "440" height = "90" border = "0" cellpadding="0" cellspacing="0" id = "score">
+<tr height = "30" class = "tdlarge">
+<th width = "180" align = "right" class = "tdlarge">Man City
+</th>
+<th width = "80" align = "center" class = "tdlarge">2-0
+</th>
+<th width = "180" align = "left" class = "tdlarge">Chelsea
+</th>
+</tr>
+<tr height = "60" class = "tdsmall">
+<td width = "180" align = "right" class = "tdsmall">
+Nasri '35 <br>
+Aguero '47
+</td>
+<td width = "80" align = "center" class = "tdsmall">
+</td>
+<td width = "180" align = "left" class = "tdsmall">
+</td>
+</tr>
+</table>
+</td>
+<td width = "100"></td>
+</tr>
+</table>
+</a>
+
+<table width = "640" height = "100" bgcolor = "#333333" border = "0" cellpadding="0" cellspacing="0">
+
+<tr height = "5" width = "640" bgcolor = "#333333">
+
+</tr>
+
+<tr height = "100" bgcolor = "#444444">
+<td width = "10" bgcolor = "#333333">
+</td>
+<td width = "5" bgcolor = "#444444">
+</td>
+<td width = "90">
+
+
+<table width = "90" height = "90" bgcolor = "#444444" border = "0" cellpadding="0" cellspacing="0">
+<tr height = "4">
+<td width = "90">
+</tr>
+</td>
+<tr height = "86">
+<td width = "90">
+
+<img src = "alangreenagainsmall.jpg" height = "90" width = "90">
+</tr>
+</td>
+</table>
+
+
+</td>
+<td width = "5">
+</td>
+<td>
+
+<table width = "200" height = "90" bgcolor = "#555555" border = "0" cellpadding="0" cellspacing="0"  id = "navigator" align = "center" valign = "center">
+<tr height = "30">
+<td width = "200"><center>Commentary balance
+</td>
+</tr>
+<tr height = "30">
+<td width = "200"><center>
+
+<table cellpadding = "0" cellspacing="0" border = "0">
+<tr>
+<td width = "75">
+ 
+<div id='balancebar'>
+<div id='slider3'>
+ 
+</div>
+</div>
+
+</td>
+<td width = "75">
+
+<div id='balancebar2'>
+<div id='slider2'>
+ 
+</div>
+</div>
+</td>
+</tr>
+</table>
+
+
+ 
+
+
+</td>
+</tr>
+<tr height = "30">
+<td width = "200"><center><div id='info3'><center>loading...</div>
+</td>
+</tr>
+
+
+</table>
+</td>
+<td width = "5">
+</td>
+<td width = "90">
+
+<table width = "90" height = "90" bgcolor = "#444444" border = "0" cellpadding="0" cellspacing="0">
+<tr height = "4">
+<td width = "90">
+</tr>
+</td>
+<tr height = "86">
+<td width = "90">
+<img src = "fanssmall.jpg" height = "90" width = "90">
+</td>
+</tr>
+</table>
+
+</td>
+<td width = "5" bgcolor = "#444444">
+</td>
+<td width = "10" bgcolor = "#333333">
+</td>
+<td width = "5" bgcolor = "#444444">
+</td>
+<td>
+<table width = "200" height = "90" bgcolor = "#555555" border = "0" cellpadding="0" cellspacing="0"  id = "navigator"  >
+<tr height = "30">
+<td width = "200"><center>Volume
+</td>
+</tr>
+<tr height = "30">
+<td width = "200"><center><font face = "arial" size = "4" color = "#FFFFFF">
+<div id='bar'>
+<div id='slider'>
+
+</div>
+</div>
+
+ 
+
+
+</td>
+</tr>
+<tr height = "30">
+<td width = "200"><center><div id='info'>loading...</div>
+</td>
+</tr>
+</table>
+</td>
+<td width = "5">
+</td>
+<td width = "10" bgcolor = "#333333">
+</td>
+</tr>
+<tr height = "5" width = "640" bgcolor = "#333333">
+
+</tr>
+</table>
+<br>
+<br>
+
+<img id="image" src="mic.gif"  onclick="changeImage()" / >
+
+<br>
+<br>*********************************TESTING AREA: IGNORE BELOW THIS LINE************************************************
+<br>
+<br>World service mpga url - tested, works in VLC
+<br>
+
+<audio controls="controls"  id = "audio1">
+  <source src="http://ic.prototype0.net:8000/radio1.mp3" type="audio/mpeg">
+  Your browser does not support the audio tag.
+</audio>
+<button onclick="getNWState1()" type="button">Get network state</button>
+<br>
+
+<audio controls="controls" id = "audio2">
+  <source src="http://ic.prototype0.net:8000/radio2.mp3" type="audio/mpeg">
+  Your browser does not support the audio tag.
+</audio>
+<button onclick="getNWState2()" type="button">Get network state</button>
+<br>
+
+<audio controls="controls" id = "audio3">
+  <source src="http://ic.prototype0.net:8000/radio5l.mp3" type="audio/mpeg">
+  Your browser does not support the audio tag.
+</audio>
+<button onclick="getNWState3()" type="button">Get network state</button>
+
+<script>
+myAudio1=document.getElementById("audio1");
+function getNWState1()
+  { 
+  alert(myAudio1.networkState);
+  } 
+
+myAudio2=document.getElementById("audio2");
+function getNWState2()
+  { 
+  alert(myAudio2.networkState);
+  } 
+
+myAudio3=document.getElementById("audio3");
+function getNWState3()
+  { 
+  alert(myAudio3.networkState);
+  } 
+</script>
+
+</body>
+</html>
