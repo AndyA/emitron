@@ -124,7 +124,7 @@ sub run_encoder {
   unless ($pid) {
     my @k = keys %env;
     local @ENV{@k} = @env{@k};
-    exec 'bash', $encode{script}, @args;
+    exec $encode{script}, @args;
     die;
   }
 
