@@ -49,7 +49,7 @@ my @CHANNELS = (
     encode  => {
       name     => 'commentary.aac',
       bit_rate => '128k',
-      input    => ['system:capture_5'],
+      input    => ['system:capture_1'],
     },
     enabled => 1,
   },
@@ -57,7 +57,7 @@ my @CHANNELS = (
     encode  => {
       name     => 'arena1.aac',
       bit_rate => '128k',
-      input    => ['system:capture_1', 'system:capture_2'],
+      input    => ['system:capture_5', 'system:capture_6'],
     },
     enabled => 1,
   },
@@ -65,7 +65,7 @@ my @CHANNELS = (
     encode  => {
       name     => 'arena2.aac',
       bit_rate => '128k',
-      input    => ['system:capture_3', 'system:capture_4'],
+      input    => ['system:capture_7', 'system:capture_8'],
     },
     enabled => 1,
   },
