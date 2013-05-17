@@ -9,7 +9,7 @@ use Net::Icecast::Source;
 use POSIX qw( mkfifo );
 use Path::Class;
 
-use constant ENVIRONMENT => 'dev';
+use constant ENVIRONMENT => 'test';
 use constant SOURCE      => 'simulation';
 
 my %DEFAULT = (
