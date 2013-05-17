@@ -1,0 +1,11 @@
+Current test server
+Ip 132.185.142.139
+Name ic.prototype0.net
+Icecast port 8000
+Source password 123.$$ices
+
+Production Server
+Ip 132.185.142.140
+Name 5live.kw.bbc.co.uk
+Icecast port 8000
+Source password 123.$$ices
