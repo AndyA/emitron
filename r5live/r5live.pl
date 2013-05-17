@@ -10,6 +10,7 @@ use POSIX qw( mkfifo );
 use Path::Class;
 
 use constant ENVIRONMENT => 'dev';
+use constant SOURCE      => 'simulation';
 
 my %DEFAULT = (
   global => {
@@ -44,34 +45,62 @@ my %DEFAULT = (
   },
 );
 
-my @CHANNELS = (
-  { connect => { mount_point => '/commentary', },
-    encode  => {
-      name     => 'commentary.aac',
-      bit_rate => '128k',
-      input    => ['system:capture_1'],
+my %CHANNELS = (
+  simulation => [
+    { connect => { mount_point => '/commentary', },
+      encode  => {
+        name   => 'commentary.aac',
+        source => '../webroot/stadium/media/commentary.m4a',
+        script => 'encoder/play_aac.sh',
+      },
+      enabled => 1,
     },
-    enabled => 1,
-  },
-  { connect => { mount_point => '/arena1', },
-    encode  => {
-      name     => 'arena1.aac',
-      bit_rate => '128k',
-      input    => ['system:capture_5', 'system:capture_6'],
+    { connect => { mount_point => '/arena1', },
+      encode  => {
+        name   => 'arena1.aac',
+        source => '../webroot/stadium/media/millwall.m4a',
+        script => 'encoder/play_aac.sh',
+      },
+      enabled => 1,
     },
-    enabled => 1,
-  },
-  { connect => { mount_point => '/arena2', },
-    encode  => {
-      name     => 'arena2.aac',
-      bit_rate => '128k',
-      input    => ['system:capture_7', 'system:capture_8'],
+    { connect => { mount_point => '/arena2', },
+      encode  => {
+        name   => 'arena2.aac',
+        source => '../webroot/stadium/media/wigan.m4a',
+        script => 'encoder/play_aac.sh',
+      },
+      enabled => 1,
     },
-    enabled => 1,
-  },
+  ],
+  apogee => [
+    { connect => { mount_point => '/commentary', },
+      encode  => {
+        name     => 'commentary.aac',
+        bit_rate => '128k',
+        input    => ['system:capture_1'],
+      },
+      enabled => 1,
+    },
+    { connect => { mount_point => '/arena1', },
+      encode  => {
+        name     => 'arena1.aac',
+        bit_rate => '128k',
+        input    => ['system:capture_5', 'system:capture_6'],
+      },
+      enabled => 1,
+    },
+    { connect => { mount_point => '/arena2', },
+      encode  => {
+        name     => 'arena2.aac',
+        bit_rate => '128k',
+        input    => ['system:capture_7', 'system:capture_8'],
+      },
+      enabled => 1,
+    },
+  ],
 );
 
-for my $channel (@CHANNELS) {
+for my $channel ( @{ $CHANNELS{&SOURCE} } ) {
   next unless $channel->{enabled};
 
   my $spec = merge $DEFAULT{global}, $DEFAULT{&ENVIRONMENT}, $channel;
@@ -107,7 +136,7 @@ sub launch {
 sub run_encoder {
   my $spec   = shift;
   my %encode = %{ $spec->{encode} };
-  my @args   = @{ delete $encode{input} };
+  my @args   = @{ delete $encode{input} || [] };
   my %env    = ();
   my $fifo   = $encode{fifo} = file( $encode{work}, $encode{name} );
   my $log    = $encode{log} = file( $encode{work}, "$encode{name}.log" );
