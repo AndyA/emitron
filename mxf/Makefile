@@ -1,6 +1,8 @@
 PRXD=proxy
 SRCD=wales
 HLSD=hls
+HLSAD=$(HLSD)/a
+HLSBD=$(HLSD)/b
 
 SRCD16BY9=$(SRCD)/16by9
 MXF16BY9=$(wildcard $(SRCD16BY9)/*.mxf)
@@ -17,15 +19,19 @@ KEY_INT="200"
 KEY_INT_MIN="100"
 
 PRX=$(PRX4BY3) $(PRX16BY9)
-HLS=$(patsubst $(PRXD)/%.mov, $(HLSD)/%/a.m3u8, $(PRX))
+HLSA=$(patsubst $(PRXD)/%.mov, $(HLSAD)/%/a.m3u8, $(PRX))
+HLSB=$(patsubst $(PRXD)/%.mov, $(HLSBD)/%.m3u8, $(PRX))
 
-all: $(HLS)
+all: $(HLSA) $(HLSB)
 
 $(PRXD):
 	mkdir -p $(PRXD)
 
-$(HLSD):
-	mkdir -p $(HLSD)
+$(HLSAD):
+	mkdir -p $(HLSAD)
+
+$(HLSBD):
+	mkdir -p $(HLSBD)
 
 $(PRX16BY9): $(PRXD)/%.mov: $(SRCD16BY9)/%.mxf $(PRXD)
 	ffmpeg -y -i "$<" \
@@ -47,12 +53,32 @@ $(PRX4BY3): $(PRXD)/%.mov: $(SRCD4BY3)/%.mxf $(PRXD)
 		-c:v libx264 -b:v $(VID_BR) \
 		-g $(KEY_INT) -keyint_min $(KEY_INT_MIN) \
 		-aspect 16:9 \
-		"$@"
+		"$@" 
 
-$(HLS): $(HLSD)/%/a.m3u8: $(PRXD)/%.mov $(HLSD)
-	rm -rf `dirname "$@"`
-	mkdir -p `dirname "$@"`
+$(HLSA): $(HLSAD)/%/a.m3u8: $(PRXD)/%.mov $(HLSAD)
+	$(eval _DIR := $(shell dirname "$@"))
+	rm -rf "$(_DIR)"
+	mkdir -p "$(_DIR)"
 	ffmpeg -y -i "$<" -bsf h264_mp4toannexb -c copy -hls_list_size 100000 -hls_time 8 "$@"
+
+$(HLSB): $(HLSBD)/%.m3u8: $(PRXD)/%.mov $(HLSBD)
+	$(eval _DIR := $(shell dirname "$@"))
+	$(eval _BASE := $(shell basename "$@" .m3u8))
+	$(eval _FRAG := $(_DIR)/$(_BASE))
+	rm -rf "$(_FRAG)"
+	mkdir -p "$(_FRAG)"
+	cd "$(_DIR)" && ffmpeg -y \
+		-i "../../$<" \
+	       	-bsf h264_mp4toannexb \
+		-map 0:0 \
+		-map 0:1 \
+		-c copy \
+		-f segment \
+		-segment_time 8 \
+		-segment_format mpegts \
+		-segment_list "$(_BASE).m3u8" \
+		-segment_list_type m3u8 \
+		"$(_BASE)/%08d.ts"
 
 clean:
 	rm -rf $(PRXD) $(HLSD)
