@@ -67,6 +67,7 @@ $(HLSAD)/%/a.m3u8: $(PRXD)/%.mov $(HLSAD)
 	rm -rf "$(_DIR)"
 	mkdir -p "$(_DIR)"
 	ffmpeg -y -i "$<" -bsf h264_mp4toannexb -c copy -hls_list_size 100000 -hls_time 8 "$@"
+	touch "$@"
 
 $(HLSBD)/%.m3u8: $(PRXD)/%.mov $(HLSBD)
 	$(eval _DIR := $(shell dirname "$@"))
@@ -86,6 +87,7 @@ $(HLSBD)/%.m3u8: $(PRXD)/%.mov $(HLSBD)
 		-segment_list "$(_BASE).m3u8" \
 		-segment_list_type m3u8 \
 		"$(_BASE)/%08d.ts"
+	touch "$@"
 
 clean:
 	rm -rf $(PRXD) $(HLSD)
