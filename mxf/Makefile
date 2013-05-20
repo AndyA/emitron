@@ -24,6 +24,13 @@ HLSB=$(patsubst $(PRXD)/%.mov, $(HLSBD)/%.m3u8, $(PRX))
 
 all: $(HLSA) $(HLSB)
 
+$(PRX16BY9): $(SRCD16BY9)
+
+$(PRX4BY3): $(SRCD4BY3)
+
+$(HLSA): $(PRX)
+$(HLSB): $(PRX)
+
 $(PRXD):
 	mkdir -p $(PRXD)
 
@@ -33,10 +40,10 @@ $(HLSAD):
 $(HLSBD):
 	mkdir -p $(HLSBD)
 
-$(PRX16BY9): $(PRXD)/%.mov: $(SRCD16BY9)/%.mxf $(PRXD)
+$(PRXD)/%.mov: $(SRCD16BY9)/%.mxf $(PRXD)
 	ffmpeg -y -i "$<" \
 		$(LIMIT) \
-		-vf format=yuv420p,yadif,crop=720:576:0:32 \
+		-vf 'format=yuv420p,yadif,crop=720:576:0:32' \
 		-s 1024x576 \
 		-c:a libfaac -b:a $(AUD_BR) \
 		-c:v libx264 -b:v $(VID_BR) \
@@ -45,7 +52,7 @@ $(PRX16BY9): $(PRXD)/%.mov: $(SRCD16BY9)/%.mxf $(PRXD)
 		"$@"
 
 
-$(PRX4BY3): $(PRXD)/%.mov: $(SRCD4BY3)/%.mxf $(PRXD)
+$(PRXD)/%.mov: $(SRCD4BY3)/%.mxf $(PRXD)
 	ffmpeg -y -i "$<" \
 		$(LIMIT) \
 		-vf 'format=yuv420p,yadif,crop=720:576:0:32,pad=1024:576:152:0' \
@@ -55,13 +62,13 @@ $(PRX4BY3): $(PRXD)/%.mov: $(SRCD4BY3)/%.mxf $(PRXD)
 		-aspect 16:9 \
 		"$@" 
 
-$(HLSA): $(HLSAD)/%/a.m3u8: $(PRXD)/%.mov $(HLSAD)
+$(HLSAD)/%/a.m3u8: $(PRXD)/%.mov $(HLSAD)
 	$(eval _DIR := $(shell dirname "$@"))
 	rm -rf "$(_DIR)"
 	mkdir -p "$(_DIR)"
 	ffmpeg -y -i "$<" -bsf h264_mp4toannexb -c copy -hls_list_size 100000 -hls_time 8 "$@"
 
-$(HLSB): $(HLSBD)/%.m3u8: $(PRXD)/%.mov $(HLSBD)
+$(HLSBD)/%.m3u8: $(PRXD)/%.mov $(HLSBD)
 	$(eval _DIR := $(shell dirname "$@"))
 	$(eval _BASE := $(shell basename "$@" .m3u8))
 	$(eval _FRAG := $(_DIR)/$(_BASE))
