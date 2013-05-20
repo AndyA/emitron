@@ -1,6 +1,6 @@
 PRXD=proxy
 SRCD=wales
-HLSD=hls
+HLSD=../webroot/wales
 HLSAD=$(HLSD)/a
 HLSBD=$(HLSD)/b
 
