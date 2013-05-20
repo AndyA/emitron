@@ -15,7 +15,8 @@ $(PRX): $(PRXD)/%.mov: $(SRCD)/%.mxf
 		-vf format=yuv420p,yadif,crop=720:576:0:32 \
 		-s 1024x576 \
 		-c:a libfaac -b:a 192k \
-		-c:v libx264 -b:v 5000k \
+		-c:v libx264 -b:v 2000k \
+		-g 800 -keyint_min 400 \
 		-aspect 16:9 \
 		"$@"
 
