@@ -1,30 +1,33 @@
-SRCD16BY9=wales/16by9
-PRXD16BY9=proxy/16by9
-WRPD16BY9=wrap/16by9
-MXF16BY9=$(wildcard $(SRCD16BY9)/*.mxf)
-PRX16BY9=$(patsubst $(SRCD16BY9)/%.mxf, $(PRXD16BY9)/%.mov, $(MXF16BY9))
+PRXD=proxy
+SRCD=wales
+HLSD=hls
 
-SRCD4BY3=wales/4by3
-PRXD4BY3=proxy/4by3
-WRPD4BY3=wrap/4by3
+SRCD16BY9=$(SRCD)/16by9
+MXF16BY9=$(wildcard $(SRCD16BY9)/*.mxf)
+PRX16BY9=$(patsubst $(SRCD16BY9)/%.mxf, $(PRXD)/%.mov, $(MXF16BY9))
+
+SRCD4BY3=$(SRCD)/4by3
 MXF4BY3=$(wildcard $(SRCD4BY3)/*.mxf)
-PRX4BY3=$(patsubst $(SRCD4BY3)/%.mxf, $(PRXD4BY3)/%.mov, $(MXF4BY3))
+PRX4BY3=$(patsubst $(SRCD4BY3)/%.mxf, $(PRXD)/%.mov, $(MXF4BY3))
 
 # LIMIT=-ss 00:03:00 -t 120
-VID_BR="2000k"
+VID_BR="2500k"
 AUD_BR="128k"
-KEY_INT="800"
-KEY_INT_MIN="400"
+KEY_INT="200"
+KEY_INT_MIN="100"
 
-all: $(PRXD4BY3) $(PRX4BY3) $(PRXD16BY9) $(PRX16BY9) 
+PRX=$(PRX4BY3) $(PRX16BY9)
+HLS=$(patsubst $(PRXD)/%.mov, $(HLSD)/%/a.m3u8, $(PRX))
 
-$(PRXD4BY3):
-	mkdir -p $(PRXD4BY3)
+all: $(HLS)
 
-$(PRXD16BY9):
-	mkdir -p $(PRXD16BY9)
+$(PRXD):
+	mkdir -p $(PRXD)
 
-$(PRX16BY9): $(PRXD16BY9)/%.mov: $(SRCD16BY9)/%.mxf
+$(HLSD):
+	mkdir -p $(HLSD)
+
+$(PRX16BY9): $(PRXD)/%.mov: $(SRCD16BY9)/%.mxf $(PRXD)
 	ffmpeg -y -i "$<" \
 		$(LIMIT) \
 		-vf format=yuv420p,yadif,crop=720:576:0:32 \
@@ -36,7 +39,7 @@ $(PRX16BY9): $(PRXD16BY9)/%.mov: $(SRCD16BY9)/%.mxf
 		"$@"
 
 
-$(PRX4BY3): $(PRXD4BY3)/%.mov: $(SRCD4BY3)/%.mxf
+$(PRX4BY3): $(PRXD)/%.mov: $(SRCD4BY3)/%.mxf $(PRXD)
 	ffmpeg -y -i "$<" \
 		$(LIMIT) \
 		-vf 'format=yuv420p,yadif,crop=720:576:0:32,pad=1024:576:152:0' \
@@ -46,7 +49,12 @@ $(PRX4BY3): $(PRXD4BY3)/%.mov: $(SRCD4BY3)/%.mxf
 		-aspect 16:9 \
 		"$@"
 
+$(HLS): $(HLSD)/%/a.m3u8: $(PRXD)/%.mov $(HLSD)
+	rm -rf `dirname "$@"`
+	mkdir -p `dirname "$@"`
+	ffmpeg -y -i "$<" -bsf h264_mp4toannexb -c copy -hls_list_size 100000 -hls_time 8 "$@"
+
 clean:
-	rm -rf $(PRXD4BY3) $(PRXD16BY9)
+	rm -rf $(PRXD) $(HLSD)
 
 
