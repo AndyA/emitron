@@ -34,7 +34,6 @@ sub import {
     unless (@col) { @col = map nice_name($_), @row; next }
     my $rec = {};
     @{$rec}{@col} = @row;
-    delete $rec->{''};
     push @$index, $rec;
   }
 
@@ -46,7 +45,9 @@ sub cook {
   for my $prog (@$idx) {
     my %np = %$prog;
     ( my $base = $np{file_name} ) =~ s/\.mxf$//;
+    $np{name} = $base;
     $np{media}{$_} = sprintf $HLS_PATH{$_}, $base for keys %HLS_PATH;
+    delete @np{ '', };
     push @ni, \%np;
   }
   return \@ni;
