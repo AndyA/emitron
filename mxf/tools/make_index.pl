@@ -8,6 +8,7 @@ use Path::Class;
 use Text::CSV_XS;
 
 use constant PROXY => 'proxy';
+use constant THUMB => '../webroot/wales/t';
 
 my %HLS_PATH = (
   a => 'a/%s/a.m3u8',
@@ -45,12 +46,26 @@ sub cook {
   for my $prog (@$idx) {
     my %np = %$prog;
     ( my $base = $np{file_name} ) =~ s/\.mxf$//;
+    my @thb = read_thumbs($base);
+    unless (@thb) {
+      warn "No thumbnails for $base; skipping\n";
+      next;
+    }
     $np{name} = $base;
     $np{media}{$_} = sprintf $HLS_PATH{$_}, $base for keys %HLS_PATH;
+    $np{thumbs} = { base => "t/$base", count => scalar @thb };
+
     delete @np{ '', };
     push @ni, \%np;
   }
   return \@ni;
+}
+
+sub read_thumbs {
+  my $base = shift;
+  my $td = dir( THUMB, $base );
+  return unless -d $td;
+  grep { /\.jpg$/ } $td->children;
 }
 
 sub proxy_name {
