@@ -31,16 +31,8 @@ $(PRX4BY3): $(SRCD4BY3)
 $(HLSA): $(PRX)
 $(HLSB): $(PRX)
 
-$(PRXD):
-	mkdir -p $(PRXD)
-
-$(HLSAD):
-	mkdir -p $(HLSAD)
-
-$(HLSBD):
-	mkdir -p $(HLSBD)
-
 $(PRXD)/%.mov: $(SRCD16BY9)/%.mxf $(PRXD)
+	mkdir -p $(PRXD)
 	ffmpeg -y -i "$<" \
 		$(LIMIT) \
 		-vf 'format=yuv420p,yadif,crop=720:576:0:32' \
@@ -51,8 +43,8 @@ $(PRXD)/%.mov: $(SRCD16BY9)/%.mxf $(PRXD)
 		-aspect 16:9 \
 		"$@"
 
-
 $(PRXD)/%.mov: $(SRCD4BY3)/%.mxf $(PRXD)
+	mkdir -p $(PRXD)
 	ffmpeg -y -i "$<" \
 		$(LIMIT) \
 		-vf 'format=yuv420p,yadif,crop=720:576:0:32,pad=1024:576:152:0' \
@@ -67,7 +59,6 @@ $(HLSAD)/%/a.m3u8: $(PRXD)/%.mov $(HLSAD)
 	rm -rf "$(_DIR)"
 	mkdir -p "$(_DIR)"
 	ffmpeg -y -i "$<" -bsf h264_mp4toannexb -c copy -hls_list_size 100000 -hls_time 8 "$@"
-	touch "$@"
 
 $(HLSBD)/%.m3u8: $(PRXD)/%.mov $(HLSBD)
 	$(eval _DIR := $(shell dirname "$@"))
@@ -87,7 +78,6 @@ $(HLSBD)/%.m3u8: $(PRXD)/%.mov $(HLSBD)
 		-segment_list "$(_BASE).m3u8" \
 		-segment_list_type m3u8 \
 		"$(_BASE)/%08d.ts"
-	touch "$@"
 
 clean:
 	rm -rf $(PRXD) $(HLSD)
