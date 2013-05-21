@@ -1,136 +1,129 @@
 $(function() {
 
-  var track = [{
-    url: "media/commentary.m4a",
-    name: "commentary"
-  },
-  {
-    url: "media/millwall.m4a",
-    name: "millwall"
-  },
-  {
-    url: "media/wigan.m4a",
-    name: "wigan"
-  }];
+  var SKIP_THUMB = 3;
 
-  var layout = {
-    commentary: track[0],
-    ends: [track[1], track[2]]
-  };
-
-  var SPEED_OF_SOUND = 340.29;
-  var END_TO_END = 140; // Assume 100m pitch, mics set back 20m at each end
-  var SIDE_TO_SIDE = 80; // Approx 80m apart at each end
-  var MIN_DIST = (SIDE_TO_SIDE / 2);
-
-  function positionToDistance(pos) {
-    return (END_TO_END - MIN_DIST) * pos + MIN_DIST;
+  function mkid() {
+    return Array.prototype.slice.call(arguments, 0).join('__');
   }
 
-  // Dist in the range 0 (west) to 1 (east)
-  function positionToDelay(pos) {
-    return positionToDistance(pos) / SPEED_OF_SOUND;
+  function padNumber(n, digits) {
+    var s = Math.floor(n).toString(10);
+    while (s.length < digits) s = "0" + s;
+    return s;
   }
 
-  function positionToGain(pos) {
-    var dist = positionToDistance(pos);
-    // Inverse square
-    return (MIN_DIST * MIN_DIST) / (dist * dist);
+  function thumbName(base, idx) {
+    return base + '/' + padNumber(idx + SKIP_THUMB + 1, 5) + '.jpg';
   }
 
-  function getAudioContext() {
-    if (typeof AudioContext !== "undefined") return new AudioContext();
-    if (typeof webkitAudioContext !== "undefined") return new webkitAudioContext();
-    return null;
+  function getJson(url, cb) {
+    $.ajax({
+      url: url,
+      context: this,
+      dataType: 'json',
+      global: false,
+      success: cb
+    });
   }
 
-  function loadAudio(url, cb) {
-    var rq = new XMLHttpRequest();
-    rq.open("GET", url, true);
-    rq.responseType = "arraybuffer";
-    rq.addEventListener('load', function(evt) {
-      cb(evt.target.response);
-    },
-    false);
-    rq.send();
-  }
-
-  function connectPipe() {
-    for (var i = 1; i < arguments.length; i++) {
-      arguments[i - 1].connect(arguments[i]);
+  function loadThumbs(rec) {
+    for (var i = 0; i < rec.thumbs.number; i++) {
+      (function(img) {
+        img.src = thumbName(rec.thumbs.base, i);
+        img.onload = function(e) {
+          console.log("Loaded ", img.src);
+        }
+      })(new Image());
     }
   }
 
-  function wire() {
-    for (var i = 0; i < track.length; i++) {
-      track[i].gain = ctx.createGainNode();
-      track[i].delay = ctx.createDelayNode(positionToDelay(1) * 2);
-      connectPipe(track[i].src, track[i].delay, track[i].gain, ctx.destination);
+  function switchMedia(id, seek) {
+    console.log("switchMedia(\"" + id + "\", ", seek, ")");
+    if (id != media_id) {
+      media_id = id;
+      //      console.log("Loading " + getField(cat[id], 'media'));
+      $('#title').text(cat[id].title + ' (' + cat[id].tx_date + ')');
+      mp.load({
+        file: cat[id].media.a,
+        seek: seek,
+        onInit: function(player) {
+          player.onTime(function(e) {
+            $('#progress').width(Math.floor(e.position / e.duration * player_width));
+            //            window.location.hash = makeFrag(media_id, e.position);
+          });
+        }
+      });
+      loadThumbs(cat[id]);
+      $('#nav').attr({
+        src: cat[id].thumbs.base + '/barcode.jpeg'
+      });
+      //      loadChapters(id);
+    }
+    else {
+      mp.seek(seek);
     }
   }
 
-  function makeSlider(elt, cb) {
-    elt.append($('<div class="slider"></div>').slider({
-      slide: function(evt, ui) {
-        cb(ui.value / 100);
+  var here = new URLParser(window.location.href);
+  var cat = {};
+
+  var media_id = null;
+
+  var $player = $('#player');
+  var player_width = $player.width();
+  var player_height = $player.height();
+
+  var mp = new MagicPlayer('player', {
+    width: player_width,
+    height: player_height
+  });
+
+  getJson('index.json', function(data) {
+    console.log('data: ', data);
+    var dock = $('#dock');
+    for (var i = 0; i < data.length; i++) {
+      (function(d) {
+        var name = d.name;
+        cat[name] = d;
+        console.log(name);
+        dock.append($('<div class="wrap"></div>').append($('<a></a>').attr({
+          href: '#'
+        }).append($('<img></img>').attr({
+          src: thumbName(d.thumbs.base, d.thumbs.number / 4),
+          width: 192,
+          height: 108
+        })).append($('<div class="over"></div>').append($('<h1></h1>').text(d.title)).append($('<h2></h2>').text(d.tx_date))).click(function(e) {
+          switchMedia(name, 0);
+        })));
+      })(data[i]);
+    }
+
+    $('#nav').click(function(e) {
+      if (media_id) {
+        var cx = (e.pageX - $(this).offset().left) / this.width;
+        var thb = cat[media_id].thumbs.number - SKIP_THUMB;
+        // quantise
+        cx = Math.floor(cx * thb) / thb;
+        mp.seek([cx]);
       }
-    }));
-    cb(0);
-  }
-
-  function setPosition(t, pos) {
-    t.gain.gain.value = positionToGain(pos);
-    t.delay.delayTime.value = positionToDelay(pos);
-    console.log(t.name + ": gain=", t.gain.gain.value, ", delay=", t.delay.delayTime.value);
-  }
-
-  function buildInterface() {
-    var $controls = $('#controls');
-
-    makeSlider($controls, function(value) {
-      layout.commentary.gain.gain.value = value;
-    });
-
-    makeSlider($controls, function(value) {
-      setPosition(layout.ends[0], value);
-      setPosition(layout.ends[1], 1 - value);
-    });
-  }
-
-  function play() {
-    for (var i = 0; i < track.length; i++) {
-      track[i].src.noteOn(0);
-    }
-  }
-
-  function stop() {
-    for (var i = 0; i < track.length; i++) {
-      track[i].src.noteOff(0);
-    }
-  }
-
-  function init() {
-    var j = new Join(function() {
-      console.log("All loaded");
-      $('#play').click(play);
-      $('#stop').click(stop);
-      wire();
-      buildInterface();
-    });
-
-    for (var i = 0; i < track.length; i++) {
-      (function(t, cb) {
-        loadAudio(t.url, function(data) {
-          t.src = ctx.createBufferSource();
-          t.src.buffer = ctx.createBuffer(data, false);
-          console.log("Loaded " + t.url);
-          cb();
+    }).mousemove(function(e) {
+      if (media_id) {
+        var cx = (e.pageX - $(this).offset().left) / this.width;
+        var thb = cat[media_id].thumbs;
+        $('#popup img').attr({
+          src: thumbName(thb.base, (thb.number - SKIP_THUMB) * cx)
         });
-      })(track[i], j.getCallback());
-    }
-  }
+      }
+      $('#popup').show().position({
+        my: 'bottom',
+        at: 'top',
+        of: '#nav',
+        collision: 'fit'
+      });
+    }).mouseleave(function(e) {
+      $('#popup').hide();
+    });
 
-  var ctx = getAudioContext();
-  init();
+  });
 
 });

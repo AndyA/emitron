@@ -1,24 +1,35 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Stadium Audio</title>
+    <title>Welsh Programme Archive</title>
     <link href="css/hot-sneaks/jquery-ui-1.10.3.custom.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet" />
     <script type="text/javascript" src="js/jquery-2.0.0.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.10.3.custom.min.js"></script>
+    <script type="text/javascript" src="/jwplayer/jwplayer.js"></script>
     <script type="text/javascript" src="js/join.js"></script>
+    <script type="text/javascript" src="js/urlparser.js"></script>
+    <script type="text/javascript" src="js/magicplayer.js"></script>
     <script type="text/javascript" src="js/switcher.js"></script>
+    <script>jwplayer.key="2AHTbWlp3ERfmYStCG2V5+1YzHv2bSawVu07CPzQBto="</script>
   </head>
   <body>
-    <a href="#" id="play">play</a>
-    <a href="#" id="stop">stop</a>
-    <div id="controls"></div>
-    <p>
-      Millwall are at the West End
-      Wigan right to left.
-      Wigan in red.
-      Millwall in blue
-    </p>
+    <div id="container">
+      <div id="dock"></div>
+      <div id="browser">
+        <div class="wrap">
+          <h1 id="title">Welsh Programme Archive</h1>
+          <div class="media" id="player"></div>
+          <!--
+          <div class="media" id="chapters"></div>
+          -->
+          <img class="media" id="nav"/>
+          <div class="media" id="progress"></div>
+        </div>
+      </div>
+    </div>
+    <div id="popup" class="popup"><img src="img/blank.jpg" width="192" height="108"></img></div>
+    <div id="details" class="popup"></div>
   </body>
 </html>
 

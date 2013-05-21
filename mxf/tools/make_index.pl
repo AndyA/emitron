@@ -53,7 +53,7 @@ sub cook {
     }
     $np{name} = $base;
     $np{media}{$_} = sprintf $HLS_PATH{$_}, $base for keys %HLS_PATH;
-    $np{thumbs} = { base => "t/$base", count => scalar @thb };
+    $np{thumbs} = { base => "t/$base", number => scalar @thb };
 
     delete @np{ '', };
     push @ni, \%np;

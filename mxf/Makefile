@@ -24,8 +24,9 @@ PRX=$(PRX4BY3) $(PRX16BY9)
 HLSA=$(patsubst $(PRXD)/%.mov, $(HLSAD)/%/a.m3u8, $(PRX))
 HLSB=$(patsubst $(PRXD)/%.mov, $(HLSBD)/%.m3u8, $(PRX))
 THB=$(patsubst $(PRXD)/%.mov, $(THBD)/%/index.json, $(PRX))
+BAR=$(patsubst $(PRXD)/%.mov, $(THBD)/%/barcode.jpeg, $(PRX))
 
-all: $(HLSA) $(HLSB) $(THB) $(INDEX)
+all: $(HLSA) $(HLSB) $(THB) $(BAR) $(INDEX)
 
 $(PRX16BY9): $(SRCD16BY9)
 
@@ -34,6 +35,7 @@ $(PRX4BY3): $(SRCD4BY3)
 $(HLSA): $(PRX)
 $(HLSB): $(PRX)
 $(THB): $(PRX)
+$(BAR): $(THB)
 
 $(PRXD)/%.mov: $(SRCD16BY9)/%.mxf
 	mkdir -p $(PRXD)
@@ -91,6 +93,10 @@ $(THBD)/%/index.json: $(PRXD)/%.mov
 	echo '[' > "$@"; \
 	find "$(_DIR)" -name '*.jpg' -printf "\"%f\",\n" >> "$@"
 	echo ']' >> "$@"
+
+$(THBD)/%/barcode.jpeg: $(THBD)/%/index.json
+	$(eval _DIR := $(shell dirname "$@"))
+	perl ../tools/barcode.pl --width 1024 "$(_DIR)"
 
 $(INDEX): $(THB) index.csv
 	perl tools/make_index.pl index.csv > "$@"
