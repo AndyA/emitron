@@ -4,6 +4,7 @@ HLSD=../webroot/wales
 HLSAD=$(HLSD)/a
 HLSBD=$(HLSD)/b
 THBD=$(HLSD)/t
+INDEX=$(HLSD)/index.json
 
 SRCD16BY9=$(SRCD)/16by9
 MXF16BY9=$(wildcard $(SRCD16BY9)/*.mxf)
@@ -24,7 +25,7 @@ HLSA=$(patsubst $(PRXD)/%.mov, $(HLSAD)/%/a.m3u8, $(PRX))
 HLSB=$(patsubst $(PRXD)/%.mov, $(HLSBD)/%.m3u8, $(PRX))
 THB=$(patsubst $(PRXD)/%.mov, $(THBD)/%/index.json, $(PRX))
 
-all: $(HLSA) $(HLSB) $(THB)
+all: $(HLSA) $(HLSB) $(THB) $(INDEX)
 
 $(PRX16BY9): $(SRCD16BY9)
 
@@ -90,6 +91,9 @@ $(THBD)/%/index.json: $(PRXD)/%.mov
 	echo '[' > "$@"; \
 	find "$(_DIR)" -name '*.jpg' -printf "\"%f\",\n" >> "$@"
 	echo ']' >> "$@"
+
+$(INDEX): $(THB) index.csv
+	perl tools/make_index.pl index.csv > "$@"
 
 clean:
 	rm -rf $(PRXD) $(HLSD)
