@@ -46,7 +46,8 @@ img {
   left: 0; 
   width: 192px;
   padding: 0.3em;
-  background-color: rgba(0,0,0,0.60);
+  text-align: right;
+  background-color: rgba(0,0,0,0.30);
 }
 
 .over h1 {
@@ -55,6 +56,10 @@ img {
 
 .over h2 {
   font-size: 0.6em;
+}
+
+.over * {
+  margin-right: 11px;
 }
 
 #browser {

@@ -92,7 +92,9 @@ $(function() {
           src: thumbName(d.thumbs.base, d.thumbs.number / 4),
           width: 192,
           height: 108
-        })).append($('<div class="over"></div>').append($('<h1></h1>').text(d.title)).append($('<h2></h2>').text(d.tx_date))).click(function(e) {
+        })).append($('<div></div>').attr({
+          class: "over"
+        }).append($('<h1></h1>').text(d.title)).append($('<h2></h2>').text(d.tx_date))).click(function(e) {
           switchMedia(name, 0);
         })));
       })(data[i]);
@@ -115,10 +117,15 @@ $(function() {
         });
       }
       $('#popup').show().position({
-        my: 'bottom',
+        my: 'bottom-10',
         at: 'top',
         of: '#nav',
-        collision: 'fit'
+        using: function(pos, info) {
+          info.element.element.css({
+            left: Math.floor(e.clientX - info.element.width / 2) + 'px',
+            top: pos.top + 'px'
+          });
+        }
       });
     }).mouseleave(function(e) {
       $('#popup').hide();
