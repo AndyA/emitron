@@ -21,12 +21,15 @@ KEY_INT="200"
 KEY_INT_MIN="100"
 
 PRX=$(PRX4BY3) $(PRX16BY9)
+META=$(patsubst $(PRXD)/%.mov, $(PRXD)/%.xml, $(PRX))
 HLSA=$(patsubst $(PRXD)/%.mov, $(HLSAD)/%/a.m3u8, $(PRX))
+HLSAM=$(patsubst $(PRXD)/%.mov, $(HLSAD)/%/a.json, $(PRX))
 HLSB=$(patsubst $(PRXD)/%.mov, $(HLSBD)/%.m3u8, $(PRX))
+HLSBM=$(patsubst $(PRXD)/%.mov, $(HLSBD)/%.json, $(PRX))
 THB=$(patsubst $(PRXD)/%.mov, $(THBD)/%/index.json, $(PRX))
 BAR=$(patsubst $(PRXD)/%.mov, $(THBD)/%/barcode.jpeg, $(PRX))
 
-all: $(HLSA) $(HLSB) $(THB) $(BAR) $(INDEX)
+all: $(HLSA) $(HLSB) $(THB) $(BAR) $(INDEX) $(HLSAM) $(HLSBM)
 
 $(PRX16BY9): $(SRCD16BY9)
 
@@ -36,6 +39,12 @@ $(HLSA): $(PRX)
 $(HLSB): $(PRX)
 $(THB): $(PRX)
 $(BAR): $(THB)
+$(META): $(PRX)
+$(HLSAM): $(META)
+$(HLSBM): $(META)
+
+$(PRXD)/%.xml: $(PRXD)/%.mov
+	mediainfo -f --Output=META "$<" > "$@"
 
 $(PRXD)/%.mov: $(SRCD16BY9)/%.mxf
 	mkdir -p $(PRXD)
@@ -62,7 +71,6 @@ $(PRXD)/%.mov: $(SRCD4BY3)/%.mxf
 
 $(HLSAD)/%/a.m3u8: $(PRXD)/%.mov
 	$(eval _DIR := $(shell dirname "$@"))
-	rm -rf "$(_DIR)"
 	mkdir -p "$(_DIR)"
 	ffmpeg -y -i "$<" -bsf h264_mp4toannexb -c copy -hls_list_size 100000 -hls_time 8 "$@"
 
@@ -70,10 +78,9 @@ $(HLSBD)/%.m3u8: $(PRXD)/%.mov
 	$(eval _DIR := $(shell dirname "$@"))
 	$(eval _BASE := $(shell basename "$@" .m3u8))
 	$(eval _FRAG := $(_DIR)/$(_BASE))
-	rm -rf "$(_FRAG)"
 	mkdir -p "$(_FRAG)"
 	cd "$(_DIR)" && ffmpeg -y \
-		-i "../../$<" \
+		-i "../../../mxf/$<" \
 	       	-bsf h264_mp4toannexb \
 		-map 0:0 \
 		-map 0:1 \
@@ -84,6 +91,16 @@ $(HLSBD)/%.m3u8: $(PRXD)/%.mov
 		-segment_list "$(_BASE).m3u8" \
 		-segment_list_type m3u8 \
 		"$(_BASE)/%08d.ts"
+
+$(HLSAD)/%/a.json: $(PRXD)/%.xml
+	$(eval _DIR := $(shell dirname "$@"))
+	mkdir -p "$(_DIR)"
+	perl tools/tech_meta.pl < "$<" > "$@"
+
+$(HLSBD)/%.json: $(PRXD)/%.xml
+	$(eval _DIR := $(shell dirname "$@"))
+	mkdir -p "$(_DIR)"
+	perl tools/tech_meta.pl < "$<" > "$@"
 
 $(THBD)/%/index.json: $(PRXD)/%.mov
 	$(eval _DIR := $(shell dirname "$@"))
