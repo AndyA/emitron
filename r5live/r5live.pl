@@ -9,7 +9,7 @@ use Net::Icecast::Source;
 use POSIX qw( mkfifo );
 use Path::Class;
 
-use constant ENVIRONMENT => 'test';
+use constant ENVIRONMENT => 'live';
 use constant SOURCE      => 'simulation';
 
 my %DEFAULT = (
@@ -27,6 +27,13 @@ my %DEFAULT = (
       script => 'encoder/jack_aac.sh',
       work   => "tmp/r5live.$$",
       rate   => 48000,
+    },
+  },
+  live => {
+    connect => {
+      password => '123.$$ices',
+      server   => '5live.kw.bbc.co.uk',
+      port     => '8000',
     },
   },
   test => {
