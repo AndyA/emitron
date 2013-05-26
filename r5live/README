@@ -1,0 +1,15 @@
+In a tmux or screen window run
+
+$ jackd -d firewire
+
+And then in another window
+
+$ perl r5live.pl
+
+The configuration is in the source of r5live.pl. The jack mappings can
+be set up in the 'apogee' section of the config. Find channels to
+connect to using:
+
+$ jack_lsp -A
+
+The indented alias name is the one to use.
