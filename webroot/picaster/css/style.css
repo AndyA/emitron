@@ -1,0 +1,15 @@
+body, #container {
+  color: white;
+  background-color: black;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", 
+    Calibri, Helvetica, Arial, sans-serif;
+}
+
+#wrapper {
+  width: 1300px;
+  margin-left: auto;
+  margin-right: auto;
+}
