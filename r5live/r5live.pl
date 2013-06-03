@@ -9,8 +9,8 @@ use Net::Icecast::Source;
 use POSIX qw( mkfifo );
 use Path::Class;
 
-use constant ENVIRONMENT => 'live';
-use constant SOURCE      => 'simulation';
+use constant ENVIRONMENT => 'dev';
+use constant SOURCE      => 'alsa';
 
 my %DEFAULT = (
   global => {
@@ -75,6 +75,17 @@ my %CHANNELS = (
         name   => 'arena2.aac',
         source => '../webroot/stadium/media/wigan.m4a',
         script => 'encoder/play_aac.sh',
+      },
+      enabled => 1,
+    },
+  ],
+  alsa => [
+    { connect => { mount_point => '/commentary', },
+      encode  => {
+        name     => 'commentary.aac',
+        bit_rate => '128k',
+        script   => 'encoder/alsa_aac.sh',
+        input    => ['hw:1,0'],
       },
       enabled => 1,
     },
