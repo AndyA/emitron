@@ -32,6 +32,6 @@
          "aws_secret_access_key" : "7bbGwIxkBJw8rxgNJxbAPy3FrsfhDhg1mC8Yoizy",
          "retry" : 1
       },
-      "enable" : false
+      "enable" : true
    }
 }
