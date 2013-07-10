@@ -1,10 +1,24 @@
 {
    "hls" : {
+      "cleanup" : 1000,
+      "first" : "mag3",
       "manifests" : {
-         "mag1" : "tmp/hls/hls1/mag.m3u8",
-         "mag2" : "tmp/hls/hls2/mag.m3u8",
-         "mag3" : "tmp/hls/hls3/mag.m3u8",
-         "mag4" : "tmp/hls/hls3/mag.m3u8"
+         "mag1" : {
+            "bandwidth" : 450000,
+            "source" : "tmp/hls/hls1/mag.m3u8"
+         },
+         "mag2" : {
+            "bandwidth" : 900000,
+            "source" : "tmp/hls/hls2/mag.m3u8"
+         },
+         "mag3" : {
+            "bandwidth" : 1930000,
+            "source" : "tmp/hls/hls3/mag.m3u8"
+         },
+         "mag4" : {
+            "bandwidth" : 2900000,
+            "source" : "tmp/hls/hls4/mag.m3u8"
+         }
       },
       "work" : "tmp/s3/mag"
    },
@@ -17,6 +31,7 @@
          "aws_access_key_id" : "AKIAI6GJFGORYS6CWV6A",
          "aws_secret_access_key" : "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",
          "retry" : 1
-      }
+      },
+      "enable" : false
    }
 }
