@@ -149,7 +149,11 @@ sub update {
     }
   }
 
+  my $before = m3u8_count($m3u8out);
   $m3u8out->cleanup( $cfg->{hls}{cleanup} || 1000 );
+  my $after = m3u8_count($m3u8out);
+
+  $m3u8out->meta->{EXT_X_MEDIA_SEQUENCE}++ if $after != $before;
 
   $m3u8out->write($m3u8_file);
 
@@ -162,6 +166,10 @@ sub update {
   }
 
   return $m3u8_url;
+}
+
+sub m3u8_count {
+  scalar map { @$_ } @{ shift->seg };
 }
 
 sub load_map {
