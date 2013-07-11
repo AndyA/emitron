@@ -1,7 +1,13 @@
 {
    "hls" : {
       "cleanup" : 1000,
-      "first" : "mag3",
+      "disabled" : {
+         "mag3" : {
+            "bandwidth" : 1930000,
+            "source" : "tmp/hls/hls3/mag.m3u8"
+         }
+      },
+      "first" : "mag2",
       "manifests" : {
          "mag1" : {
             "bandwidth" : 450000,
@@ -10,10 +16,6 @@
          "mag2" : {
             "bandwidth" : 900000,
             "source" : "tmp/hls/hls2/mag.m3u8"
-         },
-         "mag3" : {
-            "bandwidth" : 1930000,
-            "source" : "tmp/hls/hls3/mag.m3u8"
          },
          "mag4" : {
             "bandwidth" : 2900000,
