@@ -14,10 +14,6 @@
          "mag3" : {
             "bandwidth" : 1930000,
             "source" : "tmp/hls/hls3/mag.m3u8"
-         },
-         "mag4" : {
-            "bandwidth" : 2900000,
-            "source" : "tmp/hls/hls4/mag.m3u8"
          }
       },
       "work" : "tmp/s3/mag"
