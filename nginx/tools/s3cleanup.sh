@@ -2,7 +2,7 @@
 
 pid="v0001phs"
 
-for b in {1..3}; do
+for b in {1..4}; do
   s3cmd del -r s3://thespace-media-live/$pid/mag${b} 
   s3cmd del s3://thespace-media-live/$pid/mag${b}.m3u8
 done
