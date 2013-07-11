@@ -3,7 +3,7 @@
 in="$1"
 out="$2"
 
-ffmpeg -i "$in" \
+/opt/ffmpeg/bin/ffmpeg -i "$in" \
   -c copy \
   -f flv "$out" 2>> logs/ffmpeg-hls3.log
 
