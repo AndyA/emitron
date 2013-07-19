@@ -14,7 +14,7 @@ use Time::Local qw( timegm );
 use XML::LibXML::XPathContext;
 use XML::LibXML;
 
-use constant ELVIS => 'app/public/asset/elvis';
+use constant ELVIS => 'fail/app/public/asset/elvis';
 use constant HOST  => 'localhost';
 use constant USER  => 'root';
 use constant PASS  => '';
@@ -44,7 +44,7 @@ sub import_elvis {
       eval {
         my $rel = $obj->absolute->relative(ELVIS);
         my ( $kind, $base ) = split /\//, $rel;
-        ( my $jpg = $rel ) =~ s/\.xml$/.jpg/;
+        ( my $jpg = $obj ) =~ s/\.xml$/.jpg/;
         ( my $id  = $base ) =~ s/\.xml$//;
         my $fh = $obj->openr;
         $fh->binmode(':encoding(cp1252)');
@@ -91,7 +91,7 @@ sub import_image {
         location_id => ref_data( $dbh, 'elvis_location', $rec->{location} ),
         news_restriction_id =>
          ref_data( $dbh, 'elvis_news_restriction', $rec->{newsrestrictions} ),
-        origin_date => fmt_dt( parse_dt( $rec->{origindate} ) ),
+        origin_date => cvt_dt( $rec->{origindate} ),
         personality_id =>
          ref_data( $dbh, 'elvis_personality', $rec->{personalities} ),
         photographer_id =>
@@ -100,6 +100,7 @@ sub import_image {
         width      => $w,
       };
 
+      insert( $dbh, 'elvis_image', $img_rec )
     }
   );
 }
@@ -117,6 +118,7 @@ sub transaction {
 
 sub ref_data {
   my ( $dbh, $tbl, $value ) = @_;
+  return undef unless defined $value && length $value;
   my ( $sql, @bind ) = make_select( $tbl, { name => $value }, ['id'] );
   my ($id) = $dbh->selectrow_array( $sql, {}, @bind );
   return $id if defined $id;
@@ -135,10 +137,17 @@ sub parse_elvis {
   }
 }
 
+sub cvt_dt {
+  my $tm = parse_dt(shift);
+  return undef unless defined $tm;
+  return fmt_dt($tm);
+}
+
 sub fmt_dt { strftime '%Y-%m-%d', gmtime shift }
 
 sub parse_dt {
   my $dt = shift;
+  return undef if $dt eq '' || $dt eq '00000000';
   die "Bad date: $dt\n" unless $dt =~ /^(\d\d\d\d)(\d\d)(\d\d)$/;
   my ( $y, $m, $d ) = ( $1, $2, $3 );
   return timegm( 0, 0, 0, $d, $m - 1, $y );
