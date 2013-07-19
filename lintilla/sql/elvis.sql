@@ -147,29 +147,6 @@ LOCK TABLES `elvis_image` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `elvis_image_personality`
---
-
-DROP TABLE IF EXISTS `elvis_image_personality`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `elvis_image_personality` (
-  `image_acno` int(10) unsigned NOT NULL COMMENT 'Image id',
-  `personality_id` int(10) unsigned NOT NULL COMMENT 'Personality id',
-  PRIMARY KEY (`image_acno`,`personality_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `elvis_image_personality`
---
-
-LOCK TABLES `elvis_image_personality` WRITE;
-/*!40000 ALTER TABLE `elvis_image_personality` DISABLE KEYS */;
-/*!40000 ALTER TABLE `elvis_image_personality` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `elvis_kind`
 --
 
