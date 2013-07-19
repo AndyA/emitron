@@ -9,7 +9,7 @@ use Path::Class;
 use XML::LibXML::XPathContext;
 use XML::LibXML;
 
-use constant ELVIS => 'webroot/elvis';
+use constant ELVIS => 'app/public/asset/elvis';
 use constant STASH => file( ELVIS, 'stash.json' );
 
 my %db = ();
@@ -26,7 +26,6 @@ find {
       my $fh = $obj->openr;
       $fh->binmode(':encoding(cp1252)');
       my $xml = do { local $/; <$fh> };
-
       my $dd = parse_elvis($xml);
       $db{$id}{$kind} = $dd;
     }
