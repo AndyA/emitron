@@ -1,0 +1,29 @@
+{
+   "hls" : {
+      "cleanup" : 1000,
+      "first" : "mag3",
+      "manifests" : {
+         "mag2" : {
+            "bandwidth" : 900000,
+            "source" : "tmp/hls/hls2/mag.m3u8"
+         },
+         "mag3" : {
+            "bandwidth" : 1930000,
+            "source" : "tmp/hls/hls3/mag.m3u8"
+         }
+      },
+      "work" : "tmp/s3/mag"
+   },
+   "s3" : {
+      "config" : {
+         "bucket" : "thespace-media-live",
+         "key" : "v0001r7c"
+      },
+      "connect" : {
+         "aws_access_key_id" : "AKIAI6GJFGORYS6CWV6A",
+         "aws_secret_access_key" : "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",
+         "retry" : 1
+      },
+      "enable" : true
+   }
+}
