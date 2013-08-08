@@ -8,7 +8,7 @@ out="$2"
   -c:v libx264 -vprofile main \
   -s 640x360 \
   -b:v 800k \
-  -c:a libfaac -ar 44100 -ac 2 -b:a 96k \
+  -c:a libfaac -ar 44100 -ac 2 -b:a 128k \
   -f flv "$out" 2>> logs/ffmpeg-hls2.log
 
 # vim:ts=2:sw=2:sts=2:et:ft=sh
