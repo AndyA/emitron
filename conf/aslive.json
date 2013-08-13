@@ -1,5 +1,6 @@
 {
    "general" : {
+      "grace" : 10,
       "maxdelete" : 10,
       "work" : "tmp"
    },

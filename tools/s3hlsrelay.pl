@@ -109,10 +109,7 @@ sub spawn_worker {
     my $ttl = ( $m3u8->meta->{EXT_X_TARGETDURATION} || 4 ) / 2;
 
     if ( $m3u8->segment_count ) {
-      for ( values %state ) {
-        s/^OLD(\d+)$/'OLD' . ($1 + 1)/e;
-        $_ = 'OLD1' if $_ eq 'CURRENT';
-      }
+      $_++ for values %state;
       for my $seg ( map { @$_ } @{ $m3u8->seg } ) {
         my $src  = URI->new_abs( $seg->{uri}, $url );
         my $dst  = $tsm->($src);
@@ -123,7 +120,7 @@ sub spawn_worker {
           debug "$src -> $loc";
         }
         $seg->{uri} = $dst;
-        $state{$dloc} = 'CURRENT';
+        $state{$dloc} = 0;
       }
 
       if ( $cfg->{s3}{enable} ) {
@@ -135,7 +132,7 @@ sub spawn_worker {
         debug "Updated ", $obj->uri;
       }
 
-      my @old = sort grep { $state{$_} eq 'OLD10' } keys %state;
+      my @old = sort grep { $state{$_} >= $cfg->{general}{grace} } keys %state;
 
       @old = splice @old, 0, $cfg->{general}{maxdelete}
        if defined $cfg->{general}{maxdelete};
@@ -167,7 +164,7 @@ sub load_state {
   my $stm = $bucket->list( { prefix => $prefix } );
   until ( $stm->is_done ) {
     for my $obj ( $stm->items ) {
-      $state->{ $obj->key } = 'CURRENT';
+      $state->{ $obj->key } = 0;
     }
   }
 }
