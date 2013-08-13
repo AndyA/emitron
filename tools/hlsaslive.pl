@@ -63,11 +63,11 @@ sub mk_seg_iter {
     my $seg   = shift @{ $seg[0] };
     my $disco = !defined $seg;
     if ($disco) {
-      push @$seg, shift @$seg until @{ $seg[0] };
+      push @seg, shift @seg until @{ $seg[0] };
       $seg = shift @{ $seg[0] };
     }
     push @{ $seg[-1] }, $seg;
-    return ( $seg, $disco );
+    return ( dclone $seg, $disco );
   };
 }
 
