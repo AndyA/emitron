@@ -1,5 +1,6 @@
 {
    "general" : {
+      "maxdelete" : 10,
       "work" : "tmp"
    },
    "relay" : [
