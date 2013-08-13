@@ -20,8 +20,9 @@ use URI;
 
 sub debug(@) {
   my $ts = strftime '%Y-%m-%d %H:%M:%S', localtime;
+  my $id = sprintf '%6d', $$;
   for my $ln ( split /\n/, join '', @_ ) {
-    print "$ts $ln\n";
+    print "$ts [$id] $ln\n";
   }
 }
 
@@ -32,13 +33,17 @@ my $cfg  = JSON->new->decode( scalar file($config)->slurp );
 my $work = dir( $cfg->{general}{work} );
 $work->mkpath;
 
-my $s3     = Net::Amazon::S3->new( $cfg->{s3}{connect} );
-my $s3c    = Net::Amazon::S3::Client->new( s3 => $s3 );
-my $bucket = $s3c->bucket( name => $cfg->{s3}{config}{bucket} );
-
+my $bucket = get_bucket();
 relay( $bucket, @{ $cfg->{relay} } );
 
 wait;
+
+sub get_bucket {
+  my $s3     = Net::Amazon::S3->new( $cfg->{s3}{connect} );
+  my $s3c    = Net::Amazon::S3::Client->new( s3 => $s3 );
+  my $bucket = $s3c->bucket( name => $cfg->{s3}{config}{bucket} );
+  return $bucket;
+}
 
 sub relay {
   my ( $bucket, @stm ) = @_;
@@ -63,26 +68,29 @@ sub relay {
       }
     );
 
-    my $pid = spawn_worker( $bucket, $_, $path, $m3m ) for @leaf;
+    my $pid = spawn_worker( $_, $path, $m3m ) for @leaf;
   }
 }
 
-sub tmp_file { file( $cfg->{general}{work}, $next_tmp++ ) }
+sub tmp_file { file( $cfg->{general}{work}, join '.', $$, $next_tmp++ ) }
 
 sub spawn_worker {
-  my ( $bucket, $url, $path, $m3m ) = @_;
+  my ( $url, $path, $m3m ) = @_;
   my $pid = fork;
   die "Fork failed: $!\n" unless defined $pid;
   return $pid if $pid;
   # FORKED
 
-  my $out = $path . $m3m->($url);
-  my $tsm = make_ts_mapper($out);
+  my $bucket = get_bucket();
+  my $out    = $path . $m3m->($url);
+  my $tsm    = make_ts_mapper($out);
   debug "worker($url -> $out)";
 
   my %state = ();
   if ( $cfg->{s3}{enable} ) {
+    debug "Loading state for $out";
     load_state( $bucket, $out, \%state );
+    debug "State loaded, ", scalar keys %state, " items found";
   }
 
   my $ua = LWP::UserAgent->new;
@@ -142,11 +150,12 @@ sub spawn_worker {
 sub load_state {
   my ( $bucket, $loc, $state ) = @_;
   my ( $path, $name, undef ) = split_path($loc);
-  my $stm = $bucket->list( { prefix => "$path$name" } );
+  my $prefix = "$path$name/";
+  debug "Scanning $prefix";
+  my $stm = $bucket->list( { prefix => $prefix } );
   until ( $stm->is_done ) {
     for my $obj ( $stm->items ) {
       $state->{ $obj->key } = 'CURRENT';
-      debug "Found ", $obj->key;
     }
   }
 }
