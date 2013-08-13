@@ -13,9 +13,8 @@ my $xml = do { local $/; <> };
 my $dom = XML::LibXML->load_xml( string => $xml );
 my $xp = XML::LibXML::XPathContext->new($dom);
 
-my $meta = { media => { duration => find_best( $xp, 'Duration' ) / 1000, 
-   },
- };
+my $meta
+ = { media => { duration => find_best( $xp, 'Duration' ) / 1000, }, };
 print JSON->new->pretty->canonical->encode($meta);
 
 sub find_best {
