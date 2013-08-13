@@ -88,21 +88,21 @@ sub hlsaslive {
     for my $mf (@m) {
       my ( $in, $out, $iter, $m3u8 ) = @$mf;
       my ( $seg, $disco ) = $iter->();
+
       $m3u8->push_discontinuity if $disco;
+
       $seg->{uri}
        = file( $seg->{uri} )->absolute( file($in)->parent )
        ->relative( file($out)->parent )
        unless $seg->{uri} =~ /^\w+:/;
-      debug "$seg->{uri} $seg->{duration}\n";
+
+      debug "$seg->{uri} $seg->{duration}";
       $m3u8->push_segment($seg);
-      $dur = $seg->{duration} unless defined $dur && $dur < $seg->{duration};
 
-      my $before = $m3u8->segment_count;
-      $m3u8->cleanup(100);
-      my $after = $m3u8->segment_count;
+      $dur = $seg->{duration}
+       unless defined $dur && $dur < $seg->{duration};
 
-      $m3u8->meta->{EXT_X_MEDIA_SEQUENCE}++ if $after != $before;
-      $m3u8->write($out);
+      $m3u8->rotate(100)->write($out);
     }
     sleep $dur - ( time - $now );
   }

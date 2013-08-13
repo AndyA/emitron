@@ -1,0 +1,33 @@
+{
+   "general" : {
+      "work" : "tmp"
+   },
+   "relay" : [
+      {
+         "enable" : false,
+         "path" : "henrylive1/live.m3u8",
+         "uri" : "http://newstream.hexten.net/ace/ACE330live/ACE330.m3u8"
+      },
+      {
+         "enable" : true,
+         "path" : "henrylive2/live.m3u8",
+         "uri" : "http://newstream.hexten.net/ace/ACE439live/ACE439.m3u8"
+      },
+      {
+         "enable" : false,
+         "path" : "henrylive3/live.m3u8",
+         "uri" : "http://ernie.hexten.net:6081/index.m3u8"
+      }
+   ],
+   "s3" : {
+      "config" : {
+         "bucket" : "thespace-media-test"
+      },
+      "connect" : {
+         "aws_access_key_id" : "AKIAI4Q4VVQ6IZX76VYQ",
+         "aws_secret_access_key" : "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",
+         "retry" : 1
+      },
+      "enable" : true
+   }
+}

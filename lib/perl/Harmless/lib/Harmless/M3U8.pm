@@ -77,6 +77,15 @@ sub segment_count {
   return $count;
 }
 
+sub rotate {
+  my ( $self, $segs ) = @_;
+  my $before = $self->segment_count;
+  $self->cleanup(100);
+  my $after = $self->segment_count;
+  $self->meta->{EXT_X_MEDIA_SEQUENCE}++ if $after != $before;
+  $self;
+}
+
 sub push_segment {
   my ( $self, @seg ) = @_;
   push @{ $self->seg->[-1] }, @seg;
