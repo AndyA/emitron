@@ -96,7 +96,8 @@ sub spawn_worker {
   my $ua = LWP::UserAgent->new;
 
   while () {
-    my $now  = time;
+    my $now = time;
+
     my $resp = $ua->get($url);
     if ( $resp->is_error ) {
       debug "WARNING: ", $resp->status_line;
@@ -104,39 +105,43 @@ sub spawn_worker {
       next;
     }
 
-    for ( values %state ) { $_ = 'OLD' if $_ eq 'CURRENT' }
-
     my $m3u8 = Harmless::M3U8->new->parse( $resp->content );
-    for my $seg ( map { @$_ } @{ $m3u8->seg } ) {
-      my $src  = URI->new_abs( $seg->{uri}, $url );
-      my $dst  = $tsm->($src);
-      my $dloc = $path . $dst;
-      unless ( $state{$dloc} ) {
-        my $loc = put_url( $src, $bucket, $dloc, 'video/MP2T' );
-        next unless defined $loc;
-        debug "$src -> $loc";
+    my $ttl = ( $m3u8->meta->{EXT_X_TARGETDURATION} || 4 ) / 2;
+
+    if ( $m3u8->segment_count ) {
+      for ( values %state ) { $_ = 'OLD' if $_ eq 'CURRENT' }
+      for my $seg ( map { @$_ } @{ $m3u8->seg } ) {
+        my $src  = URI->new_abs( $seg->{uri}, $url );
+        my $dst  = $tsm->($src);
+        my $dloc = $path . $dst;
+        unless ( exists $state{$dloc} ) {
+          my $loc = put_url( $src, $bucket, $dloc, 'video/MP2T' );
+          next unless defined $loc;
+          debug "$src -> $loc";
+        }
+        $seg->{uri} = $dst;
+        $state{$dloc} = 'CURRENT';
       }
-      $seg->{uri} = $dst;
-      $state{$dloc} = 'CURRENT';
+
+      if ( $cfg->{s3}{enable} ) {
+        my $obj = object( $bucket, $out, 'application/x-mpegURL', $ttl );
+        my $tmpf = tmp_file;
+        $m3u8->write($tmpf);
+        $obj->put_filename($tmpf);
+        $tmpf->remove;
+        debug "Updated ", $obj->uri;
+      }
+
+      my @old = sort grep { $state{$_} eq 'OLD' } keys %state;
+      for my $key (@old) {
+        my $obj = $bucket->object( key => $key );
+        $obj->delete;
+        delete $state{$key};
+        debug "Removed $key";
+      }
     }
-
-    my $ttl = $m3u8->meta->{EXT_X_TARGETDURATION} / 2;
-
-    if ( $cfg->{s3}{enable} ) {
-      my $obj = object( $bucket, $out, 'application/x-mpegURL', $ttl );
-      my $tmpf = tmp_file;
-      $m3u8->write($tmpf);
-      $obj->put_filename($tmpf);
-      $tmpf->remove;
-      debug "Updated ", $obj->uri;
-    }
-
-    my @old = sort grep { $state{$_} eq 'OLD' } keys %state;
-    for my $key (@old) {
-      my $obj = $bucket->object( key => $key );
-      $obj->delete;
-      delete $state{$key};
-      debug "Removed $key";
+    else {
+      debug "WARNING: empty m3u8: $url";
     }
 
     my $sleep = $ttl - ( time - $now );
