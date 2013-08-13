@@ -58,6 +58,7 @@ sub _make_tag_formatter {
     EXT_X_TARGETDURATION => 'i',
     EXT_X_VERSION        => 'i',
     EXT_X_PLAYLIST_TYPE  => ['EVENT', 'VOD'],
+    EXT_X_ALLOW_CACHE    => ['YES', 'NO'],
     EXT_X_MEDIA          => {
       require => {},
       allow   => {
