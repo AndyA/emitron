@@ -82,7 +82,7 @@ sub rotate {
   my $before = $self->segment_count;
   $self->cleanup(100);
   my $after = $self->segment_count;
-  $self->meta->{EXT_X_MEDIA_SEQUENCE}++ if $after != $before;
+  $self->meta->{EXT_X_MEDIA_SEQUENCE} += ( $before - $after );
   $self;
 }
 
