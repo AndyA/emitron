@@ -9,7 +9,7 @@ out="$2"
   -s 1280x720 \
   -b:v 2000k \
   -c:a libfaac -ar 44100 -ac 2 -b:a 128k \
-  -f flv "$out" 2>> logs/ffmpeg-hls2.log
+  -f flv "$out" 2>> logs/ffmpeg-hls3.log
 
 # vim:ts=2:sw=2:sts=2:et:ft=sh
 
