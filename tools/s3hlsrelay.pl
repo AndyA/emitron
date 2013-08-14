@@ -92,11 +92,17 @@ sub make_stream_window {
       $curr->meta->{EXT_X_MEDIA_SEQUENCE} += $next->segment_count;
     }
     if ($prev) {
+      # TODO is ffmpeg failing to update the m3u8 atomically?
+      if ( $next->segment_count < $prev->segment_count - 2 ) {
+        debug "WARNING: segment loss (", $next->segment_count, " < ",
+         $prev->segment_count, ")";
+        return $curr;
+      }
       my $seg = $next->seg;
       my ( $rn, $pos )
        = $next->segment_index(
         $prev->segment_count + $prev->sequence - $next->sequence );
-      while ( $rn < @$seg ) {
+      while ( defined $rn && $rn < @$seg ) {
         $curr->push_discontinuity if $pos == 0 && $rn > 0;
         my $run = $seg->[$rn++];
         $curr->push_segment( @{$run}[$pos .. $#$run] );
@@ -152,7 +158,7 @@ sub spawn_worker {
       next;
     }
 
-    my $m3u8 = Harmless::M3U8->new->parse( $resp->content );
+    my $m3u8 = $filter->( Harmless::M3U8->new->parse( $resp->content ) );
     my $ttl = ( $m3u8->meta->{EXT_X_TARGETDURATION} || 4 ) / 2;
 
     if ( $m3u8->segment_count ) {
