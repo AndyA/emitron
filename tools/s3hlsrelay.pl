@@ -68,14 +68,56 @@ sub relay {
       }
     );
 
-    my $pid = spawn_worker( $_, $path, $m3m ) for @leaf;
+    my $pid = spawn_worker( $_, $path, $m3m, $stream ) for @leaf;
   }
 }
 
 sub tmp_file { file( $cfg->{general}{work}, join '.', $$, $next_tmp++ ) }
 
+sub stream_latest {
+  my ( $pla, $plb ) = @_;
+
+  return $plb->segment_index(
+    $pla->segment_count + $pla->sequence - $plb->sequence );
+}
+
+sub make_stream_window {
+  my $rotate = shift;
+  my ( $prev, $curr );
+  return sub {
+    my $next = shift;
+    unless ($curr) {
+      $curr = dclone $next;
+      $curr->seg( [[]] )->closed(0);
+      $curr->meta->{EXT_X_MEDIA_SEQUENCE} += $next->segment_count;
+    }
+    if ($prev) {
+      my $seg = $next->seg;
+      my ( $rn, $pos )
+       = $next->segment_index(
+        $prev->segment_count + $prev->sequence - $next->sequence );
+      while ( $rn < @$seg ) {
+        $curr->push_discontinuity if $pos == 0 && $rn > 0;
+        my $run = $seg->[$rn++];
+        $curr->push_segment( @{$run}[$pos .. $#$run] );
+        $pos = 0;
+      }
+    }
+    $prev = dclone $next;
+    $curr->rotate($rotate) if defined $rotate;
+    return $curr;
+  };
+}
+
+sub make_stream_direct {
+  sub { $_[0] }
+}
+
 sub spawn_worker {
-  my ( $url, $path, $m3m ) = @_;
+  my ( $url, $path, $m3m, $stream ) = @_;
+
+  my $mode = $stream->{mode} || 'direct';
+
   my $pid = fork;
   die "Fork failed: $!\n" unless defined $pid;
   return $pid if $pid;
@@ -92,6 +134,11 @@ sub spawn_worker {
     load_state( $bucket, $out, \%state );
     debug "State loaded, ", scalar keys %state, " items found";
   }
+
+  my $filter
+   = $mode eq 'direct' ? make_stream_direct()
+   : $mode eq 'window' ? make_stream_window( $stream->{window} || 900 )
+   :                     die "Bad stream mode: $mode\n";
 
   my $ua = LWP::UserAgent->new;
 

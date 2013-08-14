@@ -77,6 +77,19 @@ sub segment_count {
   return $count;
 }
 
+sub sequence { shift->meta->{EXT_X_MEDIA_SEQUENCE} || 0 }
+
+sub segment_index {
+  my ( $self, $pos ) = @_;
+  my $segs = $self->seg;
+  for my $rn ( 0 .. $#$segs ) {
+    my $sz = @{ $segs->[$rn] };
+    return ( $rn, $pos ) if $pos < $sz;
+    $pos -= $sz;
+  }
+  return;
+}
+
 sub rotate {
   my ( $self, $segs ) = @_;
   my $before = $self->segment_count;
