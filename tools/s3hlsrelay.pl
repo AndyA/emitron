@@ -85,6 +85,7 @@ sub stream_latest {
 
 sub make_stream_window {
   my $rotate = shift;
+  debug "Rotation window: $rotate" if defined $rotate;
   my ( $prev, $curr );
   return sub {
     my $next = shift;
@@ -98,7 +99,7 @@ sub make_stream_window {
       if ( HACK1 && $next->segment_count < $prev->segment_count - 2 ) {
         debug "WARNING: segment loss (", $next->segment_count, " < ",
          $prev->segment_count, ")";
-        return $curr;
+        return dclone $curr;
       }
       my $seg = $next->seg;
       my ( $rn, $pos )
