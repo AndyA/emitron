@@ -93,7 +93,7 @@ sub segment_index {
 sub rotate {
   my ( $self, $segs ) = @_;
   my $before = $self->segment_count;
-  $self->cleanup(100);
+  $self->cleanup($segs);
   my $after = $self->segment_count;
   $self->meta->{EXT_X_MEDIA_SEQUENCE} += ( $before - $after );
   $self;
