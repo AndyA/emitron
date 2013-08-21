@@ -1,0 +1,34 @@
+{
+   "general" : {
+      "grace" : 10,
+      "maxdelete" : 10,
+      "work" : "tmp"
+   },
+   "relay" : [
+      {
+         "enable" : true,
+         "mode" : "window",
+         "path" : "henrylive4/henrylive4.m3u8",
+         "uri" : "http://newstream.hexten.net/henry/live.m3u8",
+         "window" : 900
+      },
+      {
+         "enable" : true,
+         "mode" : "window",
+         "path" : "henrylive5/henrylive5.m3u8",
+         "uri" : "http://newstream.hexten.net/henry/throne.m3u8",
+         "window" : 900
+      }
+   ],
+   "s3" : {
+      "config" : {
+         "bucket" : "thespace-media-live"
+      },
+      "connect" : {
+         "aws_access_key_id" : "AKIAI6GJFGORYS6CWV6A",
+         "aws_secret_access_key" : "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",
+         "retry" : 1
+      },
+      "enable" : true
+   }
+}

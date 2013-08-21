@@ -151,6 +151,7 @@ sub spawn_worker {
   while () {
     my $now = time;
 
+    debug "GET $url";
     my $resp = $ua->get($url);
     if ( $resp->is_error ) {
       debug "WARNING: ", $resp->status_line;

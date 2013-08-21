@@ -1,0 +1,27 @@
+{
+   "general" : {
+      "grace" : 10,
+      "maxdelete" : 10,
+      "work" : "tmp"
+   },
+   "relay" : [
+      {
+         "enable" : true,
+         "mode" : "window",
+         "path" : "henrylive5/henrylive5.m3u8",
+         "uri" : "http://newstream.hexten.net/henry/throne1/tc1.m3u8",
+         "window" : 900
+      }
+   ],
+   "s3" : {
+      "config" : {
+         "bucket" : "thespace-media-test"
+      },
+      "connect" : {
+         "aws_access_key_id" : "AKIAI4Q4VVQ6IZX76VYQ",
+         "aws_secret_access_key" : "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",
+         "retry" : 1
+      },
+      "enable" : true
+   }
+}
