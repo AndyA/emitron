@@ -10,14 +10,14 @@
          "mode" : "window",
          "path" : "henrylive4/henrylive4.m3u8",
          "uri" : "http://newstream.hexten.net/henry/live.m3u8",
-         "window" : 20
+         "window" : 10
       },
       {
          "enable" : true,
          "mode" : "window",
          "path" : "henrylive5/henrylive5.m3u8",
          "uri" : "http://newstream.hexten.net/henry/throne.m3u8",
-         "window" : 40
+         "window" : 20
       }
    ],
    "s3" : {

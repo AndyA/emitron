@@ -18,7 +18,7 @@ use Storable qw( dclone );
 use Time::HiRes qw( sleep time );
 use URI;
 
-use constant HACK1 => 0;
+use constant FFMPEG_NON_ATOMIC_HACK => 0;
 
 sub debug(@) {
   my $ts = strftime '%Y-%m-%d %H:%M:%S', localtime;
@@ -96,7 +96,8 @@ sub make_stream_window {
     }
     if ($prev) {
       # TODO is ffmpeg failing to update the m3u8 atomically?
-      if ( HACK1 && $next->segment_count < $prev->segment_count - 2 ) {
+      if ( FFMPEG_NON_ATOMIC_HACK
+        && $next->segment_count < $prev->segment_count - 2 ) {
         debug "WARNING: segment loss (", $next->segment_count, " < ",
          $prev->segment_count, ")";
         return dclone $curr;
@@ -152,62 +153,69 @@ sub spawn_worker {
   my $ua = LWP::UserAgent->new;
 
   while () {
-    my $now = time;
+    eval {
+      my $now = time;
 
-    debug "GET $url";
-    my $resp = $ua->get($url);
-    if ( $resp->is_error ) {
-      debug "WARNING: $url: ", $resp->status_line;
-      sleep 10;
-      next;
-    }
+      debug "GET $url";
+      my $resp = $ua->get($url);
+      if ( $resp->is_error ) {
+        debug "WARNING: $url: ", $resp->status_line;
+        sleep 10;
+        next;
+      }
 
-    my $m3u8 = $filter->( Harmless::M3U8->new->parse( $resp->content ) );
-    my $ttl = ( $m3u8->meta->{EXT_X_TARGETDURATION} || 4 ) / 2;
+      my $m3u8 = $filter->( Harmless::M3U8->new->parse( $resp->content ) );
+      my $ttl = ( $m3u8->meta->{EXT_X_TARGETDURATION} || 4 ) / 2;
 
-    if ( $m3u8->segment_count ) {
-      $_++ for values %state;
-      for my $seg ( map { @$_ } @{ $m3u8->seg } ) {
-        my $src  = URI->new_abs( $seg->{uri}, $url );
-        my $dst  = $tsm->($src);
-        my $dloc = $path . $dst;
-        unless ( exists $state{$dloc} ) {
-          my $loc = put_url( $src, $bucket, $dloc, 'video/MP2T' );
-          next unless defined $loc;
-          debug "$src -> $loc";
+      if ( $m3u8->segment_count ) {
+        $_++ for values %state;
+        for my $seg ( map { @$_ } @{ $m3u8->seg } ) {
+          my $src  = URI->new_abs( $seg->{uri}, $url );
+          my $dst  = $tsm->($src);
+          my $dloc = $path . $dst;
+          unless ( exists $state{$dloc} ) {
+            my $loc = put_url( $src, $bucket, $dloc, 'video/MP2T' );
+            next unless defined $loc;
+            debug "$src -> $loc";
+          }
+          $seg->{uri} = $dst;
+          $state{$dloc} = 0;
         }
-        $seg->{uri} = $dst;
-        $state{$dloc} = 0;
+
+        if ( $cfg->{s3}{enable} ) {
+          my $obj = object( $bucket, $out, 'application/x-mpegURL', $ttl );
+          my $tmpf = tmp_file;
+          $m3u8->write($tmpf);
+          $obj->put_filename($tmpf);
+          $tmpf->remove;
+          debug "Updated ", $obj->uri;
+        }
+
+        my @old = sort grep { $state{$_} >= $cfg->{general}{grace} } keys %state;
+
+        @old = splice @old, 0, $cfg->{general}{maxdelete}
+         if defined $cfg->{general}{maxdelete};
+
+        for my $key (@old) {
+          my $obj = $bucket->object( key => $key );
+          $obj->delete;
+          delete $state{$key};
+          debug "Removed $key";
+        }
+      }
+      else {
+        debug "WARNING: empty m3u8: $url";
       }
 
-      if ( $cfg->{s3}{enable} ) {
-        my $obj = object( $bucket, $out, 'application/x-mpegURL', $ttl );
-        my $tmpf = tmp_file;
-        $m3u8->write($tmpf);
-        $obj->put_filename($tmpf);
-        $tmpf->remove;
-        debug "Updated ", $obj->uri;
-      }
-
-      my @old = sort grep { $state{$_} >= $cfg->{general}{grace} } keys %state;
-
-      @old = splice @old, 0, $cfg->{general}{maxdelete}
-       if defined $cfg->{general}{maxdelete};
-
-      for my $key (@old) {
-        my $obj = $bucket->object( key => $key );
-        $obj->delete;
-        delete $state{$key};
-        debug "Removed $key";
-      }
+      my $sleep = $ttl - ( time - $now );
+      $sleep = 0.5 if $sleep < 0.5;
+      sleep $sleep;
+    };
+    if ( my $err = $@ ) {
+      $err =~ s/\s+/ /g;
+      debug "ERROR: $err";
+      sleep 5;
     }
-    else {
-      debug "WARNING: empty m3u8: $url";
-    }
-
-    my $sleep = $ttl - ( time - $now );
-    $sleep = 0.5 if $sleep < 0.5;
-    sleep $sleep;
   }
 
   exit;
