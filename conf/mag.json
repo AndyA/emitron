@@ -17,7 +17,7 @@
          "mode" : "window",
          "path" : "henrylive5/henrylive5.m3u8",
          "uri" : "http://newstream.hexten.net/henry/throne.m3u8",
-         "window" : 20
+         "window" : 10
       }
    ],
    "s3" : {
