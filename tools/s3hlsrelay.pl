@@ -18,6 +18,8 @@ use Storable qw( dclone );
 use Time::HiRes qw( sleep time );
 use URI;
 
+use constant HACK1 => 0;
+
 sub debug(@) {
   my $ts = strftime '%Y-%m-%d %H:%M:%S', localtime;
   my $id = sprintf '%6d', $$;
@@ -34,7 +36,8 @@ my $work = dir( $cfg->{general}{work} );
 $work->mkpath;
 
 my $bucket = get_bucket();
-relay( $bucket, @{ $cfg->{relay} } );
+my $prefix = strftime '%Y%m%d%H%M%S-', gmtime;
+relay( $bucket, $prefix, @{ $cfg->{relay} } );
 
 wait;
 
@@ -46,7 +49,7 @@ sub get_bucket {
 }
 
 sub relay {
-  my ( $bucket, @stm ) = @_;
+  my ( $bucket, $prefix, @stm ) = @_;
 
   for my $stream (@stm) {
     next unless $stream->{enable};
@@ -64,11 +67,10 @@ sub relay {
         my $out
          = put_data( $m3u8->format, $bucket, "$path$name",
           'application/x-mpegURL' );
-        debug "$uri -> $out\n";
       }
     );
 
-    my $pid = spawn_worker( $_, $path, $m3m, $stream ) for @leaf;
+    my $pid = spawn_worker( $_, $path, $m3m, $stream, $prefix ) for @leaf;
   }
 }
 
@@ -93,7 +95,7 @@ sub make_stream_window {
     }
     if ($prev) {
       # TODO is ffmpeg failing to update the m3u8 atomically?
-      if ( $next->segment_count < $prev->segment_count - 2 ) {
+      if ( HACK1 && $next->segment_count < $prev->segment_count - 2 ) {
         debug "WARNING: segment loss (", $next->segment_count, " < ",
          $prev->segment_count, ")";
         return $curr;
@@ -111,7 +113,7 @@ sub make_stream_window {
     }
     $prev = dclone $next;
     $curr->rotate($rotate) if defined $rotate;
-    return $curr;
+    return dclone $curr;
   };
 }
 
@@ -120,7 +122,7 @@ sub make_stream_direct {
 }
 
 sub spawn_worker {
-  my ( $url, $path, $m3m, $stream ) = @_;
+  my ( $url, $path, $m3m, $stream, $prefix ) = @_;
 
   my $mode = $stream->{mode} || 'direct';
 
@@ -131,7 +133,7 @@ sub spawn_worker {
 
   my $bucket = get_bucket();
   my $out    = $path . $m3m->($url);
-  my $tsm    = make_ts_mapper($out);
+  my $tsm    = make_ts_mapper( $out, $prefix );
   debug "worker($url -> $out)";
 
   my %state = ();
@@ -154,7 +156,7 @@ sub spawn_worker {
     debug "GET $url";
     my $resp = $ua->get($url);
     if ( $resp->is_error ) {
-      debug "WARNING: ", $resp->status_line;
+      debug "WARNING: $url: ", $resp->status_line;
       sleep 10;
       next;
     }
@@ -230,10 +232,12 @@ sub split_path {
 }
 
 sub make_ts_mapper {
-  my ( undef, $id, undef ) = split_path(shift);
+  my ( $path, $prefix ) = @_;
+  my ( undef, $id, undef ) = split_path($path);
+  $prefix ||= '';
   return sub {
     my ( undef, $name, undef ) = split_path shift;
-    return "$id/$name.ts";
+    return "$id/$prefix$name.ts";
   };
 }
 
