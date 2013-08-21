@@ -18,7 +18,7 @@ use Storable qw( dclone );
 use Time::HiRes qw( sleep time );
 use URI;
 
-use constant HACK1 => 0;
+use constant FFMPEG_NON_ATOMIC_HACK => 0;
 
 sub debug(@) {
   my $ts = strftime '%Y-%m-%d %H:%M:%S', localtime;
@@ -96,7 +96,8 @@ sub make_stream_window {
     }
     if ($prev) {
       # TODO is ffmpeg failing to update the m3u8 atomically?
-      if ( HACK1 && $next->segment_count < $prev->segment_count - 2 ) {
+      if ( FFMPEG_NON_ATOMIC_HACK
+        && $next->segment_count < $prev->segment_count - 2 ) {
         debug "WARNING: segment loss (", $next->segment_count, " < ",
          $prev->segment_count, ")";
         return dclone $curr;
