@@ -14,6 +14,7 @@ find a b -name '*.m3u8' | while read mf; do
   pushd "$( dirname "$mf" )"
   ffmpeg -y -i "$( basename "$mf" )" \
     -af aresample=osr=44100:filter_size=256:cutoff=1 \
+    -movflags faststart \
     -c:v copy -c:a libfaac -b:a 128k "$outf" < /dev/null
   popd
 done
