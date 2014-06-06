@@ -107,6 +107,7 @@ sub each {
   }
 }
 
+# This nearly does what you want already James.
 sub set {
   my ( $self, $path, $value ) = @_;
   $self->each( $path, sub { _set( $_[2], $_[3], $value ); }, 1 );
